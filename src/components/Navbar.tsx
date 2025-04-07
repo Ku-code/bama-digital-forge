@@ -1,7 +1,6 @@
 
 import { useState, useEffect } from "react";
 import { Menu, X } from "lucide-react";
-import Logo from "./Logo";
 
 const Navbar = () => {
   const [isScrolled, setIsScrolled] = useState(false);
@@ -51,13 +50,12 @@ const Navbar = () => {
   return (
     <header 
       className={`fixed top-0 w-full z-50 transition-all duration-300 ${
-        isScrolled ? "glassmorphism py-2" : "bg-transparent py-4"
+        isScrolled ? "bg-white/90 shadow-md backdrop-blur-sm py-2" : "bg-transparent py-4"
       }`}
     >
       <div className="container mx-auto px-4 flex items-center justify-between">
         <a href="#home" className="flex items-center">
-          <Logo className="h-10 w-10" />
-          <span className="ml-2 text-white font-bold text-lg">BAMA</span>
+          <img src="/lovable-uploads/6e77d85a-74ad-47e5-b141-a339ec981d57.png" alt="BAMA Logo" className="h-12" />
         </a>
         
         {/* Desktop Navigation */}
@@ -69,13 +67,13 @@ const Navbar = () => {
                   href={link.href}
                   className={`text-sm font-medium transition-colors ${
                     activeSection === link.href.substring(1)
-                      ? "text-white"
-                      : "text-gray-300 hover:text-white"
+                      ? "text-[#e62f29]"
+                      : "text-[#052e40] hover:text-[#0C9D6A]"
                   }`}
                 >
                   {link.name}
                   {activeSection === link.href.substring(1) && (
-                    <span className="block h-0.5 mt-1 bama-gradient"></span>
+                    <span className="block h-0.5 mt-1 bg-[#e62f29]"></span>
                   )}
                 </a>
               </li>
@@ -85,7 +83,7 @@ const Navbar = () => {
         
         {/* Mobile Menu Button */}
         <button
-          className="md:hidden text-white p-2"
+          className="md:hidden text-[#052e40] p-2"
           onClick={toggleMenu}
           aria-label="Toggle menu"
         >
@@ -95,7 +93,7 @@ const Navbar = () => {
       
       {/* Mobile Navigation */}
       {isMenuOpen && (
-        <div className="md:hidden glassmorphism">
+        <div className="md:hidden bg-white shadow-lg">
           <nav className="container mx-auto px-4 py-4">
             <ul className="space-y-4">
               {navLinks.map((link) => (
@@ -104,8 +102,8 @@ const Navbar = () => {
                     href={link.href}
                     className={`block text-lg font-medium transition-colors ${
                       activeSection === link.href.substring(1)
-                        ? "text-white"
-                        : "text-gray-300 hover:text-white"
+                        ? "text-[#e62f29]"
+                        : "text-[#052e40] hover:text-[#0C9D6A]"
                     }`}
                     onClick={closeMenu}
                   >

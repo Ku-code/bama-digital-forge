@@ -54,11 +54,12 @@ export default {
           foreground: "hsl(var(--card-foreground))"
         },
         bama: {
-          blue: "#0f172a",
+          blue: "#052e40",
           gray: "#64748b",
           "electric-blue": "#3b82f6",
-          "neon-green": "#22c55e",
-          dark: "#1e293b",
+          "neon-green": "#0C9D6A",
+          "accent-red": "#E62F29",
+          dark: "#052e40",
           light: "#f8fafc"
         }
       },

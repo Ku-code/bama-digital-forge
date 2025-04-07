@@ -1,11 +1,13 @@
 import { useState, useEffect } from "react";
 import { Menu, X } from "./ui/icons";
-import Logo from "./Logo";
+import { useLanguage } from "@/contexts/LanguageContext";
+import LanguageSwitcher from "./LanguageSwitcher";
 
 const Navbar = () => {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [activeSection, setActiveSection] = useState("home");
+  const { t } = useLanguage();
 
   // Update scroll state
   useEffect(() => {
@@ -29,14 +31,12 @@ const Navbar = () => {
   }, []);
 
   const navLinks = [
-    { name: "Home", href: "#home" },
-    { name: "About", href: "#about" },
-    { name: "Mission", href: "#mission" },
-    { name: "Objectives", href: "#objectives" },
-    { name: "Membership", href: "#membership" },
-    { name: "Events", href: "#events" },
-    { name: "Partner", href: "#partner" },
-    { name: "Contact", href: "#contact" },
+    { name: t("nav.home"), href: "#home" },
+    { name: t("nav.about"), href: "#about" },
+    { name: t("nav.mission"), href: "#mission" },
+    { name: t("nav.membership"), href: "#membership" },
+    { name: t("nav.events"), href: "#events" },
+    { name: t("nav.contact"), href: "#contact" },
   ];
 
   const toggleMenu = () => {
@@ -65,7 +65,7 @@ const Navbar = () => {
         </a>
 
         {/* Desktop Navigation */}
-        <nav className="hidden md:block">
+        <nav className="hidden md:flex items-center space-x-6">
           <ul className="flex space-x-6">
             {navLinks.map((link) => (
               <li key={link.name}>
@@ -84,16 +84,20 @@ const Navbar = () => {
               </li>
             ))}
           </ul>
+          <LanguageSwitcher />
         </nav>
 
         {/* Mobile Menu Button */}
-        <button
-          className="md:hidden text-[#052e40] p-2"
-          onClick={toggleMenu}
-          aria-label="Toggle menu"
-        >
-          {isMenuOpen ? <X size={24} /> : <Menu size={24} />}
-        </button>
+        <div className="md:hidden flex items-center space-x-2">
+          <LanguageSwitcher />
+          <button
+            className="text-[#052e40] p-2"
+            onClick={toggleMenu}
+            aria-label="Toggle menu"
+          >
+            {isMenuOpen ? <X size={24} /> : <Menu size={24} />}
+          </button>
+        </div>
       </div>
 
       {/* Mobile Navigation */}

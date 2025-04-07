@@ -274,40 +274,17 @@ const Index = () => {
               </ul>
             </div>
             
-            <div className="bg-gray-50 p-6 rounded-lg">
-              <h4 className="text-xl font-semibold text-[#052e40] mb-4">Pre-register your interest</h4>
-              <form onSubmit={(e) => handleFormSubmit(e, "event registration")}>
-                <div className="grid md:grid-cols-2 gap-4 mb-4">
-                  <div>
-                    <Input 
-                      placeholder="Full Name" 
-                      className="border-gray-300 text-[#052e40]"
-                      required
-                    />
-                  </div>
-                  <div>
-                    <Input 
-                      type="email" 
-                      placeholder="Email Address" 
-                      className="border-gray-300 text-[#052e40]"
-                      required
-                    />
-                  </div>
-                </div>
-                <div className="mb-4">
-                  <Input 
-                    placeholder="Organization & Role" 
-                    className="border-gray-300 text-[#052e40]"
-                    required
-                  />
-                </div>
-                <Button 
-                  type="submit" 
-                  className="bg-[#0C9D6A] hover:bg-[#0C9D6A]/90 text-white"
-                >
-                  Pre-register Now
-                </Button>
-              </form>
+            <div className="bg-gray-50 p-6 rounded-lg text-center">
+              <h4 className="text-xl font-semibold text-[#052e40] mb-4">Register for the Conference</h4>
+              <p className="text-[#052e40]/80 mb-6">Join us at the founding conference of BAMAS to connect with industry leaders and discover the future of additive manufacturing in Bulgaria.</p>
+              <Button 
+                className="bg-[#0C9D6A] hover:bg-[#0C9D6A]/90 text-white shadow-[0_0_15px_rgba(12,157,106,0.4)] transition-all hover:shadow-[0_0_20px_rgba(12,157,106,0.6)]"
+                asChild
+              >
+                <a href="https://docs.google.com/forms/d/e/1FAIpQLSdNgeoxrQDH4GxELH_nB5DKBtQZi4flmdtBmop1-znJMPR_Qg/viewform?usp=sharing" target="_blank" rel="noopener noreferrer">
+                  Register Now
+                </a>
+              </Button>
             </div>
           </div>
         </div>
@@ -470,11 +447,13 @@ const Index = () => {
           <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
             <div className="md:col-span-1">
               <div className="flex flex-col items-center md:items-start">
-                <img 
-                  src="/lovable-uploads/6e77d85a-74ad-47e5-b141-a339ec981d57.png" 
-                  alt="BAMAS Logo" 
-                  className="w-32 h-auto filter brightness-0 invert mb-4"
-                />
+                <div className="w-32 h-32 bg-white rounded-full p-4 mb-4">
+                  <img 
+                    src="/lovable-uploads/6e77d85a-74ad-47e5-b141-a339ec981d57.png" 
+                    alt="BAMAS Logo" 
+                    className="w-full h-auto"
+                  />
+                </div>
                 <h3 className="text-xl font-bold mb-2">BAMAS</h3>
                 <p className="text-sm text-white/70">Uniting Innovation. Empowering Industry. Shaping the Future.</p>
               </div>

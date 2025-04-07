@@ -1,4 +1,3 @@
-
 import { useEffect, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -70,14 +69,14 @@ const Index = () => {
           <div className="mb-8 flex justify-center">
             <img 
               src="/lovable-uploads/6e77d85a-74ad-47e5-b141-a339ec981d57.png" 
-              alt="BAMA Logo" 
+              alt="BAMAS Logo" 
               className="w-64 md:w-72 h-auto"
             />
           </div>
           <h1 className="text-4xl md:text-6xl font-bold mb-6 leading-tight">
             Bulgarian Additive <br/> Manufacturing Association
           </h1>
-          <p className="text-xl md:text-2xl mb-8 text-[#052e40]/70">Innovating Together. Competing Globally.</p>
+          <p className="text-xl md:text-2xl mb-8 text-[#052e40]/70">Uniting Innovation. Empowering Industry. Shaping the Future.</p>
           <Button className="bg-[#0C9D6A] hover:bg-[#0C9D6A]/90 text-white px-8 py-6 rounded-md text-lg" asChild>
             <a href="#membership">Become a Member</a>
           </Button>
@@ -91,11 +90,11 @@ const Index = () => {
       <section id="about" className="py-20 bg-gray-50">
         <div className="container mx-auto px-4">
           <h2 className="text-3xl md:text-4xl font-bold mb-12 text-center text-[#052e40] animate-on-scroll opacity-0 translate-y-4 transition-all duration-700 ease-out">
-            About <span className="text-[#0C9D6A]">BAMA</span>
+            About <span className="text-[#0C9D6A]">BAMAS</span>
           </h2>
           <div className="max-w-3xl mx-auto animate-on-scroll opacity-0 translate-y-4 transition-all duration-700 ease-out delay-100">
             <p className="text-lg text-[#052e40]/80 leading-relaxed mb-6">
-              The Bulgarian Additive Manufacturing Association (BAMA) was established to address the pressing need for structured collaboration within Bulgaria's growing 3D printing ecosystem. As the industry evolves rapidly, we provide a neutral, non-commercial platform that fosters innovation and strategic growth.
+              The Bulgarian Additive Manufacturing Association (BAMAS) was established to address the pressing need for structured collaboration within Bulgaria's growing 3D printing ecosystem. As the industry evolves rapidly, we provide a neutral, non-commercial platform that fosters innovation and strategic growth.
             </p>
             <p className="text-lg text-[#052e40]/80 leading-relaxed">
               Our focus is on the future of Industry 4.0 in Bulgaria, bringing together manufacturers, researchers, educational institutions, and technology innovators to create a thriving environment for additive manufacturing excellence.
@@ -207,17 +206,17 @@ const Index = () => {
               {
                 icon: <Calendar className="h-8 w-8" />,
                 title: "Priority Event Access",
-                description: "Get early registration and special rates for BAMA-hosted conferences and workshops."
+                description: "Get early registration and special rates for BAMAS-hosted conferences and workshops."
               },
               {
                 icon: <GlobeIcon className="h-8 w-8" />,
                 title: "EU Project Participation",
-                description: "Eligibility to join BAMA-coordinated EU-funded consortiums and projects."
+                description: "Eligibility to join BAMAS-coordinated EU-funded consortiums and projects."
               },
               {
                 icon: <Zap className="h-8 w-8" />,
                 title: "Marketing Exposure",
-                description: "Shared promotional opportunities through BAMA's platforms and media partnerships."
+                description: "Shared promotional opportunities through BAMAS's platforms and media partnerships."
               },
               {
                 icon: <MessageSquare className="h-8 w-8" />,
@@ -248,7 +247,7 @@ const Index = () => {
             Upcoming <span className="text-[#0C9D6A]">Events</span>
           </h2>
           <div className="bg-white p-8 rounded-lg shadow-md max-w-4xl mx-auto animate-on-scroll opacity-0 translate-y-4 transition-all duration-700 ease-out delay-100">
-            <h3 className="text-2xl font-bold text-[#052e40] mb-4">Founding Conference of BAMA</h3>
+            <h3 className="text-2xl font-bold text-[#052e40] mb-4">Founding Conference of BAMAS</h3>
             <div className="flex flex-wrap gap-4 mb-6">
               <div className="bg-[#0C9D6A]/10 text-[#0C9D6A] px-3 py-1 rounded text-sm font-medium">Date: TBA</div>
               <div className="bg-[#0C9D6A]/10 text-[#0C9D6A] px-3 py-1 rounded text-sm font-medium">Location: Sofia, Bulgaria</div>
@@ -323,7 +322,7 @@ const Index = () => {
           <div className="grid md:grid-cols-2 gap-12 mt-8">
             <div className="animate-on-scroll opacity-0 translate-y-4 transition-all duration-700 ease-out">
               <p className="text-lg text-[#052e40]/80 leading-relaxed mb-6">
-                BAMA invites companies, universities, research institutions, and organizations involved in additive manufacturing to join our network. Together, we can accelerate innovation, share knowledge, and strengthen Bulgaria's position in the global 3D printing landscape.
+                BAMAS invites companies, universities, research institutions, and organizations involved in additive manufacturing to join our network. Together, we can accelerate innovation, share knowledge, and strengthen Bulgaria's position in the global 3D printing landscape.
               </p>
               <p className="text-lg text-[#052e40]/80 leading-relaxed">
                 Our partners benefit from collaborative opportunities, shared resources, access to specialized expertise, and a wider platform for visibility and impact.
@@ -357,7 +356,7 @@ const Index = () => {
                   </div>
                   <div>
                     <Textarea 
-                      placeholder="Why you want to partner with BAMA" 
+                      placeholder="Why you want to partner with BAMAS" 
                       className="border-gray-300 text-[#052e40] resize-none h-32"
                       required
                     />
@@ -368,7 +367,7 @@ const Index = () => {
                       htmlFor="partnership-terms"
                       className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 text-[#052e40]/70"
                     >
-                      I agree to BAMA contacting me about this partnership request
+                      I agree to BAMAS contacting me about this partnership request
                     </label>
                   </div>
                   <Button 
@@ -394,12 +393,12 @@ const Index = () => {
             <div className="animate-on-scroll opacity-0 translate-y-4 transition-all duration-700 ease-out">
               <div className="flex items-center mb-6">
                 <Mail className="text-[#E62F29] mr-4 h-6 w-6" />
-                <a href="mailto:info@bama.bg" className="text-[#052e40] hover:text-[#0C9D6A] transition-colors">
-                  info@bama.bg
+                <a href="mailto:info@bamas.bg" className="text-[#052e40] hover:text-[#0C9D6A] transition-colors">
+                  info@bamas.bg
                 </a>
               </div>
               <p className="text-lg text-[#052e40]/80 mb-6">
-                Have questions about BAMA or interested in learning more about our initiatives? 
+                Have questions about BAMAS or interested in learning more about our initiatives? 
                 Send us a message and our team will get back to you as soon as possible.
               </p>
               <div className="flex space-x-4">
@@ -449,7 +448,7 @@ const Index = () => {
                       htmlFor="terms"
                       className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 text-[#052e40]/70"
                     >
-                      I consent to BAMA processing my data in accordance with GDPR
+                      I consent to BAMAS processing my data in accordance with GDPR
                     </label>
                   </div>
                   <Button 
@@ -466,20 +465,80 @@ const Index = () => {
       </section>
 
       {/* Footer */}
-      <footer className="py-8 bg-[#052e40] text-white text-center">
+      <footer className="py-12 bg-[#052e40] text-white">
         <div className="container mx-auto px-4">
-          <div className="flex justify-center mb-4">
-            <img 
-              src="/lovable-uploads/6e77d85a-74ad-47e5-b141-a339ec981d57.png" 
-              alt="BAMA Logo" 
-              className="w-32 h-auto filter brightness-0 invert"
-            />
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
+            <div className="md:col-span-1">
+              <div className="flex flex-col items-center md:items-start">
+                <img 
+                  src="/lovable-uploads/6e77d85a-74ad-47e5-b141-a339ec981d57.png" 
+                  alt="BAMAS Logo" 
+                  className="w-32 h-auto filter brightness-0 invert mb-4"
+                />
+                <h3 className="text-xl font-bold mb-2">BAMAS</h3>
+                <p className="text-sm text-white/70">Uniting Innovation. Empowering Industry. Shaping the Future.</p>
+              </div>
+            </div>
+            
+            <div className="md:col-span-1">
+              <h4 className="text-lg font-semibold mb-4 border-b border-white/20 pb-2">Quick Links</h4>
+              <ul className="space-y-2">
+                <li><a href="#home" className="hover:text-[#0C9D6A] transition-colors">Home</a></li>
+                <li><a href="#about" className="hover:text-[#0C9D6A] transition-colors">About Us</a></li>
+                <li><a href="#mission" className="hover:text-[#0C9D6A] transition-colors">Our Mission</a></li>
+                <li><a href="#membership" className="hover:text-[#0C9D6A] transition-colors">Membership</a></li>
+              </ul>
+            </div>
+            
+            <div className="md:col-span-1">
+              <h4 className="text-lg font-semibold mb-4 border-b border-white/20 pb-2">Resources</h4>
+              <ul className="space-y-2">
+                <li><a href="#events" className="hover:text-[#0C9D6A] transition-colors">Events</a></li>
+                <li><a href="#" className="hover:text-[#0C9D6A] transition-colors">Industry News</a></li>
+                <li><a href="#" className="hover:text-[#0C9D6A] transition-colors">Research Papers</a></li>
+                <li><a href="#" className="hover:text-[#0C9D6A] transition-colors">Case Studies</a></li>
+              </ul>
+            </div>
+            
+            <div className="md:col-span-1">
+              <h4 className="text-lg font-semibold mb-4 border-b border-white/20 pb-2">Contact</h4>
+              <ul className="space-y-2">
+                <li className="flex items-center">
+                  <Mail className="h-4 w-4 mr-2 text-[#0C9D6A]" />
+                  <a href="mailto:info@bamas.bg" className="hover:text-[#0C9D6A] transition-colors">info@bamas.bg</a>
+                </li>
+                <li>
+                  <div className="flex space-x-4 mt-4">
+                    <a href="#" className="text-white hover:text-[#0C9D6A] transition-colors">
+                      <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-linkedin">
+                        <path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"/>
+                        <rect width="4" height="12" x="2" y="9"/>
+                        <circle cx="4" cy="4" r="2"/>
+                      </svg>
+                    </a>
+                    <a href="#" className="text-white hover:text-[#0C9D6A] transition-colors">
+                      <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-twitter">
+                        <path d="M22 4s-.7 2.1-2 3.4c1.6 10-9.4 17.3-18 11.6 2.2.1 4.4-.6 6-2C3 15.5.5 9.6 3 5c2.2 2.6 5.6 4.1 9 4-.9-4.2 4-6.6 7-3.8 1.1 0 3-1.2 3-1.2z"/>
+                      </svg>
+                    </a>
+                    <a href="#" className="text-white hover:text-[#0C9D6A] transition-colors">
+                      <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-facebook">
+                        <path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"/>
+                      </svg>
+                    </a>
+                  </div>
+                </li>
+              </ul>
+            </div>
           </div>
-          <p>© {new Date().getFullYear()} Bulgarian Additive Manufacturing Association. All rights reserved.</p>
-          <p className="mt-2 text-sm">
-            <a href="#" className="hover:text-[#0C9D6A] transition-colors">Privacy Policy</a> • 
-            <a href="#" className="hover:text-[#0C9D6A] transition-colors ml-2">Terms of Use</a>
-          </p>
+          
+          <div className="border-t border-white/10 mt-8 pt-6 text-center">
+            <p>© {new Date().getFullYear()} Bulgarian Additive Manufacturing Association. All rights reserved.</p>
+            <p className="mt-2 text-sm">
+              <a href="#" className="hover:text-[#0C9D6A] transition-colors">Privacy Policy</a> • 
+              <a href="#" className="hover:text-[#0C9D6A] transition-colors ml-2">Terms of Use</a>
+            </p>
+          </div>
         </div>
       </footer>
     </div>

@@ -1,6 +1,5 @@
-
 import { useState, useEffect } from "react";
-import { Menu, X } from "lucide-react";
+import { Menu, X } from "./ui/icons";
 import Logo from "./Logo";
 
 const Navbar = () => {
@@ -12,7 +11,7 @@ const Navbar = () => {
   useEffect(() => {
     const handleScroll = () => {
       setIsScrolled(window.scrollY > 50);
-      
+
       // Find the current active section
       const sections = document.querySelectorAll("section[id]");
       sections.forEach(section => {
@@ -24,7 +23,7 @@ const Navbar = () => {
         }
       });
     };
-    
+
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
@@ -49,18 +48,22 @@ const Navbar = () => {
   };
 
   return (
-    <header 
-      className={`fixed top-0 w-full z-50 transition-all duration-300 ${
-        isScrolled ? "bg-white/90 shadow-md backdrop-blur-sm py-2" : "bg-transparent py-4"
-      }`}
+    <header
+      className={`fixed top-0 w-full z-50 transition-all duration-300 ${isScrolled ? "bg-white/90 shadow-md backdrop-blur-sm py-2" : "bg-transparent py-4"
+        }`}
     >
       <div className="container mx-auto px-4 flex items-center justify-between">
         <a href="#home" className="flex items-center">
           <div className="h-12 w-12">
-            <Logo variant="circle" className="w-full h-full" />
+            <img
+              src="/lovable-uploads/6e77d85a-74ad-47e5-b141-a339ec981d57.png"
+              alt="BAMAS Logo"
+              style={{ borderRadius: '1rem' }}
+              className="w-full h-full object-contain"
+            />
           </div>
         </a>
-        
+
         {/* Desktop Navigation */}
         <nav className="hidden md:block">
           <ul className="flex space-x-6">
@@ -68,11 +71,10 @@ const Navbar = () => {
               <li key={link.name}>
                 <a
                   href={link.href}
-                  className={`text-sm font-medium transition-colors ${
-                    activeSection === link.href.substring(1)
-                      ? "text-[#e62f29]"
-                      : "text-[#052e40] hover:text-[#0C9D6A]"
-                  }`}
+                  className={`text-sm font-medium transition-colors ${activeSection === link.href.substring(1)
+                    ? "text-[#e62f29]"
+                    : "text-[#052e40] hover:text-[#0C9D6A]"
+                    }`}
                 >
                   {link.name}
                   {activeSection === link.href.substring(1) && (
@@ -83,7 +85,7 @@ const Navbar = () => {
             ))}
           </ul>
         </nav>
-        
+
         {/* Mobile Menu Button */}
         <button
           className="md:hidden text-[#052e40] p-2"
@@ -93,7 +95,7 @@ const Navbar = () => {
           {isMenuOpen ? <X size={24} /> : <Menu size={24} />}
         </button>
       </div>
-      
+
       {/* Mobile Navigation */}
       {isMenuOpen && (
         <div className="md:hidden bg-white shadow-lg">
@@ -103,11 +105,10 @@ const Navbar = () => {
                 <li key={link.name}>
                   <a
                     href={link.href}
-                    className={`block text-lg font-medium transition-colors ${
-                      activeSection === link.href.substring(1)
-                        ? "text-[#e62f29]"
-                        : "text-[#052e40] hover:text-[#0C9D6A]"
-                    }`}
+                    className={`block text-lg font-medium transition-colors ${activeSection === link.href.substring(1)
+                      ? "text-[#e62f29]"
+                      : "text-[#052e40] hover:text-[#0C9D6A]"
+                      }`}
                     onClick={closeMenu}
                   >
                     {link.name}

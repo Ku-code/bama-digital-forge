@@ -12,16 +12,16 @@ import {
   MessageSquare, 
   Lightbulb, 
   Zap, 
-  Globe as GlobeIcon, 
+  Globe, 
   Mail, 
   Calendar,
   ArrowDown,
-  CircleCheck,
-  Logo
-} from "lucide-react";
+  CircleCheck
+} from "@/components/ui/icons";
 import Navbar from "@/components/Navbar";
 import { useToast } from "@/hooks/use-toast";
-import { Globe } from "@/components/ui/globe";
+import { Globe as GlobeComponent } from "@/components/ui/globe";
+import Logo from "@/components/Logo";
 
 const Index = () => {
   const { toast } = useToast();
@@ -61,12 +61,13 @@ const Index = () => {
       <Navbar />
       
       <section id="home" className="relative h-screen flex items-center justify-center text-[#052e40] overflow-hidden">
-        <Globe />
+        <GlobeComponent />
         <div className="relative z-10 text-center max-w-5xl px-4 animate-on-scroll opacity-0 translate-y-4 transition-all duration-1000 ease-out">
           <div className="mb-8 flex justify-center">
             <img 
               src="/lovable-uploads/6e77d85a-74ad-47e5-b141-a339ec981d57.png" 
               alt="BAMAS Logo" 
+              style={{ borderRadius: '1rem' }}
               className="w-64 md:w-72 h-auto"
             />
           </div>
@@ -202,7 +203,7 @@ const Index = () => {
                 description: "Get early registration and special rates for BAMAS-hosted conferences and workshops."
               },
               {
-                icon: <GlobeIcon className="h-8 w-8" />,
+                icon: <Globe className="h-8 w-8" />,
                 title: "EU Project Participation",
                 description: "Eligibility to join BAMAS-coordinated EU-funded consortiums and projects."
               },
@@ -298,54 +299,17 @@ const Index = () => {
             </div>
             <div className="bg-gray-50 p-8 rounded-lg shadow-sm animate-on-scroll opacity-0 translate-y-4 transition-all duration-700 ease-out delay-100">
               <h3 className="text-xl font-semibold text-[#052e40] mb-4">Express Your Interest</h3>
-              <form onSubmit={(e) => handleFormSubmit(e, "partnership request")}>
-                <div className="space-y-4">
-                  <div>
-                    <Input 
-                      placeholder="Company/Organization Name" 
-                      className="border-gray-300 text-[#052e40]"
-                      required
-                    />
-                  </div>
-                  <div>
-                    <Input 
-                      placeholder="Contact Person" 
-                      className="border-gray-300 text-[#052e40]"
-                      required
-                    />
-                  </div>
-                  <div>
-                    <Input 
-                      type="email" 
-                      placeholder="Email Address" 
-                      className="border-gray-300 text-[#052e40]"
-                      required
-                    />
-                  </div>
-                  <div>
-                    <Textarea 
-                      placeholder="Why you want to partner with BAMAS" 
-                      className="border-gray-300 text-[#052e40] resize-none h-32"
-                      required
-                    />
-                  </div>
-                  <div className="flex items-center space-x-2">
-                    <Checkbox id="partnership-terms" required />
-                    <label
-                      htmlFor="partnership-terms"
-                      className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 text-[#052e40]/70"
-                    >
-                      I agree to BAMAS contacting me about this partnership request
-                    </label>
-                  </div>
-                  <Button 
-                    type="submit" 
-                    className="bg-[#0C9D6A] hover:bg-[#0C9D6A]/90 text-white w-full"
-                  >
-                    Submit Partnership Request
-                  </Button>
-                </div>
-              </form>
+              <p className="text-lg text-[#052e40]/80 leading-relaxed mb-6">
+                Ready to join forces with BAMAS? Click the button below to fill out our partnership application form.
+              </p>
+              <Button 
+                className="bg-[#0C9D6A] hover:bg-[#0C9D6A]/90 text-white w-full"
+                asChild
+              >
+                <a href="https://docs.google.com/forms/d/e/1FAIpQLSdRK7kUegigqpdz4Xh-4h3uOer3pEm29T7K2w-6NFWENNfBNA/viewform?usp=dialog" target="_blank" rel="noopener noreferrer">
+                  Apply for Membership
+                </a>
+              </Button>
             </div>
           </div>
         </div>
@@ -356,76 +320,21 @@ const Index = () => {
           <h2 className="text-3xl md:text-4xl font-bold mb-12 text-center text-[#052e40] animate-on-scroll opacity-0 translate-y-4 transition-all duration-700 ease-out">
             Contact <span className="text-[#0C9D6A]">Us</span>
           </h2>
-          <div className="grid md:grid-cols-2 gap-12 mt-8">
-            <div className="animate-on-scroll opacity-0 translate-y-4 transition-all duration-700 ease-out">
-              <div className="flex items-center mb-6">
-                <Mail className="text-[#E62F29] mr-4 h-6 w-6" />
-                <a href="mailto:info@bamas.xyz" className="text-[#052e40] hover:text-[#0C9D6A] transition-colors">
-                  info@bamas.xyz
-                </a>
-              </div>
-              <p className="text-lg text-[#052e40]/80 mb-6">
-                Have questions about BAMAS or interested in learning more about our initiatives? 
-                Send us a message and our team will get back to you as soon as possible.
-              </p>
-              <div className="flex space-x-4">
-                <a href="#" className="text-[#0C9D6A] hover:text-[#E62F29] transition-colors">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-linkedin">
-                    <path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"/>
-                    <rect width="4" height="12" x="2" y="9"/>
-                    <circle cx="4" cy="4" r="2"/>
-                  </svg>
-                </a>
-                <a href="#" className="text-[#0C9D6A] hover:text-[#E62F29] transition-colors">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-twitter">
-                    <path d="M22 4s-.7 2.1-2 3.4c1.6 10-9.4 17.3-18 11.6 2.2.1 4.4-.6 6-2C3 15.5.5 9.6 3 5c2.2 2.6 5.6 4.1 9 4-.9-4.2 4-6.6 7-3.8 1.1 0 3-1.2 3-1.2z"/>
-                  </svg>
-                </a>
-              </div>
-            </div>
+          <div className="max-w-2xl mx-auto">
             <div className="bg-white p-8 rounded-lg shadow-md animate-on-scroll opacity-0 translate-y-4 transition-all duration-700 ease-out delay-100">
               <h3 className="text-xl font-semibold text-[#052e40] mb-4">Send a Message</h3>
-              <form onSubmit={(e) => handleFormSubmit(e, "contact")}>
-                <div className="space-y-4">
-                  <div>
-                    <Input 
-                      placeholder="Full Name" 
-                      className="border-gray-300 text-[#052e40]"
-                      required
-                    />
-                  </div>
-                  <div>
-                    <Input 
-                      type="email" 
-                      placeholder="Email Address" 
-                      className="border-gray-300 text-[#052e40]"
-                      required
-                    />
-                  </div>
-                  <div>
-                    <Textarea 
-                      placeholder="Your Message" 
-                      className="border-gray-300 text-[#052e40] resize-none h-32"
-                      required
-                    />
-                  </div>
-                  <div className="flex items-center space-x-2">
-                    <Checkbox id="terms" required />
-                    <label
-                      htmlFor="terms"
-                      className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 text-[#052e40]/70"
-                    >
-                      I consent to BAMAS processing my data in accordance with GDPR
-                    </label>
-                  </div>
-                  <Button 
-                    type="submit" 
-                    className="bg-[#0C9D6A] hover:bg-[#0C9D6A]/90 text-white w-full"
-                  >
-                    Send Message
-                  </Button>
-                </div>
-              </form>
+              <p className="text-lg text-[#052e40]/80 leading-relaxed mb-6">
+                Have questions about BAMAS or interested in learning more about our initiatives? 
+                Click the button below to send us a message through our contact form.
+              </p>
+              <Button 
+                className="bg-[#0C9D6A] hover:bg-[#0C9D6A]/90 text-white w-full"
+                asChild
+              >
+                <a href="https://forms.gle/SaHA8sSpUAWStWKU7" target="_blank" rel="noopener noreferrer">
+                  Contact Us
+                </a>
+              </Button>
             </div>
           </div>
         </div>
@@ -437,7 +346,12 @@ const Index = () => {
             <div className="md:col-span-1">
               <div className="flex flex-col items-center md:items-start">
                 <div className="w-24 h-24 mb-4">
-                  <Logo variant="circle" className="w-full h-full" />
+                  <img
+                    src="/lovable-uploads/6e77d85a-74ad-47e5-b141-a339ec981d57.png" 
+                    alt="BAMAS Logo"
+                    style={{ borderRadius: '1rem' }} 
+                    className="w-full h-full object-contain"
+                  />
                 </div>
                 <h3 className="text-xl font-bold mb-2">BAMAS</h3>
                 <p className="text-sm text-white/70">Uniting Innovation. Empowering Industry. Shaping the Future.</p>
@@ -445,32 +359,23 @@ const Index = () => {
             </div>
             
             <div className="md:col-span-1">
-              <h4 className="text-lg font-semibold mb-4 border-b border-white/20 pb-2">Quick Links</h4>
-              <ul className="space-y-2">
-                <li><a href="#home" className="hover:text-[#0C9D6A] transition-colors">Home</a></li>
-                <li><a href="#about" className="hover:text-[#0C9D6A] transition-colors">About Us</a></li>
-                <li><a href="#mission" className="hover:text-[#0C9D6A] transition-colors">Our Mission</a></li>
-                <li><a href="#membership" className="hover:text-[#0C9D6A] transition-colors">Membership</a></li>
-              </ul>
+
             </div>
             
             <div className="md:col-span-1">
               <h4 className="text-lg font-semibold mb-4 border-b border-white/20 pb-2">Resources</h4>
               <ul className="space-y-2">
+              <li><a href="#home" className="hover:text-[#0C9D6A] transition-colors">Home</a></li>
+                <li><a href="#about" className="hover:text-[#0C9D6A] transition-colors">About Us</a></li>
+                <li><a href="#mission" className="hover:text-[#0C9D6A] transition-colors">Our Mission</a></li>
+                <li><a href="#membership" className="hover:text-[#0C9D6A] transition-colors">Membership</a></li>
                 <li><a href="#events" className="hover:text-[#0C9D6A] transition-colors">Events</a></li>
-                <li><a href="#" className="hover:text-[#0C9D6A] transition-colors">Industry News</a></li>
-                <li><a href="#" className="hover:text-[#0C9D6A] transition-colors">Research Papers</a></li>
-                <li><a href="#" className="hover:text-[#0C9D6A] transition-colors">Case Studies</a></li>
               </ul>
             </div>
             
             <div className="md:col-span-1">
               <h4 className="text-lg font-semibold mb-4 border-b border-white/20 pb-2">Contact</h4>
               <ul className="space-y-2">
-                <li className="flex items-center">
-                  <Mail className="h-4 w-4 mr-2 text-[#0C9D6A]" />
-                  <a href="mailto:info@bamas.xyz" className="hover:text-[#0C9D6A] transition-colors">info@bamas.xyz</a>
-                </li>
                 <li>
                   <div className="flex space-x-4 mt-4">
                     <a href="#" className="text-white hover:text-[#0C9D6A] transition-colors">

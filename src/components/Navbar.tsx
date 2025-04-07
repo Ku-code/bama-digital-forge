@@ -16,7 +16,8 @@ const Navbar = () => {
       // Find the current active section
       const sections = document.querySelectorAll("section[id]");
       sections.forEach(section => {
-        const sectionTop = section.offsetTop;
+        // Use getBoundingClientRect() instead of offsetTop for better TypeScript compatibility
+        const sectionTop = section.getBoundingClientRect().top + window.scrollY;
         const sectionHeight = section.clientHeight;
         if (window.scrollY >= (sectionTop - 300) && window.scrollY < (sectionTop + sectionHeight - 300)) {
           setActiveSection(section.getAttribute("id") || "");

@@ -56,7 +56,9 @@ const Navbar = () => {
     >
       <div className="container mx-auto px-4 flex items-center justify-between">
         <a href="#home" className="flex items-center">
-          <img src="/lovable-uploads/6e77d85a-74ad-47e5-b141-a339ec981d57.png" alt="BAMAS Logo" className="h-12" />
+          <div className="h-12 w-12">
+            <Logo variant="circle" className="w-full h-full" />
+          </div>
         </a>
         
         {/* Desktop Navigation */}

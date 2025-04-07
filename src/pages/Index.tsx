@@ -16,7 +16,8 @@ import {
   Mail, 
   Calendar,
   ArrowDown,
-  CircleCheck
+  CircleCheck,
+  Logo
 } from "lucide-react";
 import Navbar from "@/components/Navbar";
 import { useToast } from "@/hooks/use-toast";
@@ -25,7 +26,6 @@ import { Globe } from "@/components/ui/globe";
 const Index = () => {
   const { toast } = useToast();
 
-  // Intersection Observer for animations
   useEffect(() => {
     const observer = new IntersectionObserver(
       (entries) => {
@@ -47,14 +47,12 @@ const Index = () => {
     };
   }, []);
 
-  // Handle form submissions
   const handleFormSubmit = (e: React.FormEvent<HTMLFormElement>, formType: string) => {
     e.preventDefault();
     toast({
       title: "Form Submitted",
       description: `Your ${formType} information has been received. We'll be in touch soon.`,
     });
-    // Reset the form
     e.currentTarget.reset();
   };
 
@@ -62,7 +60,6 @@ const Index = () => {
     <div className="min-h-screen bg-white">
       <Navbar />
       
-      {/* Hero Section */}
       <section id="home" className="relative h-screen flex items-center justify-center text-[#052e40] overflow-hidden">
         <Globe />
         <div className="relative z-10 text-center max-w-5xl px-4 animate-on-scroll opacity-0 translate-y-4 transition-all duration-1000 ease-out">
@@ -86,7 +83,6 @@ const Index = () => {
         </div>
       </section>
 
-      {/* About Section */}
       <section id="about" className="py-20 bg-gray-50">
         <div className="container mx-auto px-4">
           <h2 className="text-3xl md:text-4xl font-bold mb-12 text-center text-[#052e40] animate-on-scroll opacity-0 translate-y-4 transition-all duration-700 ease-out">
@@ -103,7 +99,6 @@ const Index = () => {
         </div>
       </section>
 
-      {/* Vision & Mission Section */}
       <section id="mission" className="py-20 bg-white">
         <div className="container mx-auto px-4">
           <div className="grid md:grid-cols-2 gap-12">
@@ -142,7 +137,6 @@ const Index = () => {
         </div>
       </section>
 
-      {/* Core Objectives Section */}
       <section id="objectives" className="py-20 bg-gray-50">
         <div className="container mx-auto px-4">
           <h2 className="text-3xl md:text-4xl font-bold mb-12 text-center text-[#052e40] animate-on-scroll opacity-0 translate-y-4 transition-all duration-700 ease-out">
@@ -185,7 +179,6 @@ const Index = () => {
         </div>
       </section>
 
-      {/* Member Benefits Section */}
       <section id="membership" className="py-20 bg-white">
         <div className="container mx-auto px-4">
           <h2 className="text-3xl md:text-4xl font-bold mb-12 text-center text-[#052e40] animate-on-scroll opacity-0 translate-y-4 transition-all duration-700 ease-out">
@@ -240,45 +233,44 @@ const Index = () => {
         </div>
       </section>
 
-      {/* Upcoming Conference Section */}
       <section id="events" className="py-20 bg-gray-50">
         <div className="container mx-auto px-4">
           <h2 className="text-3xl md:text-4xl font-bold mb-12 text-center text-[#052e40] animate-on-scroll opacity-0 translate-y-4 transition-all duration-700 ease-out">
             Upcoming <span className="text-[#0C9D6A]">Events</span>
           </h2>
-          <div className="bg-white p-8 rounded-lg shadow-md max-w-4xl mx-auto animate-on-scroll opacity-0 translate-y-4 transition-all duration-700 ease-out delay-100">
-            <h3 className="text-2xl font-bold text-[#052e40] mb-4">Founding Conference of BAMAS</h3>
+          <div className="bg-gradient-to-br from-[#0C9D6A] to-[#0C9D6A]/80 p-8 rounded-lg shadow-md max-w-4xl mx-auto animate-on-scroll opacity-0 translate-y-4 transition-all duration-700 ease-out delay-100 text-white">
+            <h3 className="text-2xl font-bold mb-4">Founding Conference of BAMAS</h3>
             <div className="flex flex-wrap gap-4 mb-6">
-              <div className="bg-[#0C9D6A]/10 text-[#0C9D6A] px-3 py-1 rounded text-sm font-medium">Date: TBA</div>
-              <div className="bg-[#0C9D6A]/10 text-[#0C9D6A] px-3 py-1 rounded text-sm font-medium">Location: Sofia, Bulgaria</div>
+              <div className="bg-white/20 px-3 py-1 rounded text-sm font-medium backdrop-blur-sm">Date: TBA</div>
+              <div className="bg-white/20 px-3 py-1 rounded text-sm font-medium backdrop-blur-sm">Location: Sofia, Bulgaria</div>
             </div>
             <div className="mb-8">
-              <h4 className="text-lg font-semibold text-[#052e40] mb-3">Topics Preview:</h4>
-              <ul className="text-[#052e40]/80 grid md:grid-cols-2 gap-3">
+              <h4 className="text-lg font-semibold mb-3">Topics Preview:</h4>
+              <ul className="grid md:grid-cols-2 gap-3">
                 <li className="flex items-center">
-                  <CircleCheck className="h-5 w-5 text-[#E62F29] mr-2 flex-shrink-0" />
+                  <CircleCheck className="h-5 w-5 text-white mr-2 flex-shrink-0" />
                   <span>Industry trends & market opportunities</span>
                 </li>
                 <li className="flex items-center">
-                  <CircleCheck className="h-5 w-5 text-[#E62F29] mr-2 flex-shrink-0" />
+                  <CircleCheck className="h-5 w-5 text-white mr-2 flex-shrink-0" />
                   <span>AI applications in 3D printing</span>
                 </li>
                 <li className="flex items-center">
-                  <CircleCheck className="h-5 w-5 text-[#E62F29] mr-2 flex-shrink-0" />
+                  <CircleCheck className="h-5 w-5 text-white mr-2 flex-shrink-0" />
                   <span>Education & workforce readiness</span>
                 </li>
                 <li className="flex items-center">
-                  <CircleCheck className="h-5 w-5 text-[#E62F29] mr-2 flex-shrink-0" />
+                  <CircleCheck className="h-5 w-5 text-white mr-2 flex-shrink-0" />
                   <span>Cross-sector collaboration initiatives</span>
                 </li>
               </ul>
             </div>
             
-            <div className="bg-gray-50 p-6 rounded-lg text-center">
-              <h4 className="text-xl font-semibold text-[#052e40] mb-4">Register for the Conference</h4>
-              <p className="text-[#052e40]/80 mb-6">Join us at the founding conference of BAMAS to connect with industry leaders and discover the future of additive manufacturing in Bulgaria.</p>
+            <div className="bg-white/10 p-6 rounded-lg text-center backdrop-blur-sm">
+              <h4 className="text-xl font-semibold mb-4">Register for the Conference</h4>
+              <p className="mb-6">Join us at the founding conference of BAMAS to connect with industry leaders and discover the future of additive manufacturing in Bulgaria.</p>
               <Button 
-                className="bg-[#0C9D6A] hover:bg-[#0C9D6A]/90 text-white shadow-[0_0_15px_rgba(12,157,106,0.4)] transition-all hover:shadow-[0_0_20px_rgba(12,157,106,0.6)]"
+                className="bg-white text-[#0C9D6A] hover:bg-white/90 shadow-[0_0_15px_rgba(255,255,255,0.5)] transition-all hover:shadow-[0_0_20px_rgba(255,255,255,0.7)]"
                 asChild
               >
                 <a href="https://docs.google.com/forms/d/e/1FAIpQLSdNgeoxrQDH4GxELH_nB5DKBtQZi4flmdtBmop1-znJMPR_Qg/viewform?usp=sharing" target="_blank" rel="noopener noreferrer">
@@ -290,7 +282,6 @@ const Index = () => {
         </div>
       </section>
 
-      {/* Partner With Us Section */}
       <section id="partner" className="py-20 bg-white">
         <div className="container mx-auto px-4">
           <h2 className="text-3xl md:text-4xl font-bold mb-12 text-center text-[#052e40] animate-on-scroll opacity-0 translate-y-4 transition-all duration-700 ease-out">
@@ -360,7 +351,6 @@ const Index = () => {
         </div>
       </section>
 
-      {/* Contact Section */}
       <section id="contact" className="py-20 bg-gray-50">
         <div className="container mx-auto px-4">
           <h2 className="text-3xl md:text-4xl font-bold mb-12 text-center text-[#052e40] animate-on-scroll opacity-0 translate-y-4 transition-all duration-700 ease-out">
@@ -370,8 +360,8 @@ const Index = () => {
             <div className="animate-on-scroll opacity-0 translate-y-4 transition-all duration-700 ease-out">
               <div className="flex items-center mb-6">
                 <Mail className="text-[#E62F29] mr-4 h-6 w-6" />
-                <a href="mailto:info@bamas.bg" className="text-[#052e40] hover:text-[#0C9D6A] transition-colors">
-                  info@bamas.bg
+                <a href="mailto:info@bamas.xyz" className="text-[#052e40] hover:text-[#0C9D6A] transition-colors">
+                  info@bamas.xyz
                 </a>
               </div>
               <p className="text-lg text-[#052e40]/80 mb-6">
@@ -441,18 +431,13 @@ const Index = () => {
         </div>
       </section>
 
-      {/* Footer */}
       <footer className="py-12 bg-[#052e40] text-white">
         <div className="container mx-auto px-4">
           <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
             <div className="md:col-span-1">
               <div className="flex flex-col items-center md:items-start">
-                <div className="w-32 h-32 bg-white rounded-full p-4 mb-4">
-                  <img 
-                    src="/lovable-uploads/6e77d85a-74ad-47e5-b141-a339ec981d57.png" 
-                    alt="BAMAS Logo" 
-                    className="w-full h-auto"
-                  />
+                <div className="w-24 h-24 mb-4">
+                  <Logo variant="circle" className="w-full h-full" />
                 </div>
                 <h3 className="text-xl font-bold mb-2">BAMAS</h3>
                 <p className="text-sm text-white/70">Uniting Innovation. Empowering Industry. Shaping the Future.</p>
@@ -484,7 +469,7 @@ const Index = () => {
               <ul className="space-y-2">
                 <li className="flex items-center">
                   <Mail className="h-4 w-4 mr-2 text-[#0C9D6A]" />
-                  <a href="mailto:info@bamas.bg" className="hover:text-[#0C9D6A] transition-colors">info@bamas.bg</a>
+                  <a href="mailto:info@bamas.xyz" className="hover:text-[#0C9D6A] transition-colors">info@bamas.xyz</a>
                 </li>
                 <li>
                   <div className="flex space-x-4 mt-4">

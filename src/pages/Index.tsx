@@ -15,7 +15,8 @@ import {
   Globe,
   Calendar,
   CircleCheck,
-  Mail
+  Mail,
+  MapPin
 } from "@/components/ui/icons";
 import Navbar from "@/components/Navbar";
 import { useToast } from "@/hooks/use-toast";
@@ -241,6 +242,18 @@ const Index = () => {
                         <CircleCheck className="h-5 w-5 text-[#0C9D6A] mr-2 flex-shrink-0 mt-1" />
                         <span>Voting rights in BAMAS initiatives</span>
                       </li>
+                      <li className="flex items-start">
+                        <CircleCheck className="h-5 w-5 text-[#0C9D6A] mr-2 flex-shrink-0 mt-1" />
+                        <span>European Additive Manufacturing Industry representation</span>
+                      </li>
+                      <li className="flex items-start">
+                        <CircleCheck className="h-5 w-5 text-[#0C9D6A] mr-2 flex-shrink-0 mt-1" />
+                        <span>Access to new market opportunities</span>
+                      </li>
+                      <li className="flex items-start">
+                        <CircleCheck className="h-5 w-5 text-[#0C9D6A] mr-2 flex-shrink-0 mt-1" />
+                        <span>Business connections with European companies</span>
+                      </li>
                     </ul>
                   </AccordionContent>
                 </AccordionItem>
@@ -291,6 +304,18 @@ const Index = () => {
                         <CircleCheck className="h-5 w-5 text-[#0C9D6A] mr-2 flex-shrink-0 mt-1" />
                         <span>Exclusive industry partnership opportunities</span>
                       </li>
+                      <li className="flex items-start">
+                        <CircleCheck className="h-5 w-5 text-[#0C9D6A] mr-2 flex-shrink-0 mt-1" />
+                        <span>Enhanced representation in European forums</span>
+                      </li>
+                      <li className="flex items-start">
+                        <CircleCheck className="h-5 w-5 text-[#0C9D6A] mr-2 flex-shrink-0 mt-1" />
+                        <span>Opening to new European market opportunities</span>
+                      </li>
+                      <li className="flex items-start">
+                        <CircleCheck className="h-5 w-5 text-[#0C9D6A] mr-2 flex-shrink-0 mt-1" />
+                        <span>Enhanced networking with international partners</span>
+                      </li>
                     </ul>
                   </AccordionContent>
                 </AccordionItem>
@@ -308,7 +333,13 @@ const Index = () => {
           <div className="bg-gradient-to-br from-[#0C9D6A] to-[#0C9D6A]/80 p-8 rounded-lg shadow-md max-w-4xl mx-auto animate-on-scroll opacity-0 translate-y-4 transition-all duration-700 ease-out delay-100 text-white">
             <h3 className="text-2xl font-bold mb-4">{t("events.conference.title")}</h3>
             <div className="flex flex-wrap gap-4 mb-6">
-              <div className="bg-white/20 px-3 py-1 rounded text-sm font-medium backdrop-blur-sm">{t("events.conference.location")}</div>
+              <div className="bg-white/20 px-3 py-1 rounded text-sm font-medium backdrop-blur-sm flex items-center">
+                <MapPin className="h-4 w-4 mr-1" />
+                <a href="https://maps.app.goo.gl/itFtMp9FbZipFMB56" target="_blank" rel="noopener noreferrer" className="hover:underline">
+                  Capital Fort Building<br />
+                  <span className="text-xs">7-Mi Kilometar Mladost, Boulevard "Tsarigradsko shose", 1784 Sofia</span>
+                </a>
+              </div>
             </div>
             <div className="mb-8">
               <h4 className="text-lg font-semibold mb-3">{t("events.conference.topics")}</h4>
@@ -338,20 +369,16 @@ const Index = () => {
               
               <RadioGroup value={votedDate} className="space-y-3 mb-6">
                 <div className="flex items-center space-x-2">
-                  <RadioGroupItem value="October 15-16, 2025" id="date-1" onClick={() => handleVote("October 15-16, 2025")} />
-                  <Label htmlFor="date-1" className="cursor-pointer">October 15-16, 2025</Label>
+                  <RadioGroupItem value="May 20, 2025" id="date-1" onClick={() => handleVote("May 20, 2025")} />
+                  <Label htmlFor="date-1" className="cursor-pointer">May 20, 2025</Label>
                 </div>
                 <div className="flex items-center space-x-2">
-                  <RadioGroupItem value="November 5-6, 2025" id="date-2" onClick={() => handleVote("November 5-6, 2025")} />
-                  <Label htmlFor="date-2" className="cursor-pointer">November 5-6, 2025</Label>
+                  <RadioGroupItem value="June 2, 2025" id="date-2" onClick={() => handleVote("June 2, 2025")} />
+                  <Label htmlFor="date-2" className="cursor-pointer">June 2, 2025</Label>
                 </div>
                 <div className="flex items-center space-x-2">
-                  <RadioGroupItem value="November 20-21, 2025" id="date-3" onClick={() => handleVote("November 20-21, 2025")} />
-                  <Label htmlFor="date-3" className="cursor-pointer">November 20-21, 2025</Label>
-                </div>
-                <div className="flex items-center space-x-2">
-                  <RadioGroupItem value="December 4-5, 2025" id="date-4" onClick={() => handleVote("December 4-5, 2025")} />
-                  <Label htmlFor="date-4" className="cursor-pointer">December 4-5, 2025</Label>
+                  <RadioGroupItem value="June 9, 2025" id="date-3" onClick={() => handleVote("June 9, 2025")} />
+                  <Label htmlFor="date-3" className="cursor-pointer">June 9, 2025</Label>
                 </div>
               </RadioGroup>
               

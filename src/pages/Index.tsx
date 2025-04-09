@@ -206,8 +206,8 @@ const Index = () => {
               <div className="bg-gradient-to-r from-[#0C9D6A]/10 to-[#0C9D6A]/5 p-6">
                 <h3 className="text-2xl font-bold text-[#052e40] mb-2">Individual Membership</h3>
                 <div className="flex items-baseline mb-4">
-                  <span className="text-3xl font-bold text-[#E62F29]">100 BGN</span>
-                  <span className="text-lg line-through ml-2 text-gray-500">200 BGN</span>
+                  <span className="text-3xl font-bold text-[#E62F29]">50 BGN</span>
+                  <span className="text-lg line-through ml-2 text-gray-500">100 BGN</span>
                   <span className="ml-2 bg-[#E62F29] text-white text-sm px-2 py-1 rounded-full">50% OFF</span>
                 </div>
                 <p className="text-[#052e40]/70 mb-4">First year promotional price</p>
@@ -264,8 +264,8 @@ const Index = () => {
               <div className="bg-gradient-to-r from-[#0C9D6A]/20 to-[#0C9D6A]/10 p-6">
                 <h3 className="text-2xl font-bold text-[#052e40] mb-2">Corporate Membership</h3>
                 <div className="flex items-baseline mb-4">
-                  <span className="text-3xl font-bold text-[#E62F29]">500 BGN</span>
-                  <span className="text-lg line-through ml-2 text-gray-500">1000 BGN</span>
+                  <span className="text-3xl font-bold text-[#E62F29]">100 BGN</span>
+                  <span className="text-lg line-through ml-2 text-gray-500">200 BGN</span>
                   <span className="ml-2 bg-[#E62F29] text-white text-sm px-2 py-1 rounded-full">50% OFF</span>
                 </div>
                 <p className="text-[#052e40]/70 mb-4">First year promotional price</p>

@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -14,32 +14,17 @@ import {
   Zap, 
   Globe,
   Calendar,
-  CircleCheck,
-  Mail,
-  MapPin
+  CircleCheck
 } from "@/components/ui/icons";
 import Navbar from "@/components/Navbar";
 import { useToast } from "@/hooks/use-toast";
 import { Globe as GlobeComponent } from "@/components/ui/globe";
+import Logo from "@/components/Logo";
 import { useLanguage } from "@/contexts/LanguageContext";
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { Label } from "@/components/ui/label";
-import {
-  Accordion,
-  AccordionContent,
-  AccordionItem,
-  AccordionTrigger,
-} from "@/components/ui/accordion";
 
 const Index = () => {
   const { toast } = useToast();
   const { t } = useLanguage();
-  const [votedDate, setVotedDate] = useState("");
-  const [votes, setVotes] = useState({
-    "May 20, 2025": 12,
-    "June 2, 2025": 8,
-    "June 9, 2025": 15
-  });
 
   useEffect(() => {
     const observer = new IntersectionObserver(
@@ -71,21 +56,6 @@ const Index = () => {
     e.currentTarget.reset();
   };
 
-  const handleVote = (date: string) => {
-    setVotedDate(date);
-    setVotes(prev => ({
-      ...prev,
-      [date]: prev[date] + 1
-    }));
-    toast({
-      title: "Vote Submitted",
-      description: `Thank you for voting for ${date}. Your preference has been recorded.`,
-    });
-  };
-
-  const totalVotes = Object.values(votes).reduce((a, b) => a + b, 0);
-  const getPercentage = (voteCount: number) => Math.round((voteCount / totalVotes) * 100);
-
   return (
     <div className="min-h-screen bg-white">
       <Navbar />
@@ -97,15 +67,15 @@ const Index = () => {
             <img 
               src="/lovable-uploads/6e77d85a-74ad-47e5-b141-a339ec981d57.png" 
               alt="BAMAS Logo" 
-              style={{ borderRadius: '50%' }}
+              style={{ borderRadius: '1rem' }}
               className="w-64 md:w-72 h-auto"
             />
           </div>
           <h1 className="text-4xl md:text-6xl font-bold mb-6 leading-tight">
             {t("hero.title")}
           </h1>
-          <p className="text-xl md:text-2xl mb-8 text-[#052e40]/70">Uniting Innovation. Empowering Industry. Shaping the Future.</p>
-          <Button className="bg-[#0C9D6A] hover:bg-[#0C9D6A]/90 text-white px-8 py-6 rounded-md text-lg shadow-[0_0_15px_rgba(12,157,106,0.5)] hover:shadow-[0_0_20px_rgba(12,157,106,0.7)]" asChild>
+          <p className="text-xl md:text-2xl mb-8 text-[#052e40]/70">{t("hero.subtitle")}</p>
+          <Button className="bg-[#0C9D6A] hover:bg-[#0C9D6A]/90 text-white px-8 py-6 rounded-md text-lg" asChild>
             <a href="#membership">{t("hero.cta")}</a>
           </Button>
         </div>
@@ -212,149 +182,51 @@ const Index = () => {
           <h2 className="text-3xl md:text-4xl font-bold mb-12 text-center text-[#052e40] animate-on-scroll opacity-0 translate-y-4 transition-all duration-700 ease-out">
             {t("membership.title")}
           </h2>
-          
-          <div className="grid md:grid-cols-2 gap-8 mt-12 max-w-5xl mx-auto">
-            <Card className="border border-[#0C9D6A]/20 hover:border-[#0C9D6A]/50 transition-all animate-on-scroll opacity-0 translate-y-4 transition-all duration-700 ease-out overflow-hidden">
-              <div className="bg-gradient-to-r from-[#0C9D6A]/10 to-[#0C9D6A]/5 p-6">
-                <h3 className="text-2xl font-bold text-[#052e40] mb-2">Individual Membership</h3>
-                <div className="flex items-baseline mb-4">
-                  <span className="text-3xl font-bold text-[#E62F29]">50 BGN</span>
-                  <span className="text-lg line-through ml-2 text-gray-500">100 BGN</span>
-                  <span className="ml-2 bg-[#E62F29] text-white text-sm px-2 py-1 rounded-full">50% OFF</span>
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 mt-12">
+            {[
+              {
+                icon: <Brain className="h-8 w-8" />,
+                title: t("membership.benefits.item1.title"),
+                description: t("membership.benefits.item1.description")
+              },
+              {
+                icon: <Users className="h-8 w-8" />,
+                title: t("membership.benefits.item2.title"),
+                description: t("membership.benefits.item2.description")
+              },
+              {
+                icon: <Calendar className="h-8 w-8" />,
+                title: t("membership.benefits.item3.title"),
+                description: t("membership.benefits.item3.description")
+              },
+              {
+                icon: <Globe className="h-8 w-8" />,
+                title: t("membership.benefits.item4.title"),
+                description: t("membership.benefits.item4.description")
+              },
+              {
+                icon: <Zap className="h-8 w-8" />,
+                title: t("membership.benefits.item5.title"),
+                description: t("membership.benefits.item5.description")
+              },
+              {
+                icon: <MessageSquare className="h-8 w-8" />,
+                title: t("membership.benefits.item6.title"),
+                description: t("membership.benefits.item6.description")
+              }
+            ].map((benefit, index) => (
+              <Card key={index} className="border border-[#0C9D6A]/20 hover:border-[#0C9D6A]/50 transition-all animate-on-scroll opacity-0 translate-y-4 transition-all duration-700 ease-out" style={{transitionDelay: `${index * 100}ms`}}>
+                <div className="p-6 flex flex-col">
+                  <div className="flex items-center mb-4">
+                    <div className="text-[#E62F29] mr-4">
+                      {benefit.icon}
+                    </div>
+                    <h3 className="text-xl font-semibold text-[#052e40]">{benefit.title}</h3>
+                  </div>
+                  <p className="text-[#052e40]/70">{benefit.description}</p>
                 </div>
-                <p className="text-[#052e40]/70 mb-4">First year promotional price</p>
-                <p className="text-[#052e40]/70 mb-4 bg-yellow-50 p-2 rounded-md border border-yellow-200">
-                  <strong>Exclusive Offer:</strong> This 50% discount is an initial entry promotion available for a limited time only. Join today to secure this special rate!
-                </p>
-                
-                <Button className="w-full bg-[#0C9D6A] hover:bg-[#0C9D6A]/90 text-white shadow-[0_0_15px_rgba(12,157,106,0.5)] hover:shadow-[0_0_20px_rgba(12,157,106,0.7)]">
-                  Subscribe Now
-                </Button>
-              </div>
-              
-              <Accordion type="single" collapsible className="w-full">
-                <AccordionItem value="benefits">
-                  <AccordionTrigger className="px-6">Membership Benefits</AccordionTrigger>
-                  <AccordionContent className="px-6">
-                    <ul className="space-y-3">
-                      <li className="flex items-start">
-                        <CircleCheck className="h-5 w-5 text-[#0C9D6A] mr-2 flex-shrink-0 mt-1" />
-                        <span>Access to all BAMAS networking events</span>
-                      </li>
-                      <li className="flex items-start">
-                        <CircleCheck className="h-5 w-5 text-[#0C9D6A] mr-2 flex-shrink-0 mt-1" />
-                        <span>Professional development opportunities</span>
-                      </li>
-                      <li className="flex items-start">
-                        <CircleCheck className="h-5 w-5 text-[#0C9D6A] mr-2 flex-shrink-0 mt-1" />
-                        <span>Discounted conference tickets</span>
-                      </li>
-                      <li className="flex items-start">
-                        <CircleCheck className="h-5 w-5 text-[#0C9D6A] mr-2 flex-shrink-0 mt-1" />
-                        <span>Industry insights and reports</span>
-                      </li>
-                      <li className="flex items-start">
-                        <CircleCheck className="h-5 w-5 text-[#0C9D6A] mr-2 flex-shrink-0 mt-1" />
-                        <span>Voting rights in BAMAS initiatives</span>
-                      </li>
-                      <li className="flex items-start">
-                        <CircleCheck className="h-5 w-5 text-[#0C9D6A] mr-2 flex-shrink-0 mt-1" />
-                        <span>European Additive Manufacturing Industry representation</span>
-                      </li>
-                      <li className="flex items-start">
-                        <CircleCheck className="h-5 w-5 text-[#0C9D6A] mr-2 flex-shrink-0 mt-1" />
-                        <span>Access to new market opportunities</span>
-                      </li>
-                      <li className="flex items-start">
-                        <CircleCheck className="h-5 w-5 text-[#0C9D6A] mr-2 flex-shrink-0 mt-1" />
-                        <span>Business connections with European companies</span>
-                      </li>
-                    </ul>
-                  </AccordionContent>
-                </AccordionItem>
-              </Accordion>
-            </Card>
-            
-            <Card className="border border-[#0C9D6A]/20 hover:border-[#0C9D6A]/50 transition-all animate-on-scroll opacity-0 translate-y-4 transition-all duration-700 ease-out overflow-hidden">
-              <div className="bg-gradient-to-r from-[#0C9D6A]/20 to-[#0C9D6A]/10 p-6">
-                <h3 className="text-2xl font-bold text-[#052e40] mb-2">Corporate Membership</h3>
-                <div className="flex items-baseline mb-4">
-                  <span className="text-3xl font-bold text-[#E62F29]">100 BGN</span>
-                  <span className="text-lg line-through ml-2 text-gray-500">200 BGN</span>
-                  <span className="ml-2 bg-[#E62F29] text-white text-sm px-2 py-1 rounded-full">50% OFF</span>
-                </div>
-                <p className="text-[#052e40]/70 mb-4">First year promotional price</p>
-                <p className="text-[#052e40]/70 mb-4 bg-yellow-50 p-2 rounded-md border border-yellow-200">
-                  <strong>Exclusive Offer:</strong> This 50% discount is an initial entry promotion available for a limited time only. Join today to secure this special rate!
-                </p>
-                
-                <Button className="w-full bg-[#0C9D6A] hover:bg-[#0C9D6A]/90 text-white shadow-[0_0_15px_rgba(12,157,106,0.5)] hover:shadow-[0_0_20px_rgba(12,157,106,0.7)]">
-                  Subscribe Now
-                </Button>
-              </div>
-              
-              <Accordion type="single" collapsible className="w-full">
-                <AccordionItem value="benefits">
-                  <AccordionTrigger className="px-6">Membership Benefits</AccordionTrigger>
-                  <AccordionContent className="px-6">
-                    <ul className="space-y-3">
-                      <li className="flex items-start">
-                        <CircleCheck className="h-5 w-5 text-[#0C9D6A] mr-2 flex-shrink-0 mt-1" />
-                        <span>All individual benefits for up to 5 employees</span>
-                      </li>
-                      <li className="flex items-start">
-                        <CircleCheck className="h-5 w-5 text-[#0C9D6A] mr-2 flex-shrink-0 mt-1" />
-                        <span>Company logo on BAMAS website</span>
-                      </li>
-                      <li className="flex items-start">
-                        <CircleCheck className="h-5 w-5 text-[#0C9D6A] mr-2 flex-shrink-0 mt-1" />
-                        <span>Priority speaking opportunities at events</span>
-                      </li>
-                      <li className="flex items-start">
-                        <CircleCheck className="h-5 w-5 text-[#0C9D6A] mr-2 flex-shrink-0 mt-1" />
-                        <span>Opportunity to host industry workshops</span>
-                      </li>
-                      <li className="flex items-start">
-                        <CircleCheck className="h-5 w-5 text-[#0C9D6A] mr-2 flex-shrink-0 mt-1" />
-                        <span>Direct access to talent network</span>
-                      </li>
-                      <li className="flex items-start">
-                        <CircleCheck className="h-5 w-5 text-[#0C9D6A] mr-2 flex-shrink-0 mt-1" />
-                        <span>Exclusive industry partnership opportunities</span>
-                      </li>
-                      <li className="flex items-start">
-                        <CircleCheck className="h-5 w-5 text-[#0C9D6A] mr-2 flex-shrink-0 mt-1" />
-                        <span>Enhanced representation in European forums</span>
-                      </li>
-                      <li className="flex items-start">
-                        <CircleCheck className="h-5 w-5 text-[#0C9D6A] mr-2 flex-shrink-0 mt-1" />
-                        <span>Opening to new European market opportunities</span>
-                      </li>
-                      <li className="flex items-start">
-                        <CircleCheck className="h-5 w-5 text-[#0C9D6A] mr-2 flex-shrink-0 mt-1" />
-                        <span>Enhanced networking with international partners</span>
-                      </li>
-                      <li className="flex items-start">
-                        <CircleCheck className="h-5 w-5 text-[#0C9D6A] mr-2 flex-shrink-0 mt-1" />
-                        <span>Priority access to European AM industry conferences</span>
-                      </li>
-                      <li className="flex items-start">
-                        <CircleCheck className="h-5 w-5 text-[#0C9D6A] mr-2 flex-shrink-0 mt-1" />
-                        <span>Dedicated support for EU funding applications</span>
-                      </li>
-                      <li className="flex items-start">
-                        <CircleCheck className="h-5 w-5 text-[#0C9D6A] mr-2 flex-shrink-0 mt-1" />
-                        <span>Quarterly business matching with European partners</span>
-                      </li>
-                      <li className="flex items-start">
-                        <CircleCheck className="h-5 w-5 text-[#0C9D6A] mr-2 flex-shrink-0 mt-1" />
-                        <span>Featured profile in European AM industry directory</span>
-                      </li>
-                    </ul>
-                  </AccordionContent>
-                </AccordionItem>
-              </Accordion>
-            </Card>
+              </Card>
+            ))}
           </div>
         </div>
       </section>
@@ -367,13 +239,8 @@ const Index = () => {
           <div className="bg-gradient-to-br from-[#0C9D6A] to-[#0C9D6A]/80 p-8 rounded-lg shadow-md max-w-4xl mx-auto animate-on-scroll opacity-0 translate-y-4 transition-all duration-700 ease-out delay-100 text-white">
             <h3 className="text-2xl font-bold mb-4">{t("events.conference.title")}</h3>
             <div className="flex flex-wrap gap-4 mb-6">
-              <div className="bg-white/20 px-3 py-1 rounded text-sm font-medium backdrop-blur-sm flex items-center">
-                <MapPin className="h-4 w-4 mr-1" />
-                <a href="https://maps.app.goo.gl/itFtMp9FbZipFMB56" target="_blank" rel="noopener noreferrer" className="hover:underline">
-                  Capital Fort Building<br />
-                  <span className="text-xs">7-Mi Kilometar Mladost, Boulevard "Tsarigradsko shose", 1784 Sofia</span>
-                </a>
-              </div>
+              <div className="bg-white/20 px-3 py-1 rounded text-sm font-medium backdrop-blur-sm">{t("events.conference.date")}</div>
+              <div className="bg-white/20 px-3 py-1 rounded text-sm font-medium backdrop-blur-sm">{t("events.conference.location")}</div>
             </div>
             <div className="mb-8">
               <h4 className="text-lg font-semibold mb-3">{t("events.conference.topics")}</h4>
@@ -397,48 +264,9 @@ const Index = () => {
               </ul>
             </div>
             
-            <div className="bg-white/10 p-6 rounded-lg backdrop-blur-sm mb-8">
-              <h4 className="text-xl font-semibold mb-4">Help Us Choose the Conference Date</h4>
-              <p className="mb-6">Please vote for your preferred conference date. <span className="font-medium bg-white/20 px-2 py-1 rounded">Important: When registering via the Google Form below, please include your preferred date in the notes section!</span></p>
-              
-              <RadioGroup value={votedDate} className="space-y-3 mb-6">
-                {Object.entries(votes).map(([date, voteCount]) => {
-                  const percentage = getPercentage(voteCount);
-                  return (
-                    <div key={date} className="relative">
-                      <div className="flex items-center space-x-2 mb-1">
-                        <RadioGroupItem value={date} id={`date-${date}`} onClick={() => handleVote(date)} />
-                        <Label htmlFor={`date-${date}`} className="cursor-pointer">{date}</Label>
-                      </div>
-                      <div className="w-full h-2 bg-white/20 rounded-full overflow-hidden">
-                        <div 
-                          className="h-full bg-white/60 rounded-full" 
-                          style={{ width: `${percentage}%` }}
-                        ></div>
-                      </div>
-                      <div className="text-sm mt-1 flex justify-between">
-                        <span>{voteCount} votes</span>
-                        <span>{percentage}%</span>
-                      </div>
-                    </div>
-                  );
-                })}
-              </RadioGroup>
-              
-              {votedDate && (
-                <div className="bg-white/20 p-3 rounded text-center">
-                  Thank you for voting for: <strong>{votedDate}</strong>. 
-                  Please remember to include this date preference when registering below!
-                </div>
-              )}
-            </div>
-            
             <div className="bg-white/10 p-6 rounded-lg text-center backdrop-blur-sm">
               <h4 className="text-xl font-semibold mb-4">{t("events.conference.register.title")}</h4>
               <p className="mb-6">{t("events.conference.register.description")}</p>
-              <p className="mb-6 bg-white/20 p-3 rounded-md text-sm">
-                <strong>Note:</strong> When registering, please include your preferred conference date in the notes section of the form. This will help us finalize the date that works best for most attendees.
-              </p>
               <Button 
                 className="bg-white text-[#0C9D6A] hover:bg-white/90 shadow-[0_0_15px_rgba(255,255,255,0.5)] transition-all hover:shadow-[0_0_20px_rgba(255,255,255,0.7)]"
                 asChild
@@ -513,26 +341,20 @@ const Index = () => {
           <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
             <div className="md:col-span-1">
               <div className="flex flex-col items-center md:items-start">
-                <div className="w-24 h-24 mb-4 overflow-hidden rounded-full bg-white p-2">
+                <div className="w-24 h-24 mb-4">
                   <img 
                     src="/lovable-uploads/6e77d85a-74ad-47e5-b141-a339ec981d57.png" 
                     alt="BAMAS Logo"
-                    className="w-full h-full object-contain rounded-full"
+                    style={{ borderRadius: '1rem' }}
+                    className="w-full h-full object-contain"
                   />
                 </div>
                 <h3 className="text-xl font-bold mb-2">BAMAS</h3>
-                <p className="text-sm text-white/70">Uniting Innovation. Empowering Industry. Shaping the Future.</p>
+                <p className="text-sm text-white/70">{t("hero.subtitle")}</p>
               </div>
             </div>
             
             <div className="md:col-span-1">
-              <h4 className="text-lg font-semibold mb-4 border-b border-white/20 pb-2">Contact Us</h4>
-              <ul className="space-y-3">
-                <li className="flex items-start">
-                  <Mail className="h-5 w-5 text-[#0C9D6A] mr-2 flex-shrink-0 mt-1" />
-                  <a href="mailto:info@bamas.xyz" className="hover:text-[#0C9D6A] transition-colors">info@bamas.xyz</a>
-                </li>
-              </ul>
             </div>
             
             <div className="md:col-span-1">

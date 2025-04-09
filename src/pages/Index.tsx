@@ -35,6 +35,11 @@ const Index = () => {
   const { toast } = useToast();
   const { t } = useLanguage();
   const [votedDate, setVotedDate] = useState("");
+  const [votes, setVotes] = useState({
+    "May 20, 2025": 12,
+    "June 2, 2025": 8,
+    "June 9, 2025": 15
+  });
 
   useEffect(() => {
     const observer = new IntersectionObserver(
@@ -68,11 +73,18 @@ const Index = () => {
 
   const handleVote = (date: string) => {
     setVotedDate(date);
+    setVotes(prev => ({
+      ...prev,
+      [date]: prev[date] + 1
+    }));
     toast({
       title: "Vote Submitted",
       description: `Thank you for voting for ${date}. Your preference has been recorded.`,
     });
   };
+
+  const totalVotes = Object.values(votes).reduce((a, b) => a + b, 0);
+  const getPercentage = (voteCount: number) => Math.round((voteCount / totalVotes) * 100);
 
   return (
     <div className="min-h-screen bg-white">
@@ -211,6 +223,9 @@ const Index = () => {
                   <span className="ml-2 bg-[#E62F29] text-white text-sm px-2 py-1 rounded-full">50% OFF</span>
                 </div>
                 <p className="text-[#052e40]/70 mb-4">First year promotional price</p>
+                <p className="text-[#052e40]/70 mb-4 bg-yellow-50 p-2 rounded-md border border-yellow-200">
+                  <strong>Exclusive Offer:</strong> This 50% discount is an initial entry promotion available for a limited time only. Join today to secure this special rate!
+                </p>
                 
                 <Button className="w-full bg-[#0C9D6A] hover:bg-[#0C9D6A]/90 text-white shadow-[0_0_15px_rgba(12,157,106,0.5)] hover:shadow-[0_0_20px_rgba(12,157,106,0.7)]">
                   Subscribe Now
@@ -269,6 +284,9 @@ const Index = () => {
                   <span className="ml-2 bg-[#E62F29] text-white text-sm px-2 py-1 rounded-full">50% OFF</span>
                 </div>
                 <p className="text-[#052e40]/70 mb-4">First year promotional price</p>
+                <p className="text-[#052e40]/70 mb-4 bg-yellow-50 p-2 rounded-md border border-yellow-200">
+                  <strong>Exclusive Offer:</strong> This 50% discount is an initial entry promotion available for a limited time only. Join today to secure this special rate!
+                </p>
                 
                 <Button className="w-full bg-[#0C9D6A] hover:bg-[#0C9D6A]/90 text-white shadow-[0_0_15px_rgba(12,157,106,0.5)] hover:shadow-[0_0_20px_rgba(12,157,106,0.7)]">
                   Subscribe Now
@@ -315,6 +333,22 @@ const Index = () => {
                       <li className="flex items-start">
                         <CircleCheck className="h-5 w-5 text-[#0C9D6A] mr-2 flex-shrink-0 mt-1" />
                         <span>Enhanced networking with international partners</span>
+                      </li>
+                      <li className="flex items-start">
+                        <CircleCheck className="h-5 w-5 text-[#0C9D6A] mr-2 flex-shrink-0 mt-1" />
+                        <span>Priority access to European AM industry conferences</span>
+                      </li>
+                      <li className="flex items-start">
+                        <CircleCheck className="h-5 w-5 text-[#0C9D6A] mr-2 flex-shrink-0 mt-1" />
+                        <span>Dedicated support for EU funding applications</span>
+                      </li>
+                      <li className="flex items-start">
+                        <CircleCheck className="h-5 w-5 text-[#0C9D6A] mr-2 flex-shrink-0 mt-1" />
+                        <span>Quarterly business matching with European partners</span>
+                      </li>
+                      <li className="flex items-start">
+                        <CircleCheck className="h-5 w-5 text-[#0C9D6A] mr-2 flex-shrink-0 mt-1" />
+                        <span>Featured profile in European AM industry directory</span>
                       </li>
                     </ul>
                   </AccordionContent>
@@ -365,26 +399,36 @@ const Index = () => {
             
             <div className="bg-white/10 p-6 rounded-lg backdrop-blur-sm mb-8">
               <h4 className="text-xl font-semibold mb-4">Help Us Choose the Conference Date</h4>
-              <p className="mb-6">Please vote for your preferred conference date:</p>
+              <p className="mb-6">Please vote for your preferred conference date. <span className="font-medium bg-white/20 px-2 py-1 rounded">Important: When registering via the Google Form below, please include your preferred date in the notes section!</span></p>
               
               <RadioGroup value={votedDate} className="space-y-3 mb-6">
-                <div className="flex items-center space-x-2">
-                  <RadioGroupItem value="May 20, 2025" id="date-1" onClick={() => handleVote("May 20, 2025")} />
-                  <Label htmlFor="date-1" className="cursor-pointer">May 20, 2025</Label>
-                </div>
-                <div className="flex items-center space-x-2">
-                  <RadioGroupItem value="June 2, 2025" id="date-2" onClick={() => handleVote("June 2, 2025")} />
-                  <Label htmlFor="date-2" className="cursor-pointer">June 2, 2025</Label>
-                </div>
-                <div className="flex items-center space-x-2">
-                  <RadioGroupItem value="June 9, 2025" id="date-3" onClick={() => handleVote("June 9, 2025")} />
-                  <Label htmlFor="date-3" className="cursor-pointer">June 9, 2025</Label>
-                </div>
+                {Object.entries(votes).map(([date, voteCount]) => {
+                  const percentage = getPercentage(voteCount);
+                  return (
+                    <div key={date} className="relative">
+                      <div className="flex items-center space-x-2 mb-1">
+                        <RadioGroupItem value={date} id={`date-${date}`} onClick={() => handleVote(date)} />
+                        <Label htmlFor={`date-${date}`} className="cursor-pointer">{date}</Label>
+                      </div>
+                      <div className="w-full h-2 bg-white/20 rounded-full overflow-hidden">
+                        <div 
+                          className="h-full bg-white/60 rounded-full" 
+                          style={{ width: `${percentage}%` }}
+                        ></div>
+                      </div>
+                      <div className="text-sm mt-1 flex justify-between">
+                        <span>{voteCount} votes</span>
+                        <span>{percentage}%</span>
+                      </div>
+                    </div>
+                  );
+                })}
               </RadioGroup>
               
               {votedDate && (
                 <div className="bg-white/20 p-3 rounded text-center">
-                  Thank you for voting for: <strong>{votedDate}</strong>
+                  Thank you for voting for: <strong>{votedDate}</strong>. 
+                  Please remember to include this date preference when registering below!
                 </div>
               )}
             </div>
@@ -392,6 +436,9 @@ const Index = () => {
             <div className="bg-white/10 p-6 rounded-lg text-center backdrop-blur-sm">
               <h4 className="text-xl font-semibold mb-4">{t("events.conference.register.title")}</h4>
               <p className="mb-6">{t("events.conference.register.description")}</p>
+              <p className="mb-6 bg-white/20 p-3 rounded-md text-sm">
+                <strong>Note:</strong> When registering, please include your preferred conference date in the notes section of the form. This will help us finalize the date that works best for most attendees.
+              </p>
               <Button 
                 className="bg-white text-[#0C9D6A] hover:bg-white/90 shadow-[0_0_15px_rgba(255,255,255,0.5)] transition-all hover:shadow-[0_0_20px_rgba(255,255,255,0.7)]"
                 asChild

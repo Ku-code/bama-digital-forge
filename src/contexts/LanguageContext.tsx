@@ -1,57 +1,63 @@
-import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import React, { createContext, useContext, useState, useEffect } from "react";
 
-type Language = 'en' | 'bg';
+type Language = "en" | "bg";
 
 interface LanguageContextType {
   language: Language;
   setLanguage: (lang: Language) => void;
   t: (key: string) => string;
+  isLoading: boolean;
 }
 
 const LanguageContext = createContext<LanguageContextType | undefined>(undefined);
 
-export const useLanguage = () => {
-  const context = useContext(LanguageContext);
-  if (context === undefined) {
-    throw new Error('useLanguage must be used within a LanguageProvider');
-  }
-  return context;
-};
-
-interface LanguageProviderProps {
-  children: ReactNode;
-}
-
-export const LanguageProvider: React.FC<LanguageProviderProps> = ({ children }) => {
-  const [language, setLanguage] = useState<Language>('en');
-  const [translations, setTranslations] = useState<Record<string, Record<string, string>>>({});
+export const LanguageProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  const [language, setLanguage] = useState<Language>("en");
+  const [translations, setTranslations] = useState<Record<string, string>>({});
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    // Load translations
     const loadTranslations = async () => {
       try {
-        const enTranslations = await import('../translations/en.json');
-        const bgTranslations = await import('../translations/bg.json');
-        setTranslations({
-          en: enTranslations.default,
-          bg: bgTranslations.default,
-        });
+        setIsLoading(true);
+        const translationModule = await import(`../translations/${language}.json`);
+        setTranslations(translationModule.default);
       } catch (error) {
-        console.error('Failed to load translations:', error);
+        console.error("Error loading translations:", error);
+      } finally {
+        setIsLoading(false);
       }
     };
 
     loadTranslations();
-  }, []);
+  }, [language]);
 
-  // Get translation for a key
+  const handleLanguageChange = (newLanguage: Language) => {
+    setLanguage(newLanguage);
+    // Dispatch language change event for favicon updates
+    window.dispatchEvent(new CustomEvent('languageChange', { 
+      detail: { language: newLanguage } 
+    }));
+  };
+
   const t = (key: string): string => {
-    return translations[language]?.[key] || key;
+    if (isLoading) {
+      return ""; // Return empty string while loading
+    }
+    return translations[key] || key;
   };
 
   return (
-    <LanguageContext.Provider value={{ language, setLanguage, t }}>
+    <LanguageContext.Provider value={{ language, setLanguage: handleLanguageChange, t, isLoading }}>
       {children}
     </LanguageContext.Provider>
   );
+};
+
+export const useLanguage = () => {
+  const context = useContext(LanguageContext);
+  if (context === undefined) {
+    throw new Error("useLanguage must be used within a LanguageProvider");
+  }
+  return context;
 }; 

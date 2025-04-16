@@ -7,7 +7,7 @@ const Navbar = () => {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [activeSection, setActiveSection] = useState("home");
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
 
   // Update scroll state
   useEffect(() => {
@@ -47,6 +47,12 @@ const Navbar = () => {
     setIsMenuOpen(false);
   };
 
+  const getLogoPath = () => {
+    return language === 'bg' 
+      ? '/lovable-uploads/BAMAS_Logo_bg.png'
+      : '/lovable-uploads/6e77d85a-74ad-47e5-b141-a339ec981d57.png';
+  };
+
   return (
     <header
       className={`fixed top-0 w-full z-50 transition-all duration-300 ${isScrolled ? "bg-white/90 shadow-md backdrop-blur-sm py-2" : "bg-transparent py-4"
@@ -56,7 +62,7 @@ const Navbar = () => {
         <a href="#home" className="flex items-center">
           <div className="h-12 w-12">
             <img
-              src="/lovable-uploads/6e77d85a-74ad-47e5-b141-a339ec981d57.png"
+              src={getLogoPath()}
               alt="BAMAS Logo"
               style={{ borderRadius: '1rem' }}
               className="w-full h-full object-contain"

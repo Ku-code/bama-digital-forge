@@ -1,9 +1,6 @@
 import { useEffect, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-import { Checkbox } from "@/components/ui/checkbox";
 import { 
   Users, 
   Rocket, 
@@ -19,12 +16,11 @@ import {
 import Navbar from "@/components/Navbar";
 import { useToast } from "@/hooks/use-toast";
 import { Globe as GlobeComponent } from "@/components/ui/globe";
-import Logo from "@/components/Logo";
 import { useLanguage } from "@/contexts/LanguageContext";
 
 const Index = () => {
   const { toast } = useToast();
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
 
   useEffect(() => {
     const observer = new IntersectionObserver(
@@ -56,6 +52,12 @@ const Index = () => {
     e.currentTarget.reset();
   };
 
+  const getLogoPath = () => {
+    return language === 'bg' 
+      ? '/lovable-uploads/BAMAS_Logo_bg.png'
+      : '/lovable-uploads/6e77d85a-74ad-47e5-b141-a339ec981d57.png';
+  };
+
   return (
     <div className="min-h-screen bg-white">
       <Navbar />
@@ -65,7 +67,7 @@ const Index = () => {
         <div className="relative z-10 text-center max-w-5xl px-4 animate-on-scroll opacity-0 translate-y-4 transition-all duration-1000 ease-out">
           <div className="mb-8 flex justify-center">
             <img 
-              src="/lovable-uploads/6e77d85a-74ad-47e5-b141-a339ec981d57.png" 
+              src={getLogoPath()} 
               alt="BAMAS Logo" 
               style={{ borderRadius: '1rem' }}
               className="w-64 md:w-72 h-auto"
@@ -343,7 +345,7 @@ const Index = () => {
               <div className="flex flex-col items-center md:items-start">
                 <div className="w-24 h-24 mb-4">
                   <img 
-                    src="/lovable-uploads/6e77d85a-74ad-47e5-b141-a339ec981d57.png" 
+                    src={getLogoPath()} 
                     alt="BAMAS Logo"
                     style={{ borderRadius: '1rem' }}
                     className="w-full h-full object-contain"

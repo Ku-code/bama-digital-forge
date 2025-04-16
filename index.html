@@ -2,24 +2,20 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
+    <link rel="icon" type="image/png" href="/lovable-uploads/6e77d85a-74ad-47e5-b141-a339ec981d57.png" id="favicon" />
+    <link rel="apple-touch-icon" href="/lovable-uploads/6e77d85a-74ad-47e5-b141-a339ec981d57.png" id="apple-touch-icon" />
+    <link rel="shortcut icon" href="/lovable-uploads/6e77d85a-74ad-47e5-b141-a339ec981d57.png" id="shortcut-icon" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>BAMAS</title>
-    <meta name="description" content="Official association uniting Bulgaria's additive manufacturing companies and institutions. Join the movement transforming 3D printing innovation." />
-    <meta name="author" content="BAMA" />
-    <meta name="keywords" content="additive manufacturing Bulgaria, 3D printing network, open innovation, BAMA, Bulgarian Additive Manufacturing Association" />
-
-    <meta property="og:title" content="BAMA – Bulgarian Additive Manufacturing Association" />
-    <meta property="og:description" content="Official association uniting Bulgaria's additive manufacturing companies and institutions. Join the movement transforming 3D printing innovation." />
-    <meta property="og:type" content="website" />
+    <title>BAMAS - Bulgarian Additive Manufacturing Association</title>
+    <meta name="description" content="BAMAS is dedicated to advancing additive manufacturing technologies and fostering collaboration within the industry in Bulgaria." />
+    <meta property="og:title" content="BAMAS - Bulgarian Additive Manufacturing Association" />
+    <meta property="og:description" content="BAMAS is dedicated to advancing additive manufacturing technologies and fostering collaboration within the industry in Bulgaria." />
     <meta property="og:image" content="/lovable-uploads/BamasMain.png" />
-
+    <meta property="og:url" content="https://bamas.bg" />
     <meta name="twitter:card" content="summary_large_image" />
-    <meta name="twitter:site" content="@bama_bg" />
+    <meta name="twitter:title" content="BAMAS - Bulgarian Additive Manufacturing Association" />
+    <meta name="twitter:description" content="BAMAS is dedicated to advancing additive manufacturing technologies and fostering collaboration within the industry in Bulgaria." />
     <meta name="twitter:image" content="/lovable-uploads/BamasMain.png" />
-    
-    <link rel="icon" type="image/png" href="/lovable-uploads/6e77d85a-74ad-47e5-b141-a339ec981d57.png" />
-    <link rel="apple-touch-icon" href="/lovable-uploads/6e77d85a-74ad-47e5-b141-a339ec981d57.png" />
-    <link rel="shortcut icon" href="/lovable-uploads/6e77d85a-74ad-47e5-b141-a339ec981d57.png" />
   </head>
 
   <body>
@@ -27,5 +23,22 @@
     <!-- IMPORTANT: DO NOT REMOVE THIS SCRIPT TAG OR THIS VERY COMMENT! -->
     <script src="https://cdn.gpteng.co/gptengineer.js" type="module"></script>
     <script type="module" src="/src/main.tsx"></script>
+    <script>
+      // Function to update favicon based on language
+      function updateFavicon(language) {
+        const logoPath = language === 'bg' 
+          ? '/lovable-uploads/BAMAS_Logo_bg.png'
+          : '/lovable-uploads/6e77d85a-74ad-47e5-b141-a339ec981d57.png';
+        
+        document.getElementById('favicon').href = logoPath;
+        document.getElementById('apple-touch-icon').href = logoPath;
+        document.getElementById('shortcut-icon').href = logoPath;
+      }
+
+      // Listen for language changes
+      window.addEventListener('languageChange', (event) => {
+        updateFavicon(event.detail.language);
+      });
+    </script>
   </body>
 </html>

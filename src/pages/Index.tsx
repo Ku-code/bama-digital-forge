@@ -273,7 +273,7 @@ const Index = () => {
                 className="bg-white text-[#0C9D6A] hover:bg-white/90 shadow-[0_0_15px_rgba(255,255,255,0.5)] transition-all hover:shadow-[0_0_20px_rgba(255,255,255,0.7)]"
                 asChild
               >
-                <a href="https://docs.google.com/forms/d/e/1FAIpQLSdNgeoxrQDH4GxELH_nB5DKBtQZi4flmdtBmop1-znJMPR_Qg/viewform?usp=sharing" target="_blank" rel="noopener noreferrer">
+                <a href="https://forms.gle/foDo17E5vZWaF2TC8" target="_blank" rel="noopener noreferrer">
                   {t("events.conference.register.cta")}
                 </a>
               </Button>
@@ -305,7 +305,7 @@ const Index = () => {
                 className="bg-[#0C9D6A] hover:bg-[#0C9D6A]/90 text-white w-full"
                 asChild
               >
-                <a href="https://docs.google.com/forms/d/e/1FAIpQLSdRK7kUegigqpdz4Xh-4h3uOer3pEm29T7K2w-6NFWENNfBNA/viewform?usp=dialog" target="_blank" rel="noopener noreferrer">
+                <a href="https://forms.gle/gU4GR2iWpJ22hiC26" target="_blank" rel="noopener noreferrer">
                   {t("partner.interest.cta")}
                 </a>
               </Button>
@@ -319,20 +319,37 @@ const Index = () => {
           <h2 className="text-3xl md:text-4xl font-bold mb-12 text-center text-[#052e40] animate-on-scroll opacity-0 translate-y-4 transition-all duration-700 ease-out">
             {t("contact.title")}
           </h2>
-          <div className="max-w-2xl mx-auto">
-            <div className="bg-white p-8 rounded-lg shadow-md animate-on-scroll opacity-0 translate-y-4 transition-all duration-700 ease-out delay-100">
-              <h3 className="text-xl font-semibold text-[#052e40] mb-4">{t("contact.form.title")}</h3>
-              <p className="text-lg text-[#052e40]/80 leading-relaxed mb-6">
-                {t("contact.form.description")}
-              </p>
-              <Button 
-                className="bg-[#0C9D6A] hover:bg-[#0C9D6A]/90 text-white w-full"
-                asChild
-              >
-                <a href="https://forms.gle/SaHA8sSpUAWStWKU7" target="_blank" rel="noopener noreferrer">
-                  {t("contact.form.cta")}
-                </a>
-              </Button>
+          <div className="max-w-4xl mx-auto">
+            <div className="grid md:grid-cols-2 gap-8">
+              <div className="bg-white p-8 rounded-lg shadow-md animate-on-scroll opacity-0 translate-y-4 transition-all duration-700 ease-out delay-100">
+                <h3 className="text-xl font-semibold text-[#052e40] mb-4">{t("contact.form.title")}</h3>
+                <p className="text-lg text-[#052e40]/80 leading-relaxed mb-6">
+                  {t("contact.form.description")}
+                </p>
+                <Button 
+                  className="bg-[#0C9D6A] hover:bg-[#0C9D6A]/90 text-white w-full"
+                  asChild
+                >
+                  <a href="https://docs.google.com/forms/d/1QH_opmysVjtPv_IE7ECKRqbW0t49Jv7QON6xG69l0Qk/edit" target="_blank" rel="noopener noreferrer">
+                    {t("contact.form.cta")}
+                  </a>
+                </Button>
+              </div>
+              
+              <div className="bg-white p-8 rounded-lg shadow-md animate-on-scroll opacity-0 translate-y-4 transition-all duration-700 ease-out delay-200">
+                <h3 className="text-xl font-semibold text-[#052e40] mb-4">{t("contact.discord.title")}</h3>
+                <p className="text-lg text-[#052e40]/80 leading-relaxed mb-6">
+                  {t("contact.discord.description")}
+                </p>
+                <Button 
+                  className="bg-[#5865F2] hover:bg-[#5865F2]/90 text-white w-full"
+                  asChild
+                >
+                  <a href="https://discord.com/invite/WBkGh3nz" target="_blank" rel="noopener noreferrer">
+                    {t("contact.discord.cta")}
+                  </a>
+                </Button>
+              </div>
             </div>
           </div>
         </div>
@@ -380,6 +397,11 @@ const Index = () => {
                         <path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"/>
                         <rect width="4" height="12" x="2" y="9"/>
                         <circle cx="4" cy="4" r="2"/>
+                      </svg>
+                    </a>
+                    <a href="https://discord.com/invite/WBkGh3nz" target="_blank" rel="noopener noreferrer" className="text-white hover:text-[#0C9D6A] transition-colors">
+                      <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M20.317 4.37a19.791 19.791 0 0 0-4.885-1.515a.074.074 0 0 0-.079.037c-.21.375-.444.864-.608 1.25a18.27 18.27 0 0 0-5.487 0a12.64 12.64 0 0 0-.617-1.25a.077.077 0 0 0-.079-.037A19.736 19.736 0 0 0 3.677 4.37a.07.07 0 0 0-.032.027C.533 9.046-.32 13.58.099 18.057a.082.082 0 0 0 .031.057a19.9 19.9 0 0 0 5.993 3.03a.078.078 0 0 0 .084-.028a14.09 14.09 0 0 0 1.226-1.994a.076.076 0 0 0-.041-.106a13.107 13.107 0 0 1-1.872-.892a.077.077 0 0 1-.008-.128a10.2 10.2 0 0 0 .372-.292a.074.074 0 0 1 .077-.01c3.928 1.793 8.18 1.793 12.062 0a.074.074 0 0 1 .078.01c.12.098.246.198.373.292a.077.077 0 0 1-.006.127a12.299 12.299 0 0 1-1.873.892a.077.077 0 0 0-.041.107c.36.698.772 1.362 1.225 1.993a.076.076 0 0 0 .084.028a19.839 19.839 0 0 0 6.002-3.03a.077.077 0 0 0 .032-.054c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 0 0-.031-.03zM8.02 15.33c-1.183 0-2.157-1.085-2.157-2.419c0-1.333.956-2.419 2.157-2.419c1.21 0 2.176 1.096 2.157 2.42c0 1.333-.956 2.418-2.157 2.418zm7.975 0c-1.183 0-2.157-1.085-2.157-2.419c0-1.333.955-2.419 2.157-2.419c1.21 0 2.176 1.096 2.157 2.42c0 1.333-.946 2.418-2.157 2.418z"/>
                       </svg>
                     </a>
                   </div>

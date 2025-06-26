@@ -73,6 +73,9 @@
   "contact.form.title": "Send a Message",
   "contact.form.description": "Have questions about BAMAS or interested in learning more about our initiatives? Click the button below to send us a message through our contact form.",
   "contact.form.cta": "Contact Us",
+  "contact.discord.title": "Chat with Us",
+  "contact.discord.description": "Want to connect with our team? Join our Discord server to chat with us and get your questions answered in real-time.",
+  "contact.discord.cta": "Join Discord",
   
   "footer.resources": "Resources",
   "footer.contact": "Contact",

@@ -15,12 +15,15 @@ import {
 } from "@/components/ui/icons";
 import Navbar from "@/components/Navbar";
 import { useToast } from "@/hooks/use-toast";
-import { Globe as GlobeComponent } from "@/components/ui/globe";
+import { DotGlobeHero } from "@/components/ui/globe-hero";
+import { FooterSection } from "@/components/ui/footer-section";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { motion } from "framer-motion";
+import { ArrowRight, Zap as ZapIcon, Target, Rocket as RocketIcon, Eye } from "lucide-react";
 
 const Index = () => {
   const { toast } = useToast();
-  const { t, language } = useLanguage();
+  const { t, language, setLanguage } = useLanguage();
 
   useEffect(() => {
     const observer = new IntersectionObserver(
@@ -59,87 +62,276 @@ const Index = () => {
   };
 
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen bg-background">
       <Navbar />
       
-      <section id="home" className="relative h-screen flex items-center justify-center text-[#052e40] overflow-hidden">
-        <GlobeComponent />
-        <div className="relative z-10 text-center max-w-5xl px-4 animate-on-scroll opacity-0 translate-y-4 transition-all duration-1000 ease-out">
-          <div className="mb-8 flex justify-center">
-            <img 
-              src={getLogoPath()} 
-              alt="BAMAS Logo" 
-              style={{ borderRadius: '1rem' }}
-              className="w-64 md:w-72 h-auto"
-            />
+      <section id="home" className="relative">
+        <DotGlobeHero
+          rotationSpeed={0.004}
+          className="bg-gradient-to-br from-background via-background/95 to-muted/10 relative overflow-hidden"
+        >
+          <div className="absolute inset-0 bg-gradient-to-t from-background/50 via-transparent to-background/30" />
+          <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-primary/5 rounded-full blur-3xl animate-pulse" />
+          <div className="absolute bottom-1/4 right-1/4 w-64 h-64 bg-primary/3 rounded-full blur-3xl animate-pulse" />
+          
+          <div className="relative z-10 text-center space-y-12 max-w-5xl mx-auto px-6 py-12">
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.8 }}
+              className="space-y-8"
+            >
+              <motion.div 
+                initial={{ opacity: 0, scale: 0.9 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ duration: 0.6, delay: 0.2 }}
+                className="relative inline-flex items-center gap-3 px-6 py-3 rounded-full bg-gradient-to-r from-primary/20 via-primary/10 to-primary/20 border border-primary/30 backdrop-blur-xl shadow-2xl"
+              >
+                <div className="absolute inset-0 rounded-full bg-gradient-to-r from-primary/10 via-transparent to-primary/10 animate-pulse" />
+                <div className="w-2 h-2 bg-primary rounded-full animate-ping" />
+                <span className="relative z-10 text-sm font-bold text-primary tracking-wider uppercase">BAMAS</span>
+                <div className="w-2 h-2 bg-primary rounded-full animate-ping animation-delay-500" />
+              </motion.div>
+              
+              <div className="space-y-6">
+                <motion.h1 
+                  initial={{ opacity: 0, y: 30 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 1, delay: 0.3 }}
+                  className="text-4xl md:text-6xl lg:text-7xl xl:text-8xl font-black tracking-tight leading-tight select-none"
+                  style={{ fontFamily: 'Inter, system-ui, sans-serif' }}
+                >
+                  <span className="block relative">
+                    <span className="bg-gradient-to-br from-primary via-primary to-primary/60 bg-clip-text text-transparent font-black relative z-10">
+                      {t("hero.title")}
+                    </span>
+                    <div className="absolute inset-0 bg-gradient-to-br from-primary via-primary to-primary/60 bg-clip-text text-transparent font-black blur-2xl opacity-50 scale-105" 
+                         style={{ fontFamily: 'Inter, system-ui, sans-serif' }}>
+                      {t("hero.title")}
+                    </div>
+                    <motion.div
+                      initial={{ width: 0 }}
+                      animate={{ width: "100%" }}
+                      transition={{ duration: 1.5, delay: 1.2, ease: "easeOut" }}
+                      className="absolute -bottom-6 left-0 h-3 bg-gradient-to-r from-primary via-primary/80 to-transparent rounded-full shadow-lg shadow-primary/50"
+                    />
+                  </span>
+                </motion.h1>
+              </div>
+              
+              <motion.div 
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ duration: 0.8, delay: 0.8 }}
+                className="max-w-3xl mx-auto space-y-4"
+              >
+                <p className="text-xl md:text-2xl text-muted-foreground leading-relaxed font-medium" 
+                   style={{ fontFamily: 'Inter, system-ui, sans-serif' }}>
+                  {t("hero.subtitle")}
+                </p>
+              </motion.div>
+            </motion.div>
+
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.8, delay: 1 }}
+              className="flex flex-col sm:flex-row gap-6 justify-center items-center pt-4"
+            >
+              <motion.button
+                whileHover={{ 
+                  scale: 1.05, 
+                  boxShadow: "0 20px 40px rgba(0,0,0,0.2), 0 0 25px hsl(var(--primary) / 0.3)",
+                  y: -2
+                }}
+                whileTap={{ scale: 0.98 }}
+                className="group relative inline-flex items-center gap-3 px-8 py-4 bg-gradient-to-r from-primary via-primary to-primary/90 text-primary-foreground rounded-xl font-semibold text-lg shadow-xl hover:shadow-primary/30 transition-all duration-500 overflow-hidden border border-primary/20"
+                onClick={() => {
+                  const membershipSection = document.getElementById('membership');
+                  membershipSection?.scrollIntoView({ behavior: 'smooth' });
+                }}
+              >
+                <div className="absolute inset-0 bg-gradient-to-r from-white/20 via-white/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+                <motion.div
+                  className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent"
+                  initial={{ x: "-100%" }}
+                  whileHover={{ x: "100%" }}
+                  transition={{ duration: 0.8 }}
+                />
+                <span className="relative z-10 tracking-wide">{t("hero.cta")}</span>
+                <ArrowRight className="relative z-10 w-5 h-5 group-hover:translate-x-2 transition-transform duration-300" />
+              </motion.button>
+              
+              <motion.button
+                whileHover={{ 
+                  scale: 1.05,
+                  backgroundColor: "hsl(var(--accent))",
+                  borderColor: "hsl(var(--primary))",
+                  boxShadow: "0 15px 30px rgba(0,0,0,0.1), 0 0 15px hsl(var(--primary) / 0.1)",
+                  y: -2
+                }}
+                whileTap={{ scale: 0.98 }}
+                className="group relative inline-flex items-center gap-3 px-8 py-4 border-2 border-border/40 rounded-xl font-semibold text-lg hover:border-primary/40 transition-all duration-500 backdrop-blur-xl bg-background/60 hover:bg-background/90 shadow-lg overflow-hidden"
+                onClick={() => {
+                  const aboutSection = document.getElementById('about');
+                  aboutSection?.scrollIntoView({ behavior: 'smooth' });
+                }}
+              >
+                <div className="absolute inset-0 bg-gradient-to-r from-primary/5 via-transparent to-primary/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+                <ZapIcon className="relative z-10 w-5 h-5 group-hover:scale-110 group-hover:rotate-6 transition-all duration-300" />
+                <span className="relative z-10 tracking-wide">{t("nav.about")}</span>
+              </motion.button>
+            </motion.div>
           </div>
-          <h1 className="text-4xl md:text-6xl font-bold mb-6 leading-tight">
-            {t("hero.title")}
-          </h1>
-          <p className="text-xl md:text-2xl mb-8 text-[#052e40]/70">{t("hero.subtitle")}</p>
-          <Button className="bg-[#0C9D6A] hover:bg-[#0C9D6A]/90 text-white px-8 py-6 rounded-md text-lg" asChild>
-            <a href="#membership">{t("hero.cta")}</a>
-          </Button>
-        </div>
+        </DotGlobeHero>
       </section>
 
-      <section id="about" className="py-20 bg-gray-50">
-        <div className="container mx-auto px-4">
-          <h2 className="text-3xl md:text-4xl font-bold mb-12 text-center text-[#052e40] animate-on-scroll opacity-0 translate-y-4 transition-all duration-700 ease-out">
+      <section id="about" className="py-20 bg-muted/30 relative overflow-hidden">
+        {/* Background image with reduced opacity - centered */}
+        <div 
+          className="absolute inset-0 pointer-events-none z-0"
+          style={{
+            backgroundImage: 'url(/bamas-map-logo.png)',
+            backgroundRepeat: 'no-repeat',
+            backgroundPosition: 'center center',
+            backgroundSize: 'auto 70%',
+            opacity: 0.12
+          }}
+        />
+        
+        <div className="container mx-auto px-4 relative z-10">
+          <h2 className="text-3xl md:text-4xl font-bold mb-12 text-center text-foreground animate-on-scroll opacity-0 translate-y-4 transition-all duration-700 ease-out">
             {t("about.title")}
           </h2>
           <div className="max-w-3xl mx-auto animate-on-scroll opacity-0 translate-y-4 transition-all duration-700 ease-out delay-100">
-            <p className="text-lg text-[#052e40]/80 leading-relaxed mb-6">
+            <p className="text-lg text-foreground/80 leading-relaxed mb-6">
               {t("about.description")}
             </p>
-            <p className="text-lg text-[#052e40]/80 leading-relaxed">
+            <p className="text-lg text-foreground/80 leading-relaxed">
               {t("about.subtitle")}
             </p>
           </div>
         </div>
       </section>
 
-      <section id="mission" className="py-20 bg-white">
-        <div className="container mx-auto px-4">
-          <div className="grid md:grid-cols-2 gap-12">
-            <div className="animate-on-scroll opacity-0 translate-y-4 transition-all duration-700 ease-out">
-              <h2 className="text-3xl font-bold mb-6 text-[#052e40]">{t("mission.vision.title")}</h2>
-              <div className="bg-gray-50 p-8 rounded-lg shadow-sm h-full border-l-4 border-[#0C9D6A]">
-                <p className="text-lg text-[#052e40]/80 leading-relaxed">
-                  {t("mission.vision.description")}
-                </p>
+      <section id="mission" className="py-24 bg-gradient-to-b from-background via-muted/20 to-background relative overflow-hidden">
+        {/* Background decorative elements */}
+        <div className="absolute top-0 left-0 w-96 h-96 bg-primary/5 rounded-full blur-3xl -translate-x-1/2 -translate-y-1/2"></div>
+        <div className="absolute bottom-0 right-0 w-96 h-96 bg-primary/5 rounded-full blur-3xl translate-x-1/2 translate-y-1/2"></div>
+        
+        <div className="container mx-auto px-4 relative z-10">
+          {/* Section Header */}
+          <div className="text-center mb-16 animate-on-scroll opacity-0 translate-y-4 transition-all duration-700 ease-out">
+            <h2 className="text-4xl md:text-5xl font-black text-foreground mb-4">
+              {t("mission.vision.title")} & {t("mission.mission.title")}
+            </h2>
+            <div className="w-24 h-1 bg-gradient-to-r from-transparent via-primary to-transparent mx-auto"></div>
+          </div>
+
+          {/* Vision Section - Full Width Hero Style */}
+          <div className="max-w-5xl mx-auto mb-20 animate-on-scroll opacity-0 translate-y-4 transition-all duration-700 ease-out delay-100">
+            <motion.div
+              initial={{ opacity: 0, y: 30 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.8, delay: 0.2 }}
+              className="relative"
+            >
+              <div className="bg-gradient-to-br from-primary/10 via-primary/5 to-transparent p-12 rounded-2xl border border-primary/20 shadow-xl backdrop-blur-sm">
+                <div className="flex items-start gap-6">
+                  <div className="flex-shrink-0">
+                    <div className="w-16 h-16 rounded-2xl bg-primary/20 flex items-center justify-center">
+                      <Eye className="h-8 w-8 text-primary" />
+                    </div>
+                  </div>
+                  <div className="flex-grow">
+                    <h3 className="text-3xl md:text-4xl font-bold text-foreground mb-4 flex items-center gap-3">
+                      {t("mission.vision.title")}
+                      <span className="text-primary text-2xl">👁️</span>
+                    </h3>
+                    <p className="text-xl text-foreground/80 leading-relaxed">
+                      {t("mission.vision.description")}
+                    </p>
+                  </div>
+                </div>
               </div>
+            </motion.div>
+          </div>
+
+          {/* Mission Section - Grid Layout */}
+          <div className="max-w-6xl mx-auto">
+            <div className="text-center mb-12 animate-on-scroll opacity-0 translate-y-4 transition-all duration-700 ease-out delay-200">
+              <h3 className="text-3xl md:text-4xl font-bold text-foreground mb-4 flex items-center justify-center gap-3">
+                <RocketIcon className="h-8 w-8 text-primary" />
+                {t("mission.mission.title")}
+              </h3>
+              <p className="text-lg text-foreground/60 max-w-2xl mx-auto">
+                {t("mission.mission.subtitle")}
+              </p>
             </div>
-            <div className="animate-on-scroll opacity-0 translate-y-4 transition-all duration-700 ease-out delay-100">
-              <h2 className="text-3xl font-bold mb-6 text-[#052e40]">{t("mission.mission.title")}</h2>
-              <div className="bg-gray-50 p-8 rounded-lg shadow-sm border-l-4 border-[#E62F29]">
-                <ul className="text-lg text-[#052e40]/80 space-y-4">
-                  <li className="flex items-start">
-                    <CircleCheck className="h-6 w-6 text-[#0C9D6A] mr-2 flex-shrink-0 mt-1" />
-                    <span>{t("mission.mission.item1")}</span>
-                  </li>
-                  <li className="flex items-start">
-                    <CircleCheck className="h-6 w-6 text-[#0C9D6A] mr-2 flex-shrink-0 mt-1" />
-                    <span>{t("mission.mission.item2")}</span>
-                  </li>
-                  <li className="flex items-start">
-                    <CircleCheck className="h-6 w-6 text-[#0C9D6A] mr-2 flex-shrink-0 mt-1" />
-                    <span>{t("mission.mission.item3")}</span>
-                  </li>
-                  <li className="flex items-start">
-                    <CircleCheck className="h-6 w-6 text-[#0C9D6A] mr-2 flex-shrink-0 mt-1" />
-                    <span>{t("mission.mission.item4")}</span>
-                  </li>
-                </ul>
-              </div>
+
+            <div className="grid md:grid-cols-2 gap-6">
+              {[
+                {
+                  icon: <Users className="h-8 w-8" />,
+                  text: t("mission.mission.item1"),
+                  color: "from-accent/20 to-accent/10",
+                  borderColor: "border-accent/30",
+                  iconBg: "bg-accent/20",
+                  iconColor: "text-accent-foreground"
+                },
+                {
+                  icon: <Rocket className="h-8 w-8" />,
+                  text: t("mission.mission.item2"),
+                  color: "from-primary/20 to-primary/10",
+                  borderColor: "border-primary/30",
+                  iconBg: "bg-primary/20",
+                  iconColor: "text-primary"
+                },
+                {
+                  icon: <Lightbulb className="h-8 w-8" />,
+                  text: t("mission.mission.item3"),
+                  color: "from-secondary/20 to-secondary/10",
+                  borderColor: "border-secondary/30",
+                  iconBg: "bg-secondary/20",
+                  iconColor: "text-secondary-foreground"
+                },
+                {
+                  icon: <Globe className="h-8 w-8" />,
+                  text: t("mission.mission.item4"),
+                  color: "from-primary/20 via-primary/15 to-primary/10",
+                  borderColor: "border-primary/30",
+                  iconBg: "bg-primary/20",
+                  iconColor: "text-primary"
+                }
+              ].map((item, index) => (
+                <motion.div
+                  key={index}
+                  initial={{ opacity: 0, y: 30 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.6, delay: 0.3 + index * 0.1 }}
+                  className="animate-on-scroll opacity-0 translate-y-4 transition-all duration-700 ease-out"
+                  style={{transitionDelay: `${300 + index * 100}ms`}}
+                >
+                  <Card className={`h-full bg-card border-2 ${item.borderColor} hover:shadow-xl transition-all duration-300 hover:scale-[1.02] bg-gradient-to-br ${item.color}`}>
+                    <div className="p-8">
+                      <div className={`w-16 h-16 rounded-xl ${item.iconBg} flex items-center justify-center mb-6 ${item.iconColor}`}>
+                        {item.icon}
+                      </div>
+                      <p className="text-lg text-foreground leading-relaxed font-medium">
+                        {item.text}
+                      </p>
+                    </div>
+                  </Card>
+                </motion.div>
+              ))}
             </div>
           </div>
         </div>
       </section>
 
-      <section id="objectives" className="py-20 bg-gray-50">
+      <section id="objectives" className="py-20 bg-muted/30">
         <div className="container mx-auto px-4">
-          <h2 className="text-3xl md:text-4xl font-bold mb-12 text-center text-[#052e40] animate-on-scroll opacity-0 translate-y-4 transition-all duration-700 ease-out">
+          <h2 className="text-3xl md:text-4xl font-bold mb-12 text-center text-foreground animate-on-scroll opacity-0 translate-y-4 transition-all duration-700 ease-out">
             {t("objectives.title")}
           </h2>
           <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6 mt-12">
@@ -165,13 +357,13 @@ const Index = () => {
                 description: t("objectives.item4.description")
               }
             ].map((objective, index) => (
-              <Card key={index} className="bg-white shadow-md hover:shadow-lg transition-all animate-on-scroll opacity-0 translate-y-4 transition-all duration-700 ease-out" style={{transitionDelay: `${index * 100}ms`}}>
+              <Card key={index} className="bg-card shadow-md hover:shadow-lg transition-all animate-on-scroll opacity-0 translate-y-4 transition-all duration-700 ease-out" style={{transitionDelay: `${index * 100}ms`}}>
                 <div className="p-6 flex flex-col items-center text-center">
-                  <div className="p-3 rounded-full bg-[#0C9D6A]/10 mb-4 text-[#0C9D6A]">
+                  <div className="p-3 rounded-full bg-primary/10 mb-4 text-primary">
                     {objective.icon}
                   </div>
-                  <h3 className="text-xl font-semibold mb-3 text-[#052e40]">{objective.title}</h3>
-                  <p className="text-[#052e40]/70">{objective.description}</p>
+                  <h3 className="text-xl font-semibold mb-3 text-foreground">{objective.title}</h3>
+                  <p className="text-foreground/70">{objective.description}</p>
                 </div>
               </Card>
             ))}
@@ -179,9 +371,116 @@ const Index = () => {
         </div>
       </section>
 
-      <section id="membership" className="py-20 bg-white">
+      <section id="membership-pricing" className="py-20 bg-muted/30">
         <div className="container mx-auto px-4">
-          <h2 className="text-3xl md:text-4xl font-bold mb-12 text-center text-[#052e40] animate-on-scroll opacity-0 translate-y-4 transition-all duration-700 ease-out">
+          <h2 className="text-3xl md:text-4xl font-bold mb-4 text-center text-foreground animate-on-scroll opacity-0 translate-y-4 transition-all duration-700 ease-out">
+            {t("membership.pricing.title")}
+          </h2>
+          <p className="text-lg text-center text-foreground/70 mb-12 animate-on-scroll opacity-0 translate-y-4 transition-all duration-700 ease-out delay-100">
+            {t("membership.pricing.subtitle")}
+          </p>
+          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6 mt-12">
+            {[
+              {
+                title: t("membership.pricing.individual.title"),
+                description: t("membership.pricing.individual.description"),
+                priceBGN: 250,
+                priceEUR: 128,
+                isFree: false,
+                isHighlighted: false
+              },
+              {
+                title: t("membership.pricing.company.title"),
+                description: t("membership.pricing.company.description"),
+                priceBGN: 500,
+                priceEUR: 255,
+                isFree: false,
+                isHighlighted: true
+              },
+              {
+                title: t("membership.pricing.organization.title"),
+                description: t("membership.pricing.organization.description"),
+                priceBGN: 0,
+                priceEUR: 0,
+                isFree: true,
+                isHighlighted: false
+              },
+              {
+                title: t("membership.pricing.foreign.title"),
+                description: t("membership.pricing.foreign.description"),
+                priceBGN: 1000,
+                priceEUR: 510,
+                isFree: false,
+                isHighlighted: false
+              }
+            ].map((tier, index) => (
+              <Card 
+                key={index} 
+                className={`relative overflow-hidden transition-all duration-300 hover:shadow-xl animate-on-scroll opacity-0 translate-y-4 bg-card ${
+                  tier.isHighlighted 
+                    ? "border-2 border-primary shadow-lg scale-105" 
+                    : "border border-border/40 hover:border-primary/50"
+                }`}
+                style={{transitionDelay: `${index * 100}ms`}}
+              >
+                {tier.isHighlighted && (
+                  <div className="absolute top-0 right-0 bg-primary text-primary-foreground text-xs font-bold px-3 py-1 rounded-bl-lg">
+                    POPULAR
+                  </div>
+                )}
+                <div className="p-6 flex flex-col h-full">
+                  <h3 className="text-xl font-bold text-foreground mb-2">{tier.title}</h3>
+                  <p className="text-sm text-foreground/70 mb-6 flex-grow">{tier.description}</p>
+                  
+                  <div className="mb-6">
+                    {tier.isFree ? (
+                      <div className="text-center">
+                        <div className="text-5xl font-black text-primary mb-2">
+                          {t("membership.pricing.free")}
+                        </div>
+                      </div>
+                    ) : (
+                      <div className="text-center">
+                        <div className="flex items-baseline justify-center gap-2 mb-2">
+                          <span className="text-4xl md:text-5xl font-black text-foreground">
+                            €{tier.priceEUR}
+                          </span>
+                          <span className="text-lg text-foreground/60 font-medium">
+                            EUR
+                          </span>
+                        </div>
+                        <div className="text-sm text-foreground/50">
+                          {tier.priceBGN} BGN
+                        </div>
+                        <div className="text-xs text-foreground/40 mt-1">
+                          {t("membership.pricing.perYear")}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                  
+                  <Button 
+                    className={`w-full ${
+                      tier.isHighlighted 
+                        ? "bg-primary hover:bg-primary/90 text-primary-foreground" 
+                        : tier.isFree
+                        ? "bg-muted hover:bg-muted/80 text-foreground"
+                        : "bg-secondary hover:bg-secondary/80 text-secondary-foreground"
+                    }`}
+                    asChild
+                  >
+                    <a href="#contact">{t("membership.pricing.cta")}</a>
+                  </Button>
+                </div>
+              </Card>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      <section id="membership" className="py-20 bg-background">
+        <div className="container mx-auto px-4">
+          <h2 className="text-3xl md:text-4xl font-bold mb-12 text-center text-foreground animate-on-scroll opacity-0 translate-y-4 transition-all duration-700 ease-out">
             {t("membership.title")}
           </h2>
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 mt-12">
@@ -217,15 +516,15 @@ const Index = () => {
                 description: t("membership.benefits.item6.description")
               }
             ].map((benefit, index) => (
-              <Card key={index} className="border border-[#0C9D6A]/20 hover:border-[#0C9D6A]/50 transition-all animate-on-scroll opacity-0 translate-y-4 transition-all duration-700 ease-out" style={{transitionDelay: `${index * 100}ms`}}>
+              <Card key={index} className="border border-primary/20 hover:border-primary/50 transition-all animate-on-scroll opacity-0 translate-y-4 transition-all duration-700 ease-out bg-card" style={{transitionDelay: `${index * 100}ms`}}>
                 <div className="p-6 flex flex-col">
                   <div className="flex items-center mb-4">
-                    <div className="text-[#E62F29] mr-4">
+                    <div className="text-destructive mr-4">
                       {benefit.icon}
                     </div>
-                    <h3 className="text-xl font-semibold text-[#052e40]">{benefit.title}</h3>
+                    <h3 className="text-xl font-semibold text-foreground">{benefit.title}</h3>
                   </div>
-                  <p className="text-[#052e40]/70">{benefit.description}</p>
+                  <p className="text-foreground/70">{benefit.description}</p>
                 </div>
               </Card>
             ))}
@@ -233,76 +532,126 @@ const Index = () => {
         </div>
       </section>
 
-      <section id="events" className="py-20 bg-gray-50">
+      <section id="events" className="py-20 bg-muted/30">
         <div className="container mx-auto px-4">
-          <h2 className="text-3xl md:text-4xl font-bold mb-12 text-center text-[#052e40] animate-on-scroll opacity-0 translate-y-4 transition-all duration-700 ease-out">
+          <h2 className="text-3xl md:text-4xl font-bold mb-12 text-center text-foreground animate-on-scroll opacity-0 translate-y-4 transition-all duration-700 ease-out">
             {t("events.title")}
           </h2>
-          <div className="bg-gradient-to-br from-[#0C9D6A] to-[#0C9D6A]/80 p-8 rounded-lg shadow-md max-w-4xl mx-auto animate-on-scroll opacity-0 translate-y-4 transition-all duration-700 ease-out delay-100 text-white">
-            <h3 className="text-2xl font-bold mb-4">{t("events.conference.title")}</h3>
-            <div className="flex flex-wrap gap-4 mb-6">
-              <div className="bg-white/20 px-3 py-1 rounded text-sm font-medium backdrop-blur-sm">{t("events.conference.date")}</div>
-              <div className="bg-white/20 px-3 py-1 rounded text-sm font-medium backdrop-blur-sm">{t("events.conference.location")}</div>
+          
+          {/* Timeline Container */}
+          <div className="max-w-6xl mx-auto">
+            {/* Past Events Section */}
+            <div className="mb-12">
+              <h3 className="text-2xl font-bold mb-8 text-center text-foreground/60">
+                {t("events.past.title")}
+              </h3>
+              <div className="bg-muted/70 p-8 rounded-lg shadow-sm max-w-4xl mx-auto border border-border/30 animate-on-scroll opacity-0 translate-y-4 transition-all duration-700 ease-out">
+                <div className="flex items-start gap-4">
+                  <div className="flex-shrink-0 w-3 h-3 rounded-full bg-foreground/30 mt-2"></div>
+                  <div className="flex-grow">
+                    <h4 className="text-xl font-bold text-foreground/60 mb-3">{t("events.conference.title")}</h4>
+                    <div className="flex flex-wrap gap-4 mb-4">
+                      <div className="bg-background/60 px-3 py-1 rounded text-sm font-medium text-foreground/50">{t("events.conference.date")}</div>
+                      <div className="bg-background/60 px-3 py-1 rounded text-sm font-medium text-foreground/50">{t("events.conference.location")}</div>
+                    </div>
+                    <div className="mb-6">
+                      <h5 className="text-base font-semibold mb-3 text-foreground/50">{t("events.conference.topics")}</h5>
+                      <ul className="grid md:grid-cols-2 gap-2">
+                        <li className="flex items-center text-sm text-foreground/40">
+                          <CircleCheck className="h-4 w-4 text-foreground/30 mr-2 flex-shrink-0" />
+                          <span>{t("events.conference.topic1")}</span>
+                        </li>
+                        <li className="flex items-center text-sm text-foreground/40">
+                          <CircleCheck className="h-4 w-4 text-foreground/30 mr-2 flex-shrink-0" />
+                          <span>{t("events.conference.topic2")}</span>
+                        </li>
+                        <li className="flex items-center text-sm text-foreground/40">
+                          <CircleCheck className="h-4 w-4 text-foreground/30 mr-2 flex-shrink-0" />
+                          <span>{t("events.conference.topic3")}</span>
+                        </li>
+                        <li className="flex items-center text-sm text-foreground/40">
+                          <CircleCheck className="h-4 w-4 text-foreground/30 mr-2 flex-shrink-0" />
+                          <span>{t("events.conference.topic4")}</span>
+                        </li>
+                      </ul>
+                    </div>
+                  </div>
+                </div>
+              </div>
             </div>
-            <div className="mb-8">
-              <h4 className="text-lg font-semibold mb-3">{t("events.conference.topics")}</h4>
-              <ul className="grid md:grid-cols-2 gap-3">
-                <li className="flex items-center">
-                  <CircleCheck className="h-5 w-5 text-white mr-2 flex-shrink-0" />
-                  <span>{t("events.conference.topic1")}</span>
-                </li>
-                <li className="flex items-center">
-                  <CircleCheck className="h-5 w-5 text-white mr-2 flex-shrink-0" />
-                  <span>{t("events.conference.topic2")}</span>
-                </li>
-                <li className="flex items-center">
-                  <CircleCheck className="h-5 w-5 text-white mr-2 flex-shrink-0" />
-                  <span>{t("events.conference.topic3")}</span>
-                </li>
-                <li className="flex items-center">
-                  <CircleCheck className="h-5 w-5 text-white mr-2 flex-shrink-0" />
-                  <span>{t("events.conference.topic4")}</span>
-                </li>
-              </ul>
+
+            {/* Timeline Arrow/Divider */}
+            <div className="flex items-center justify-center my-12 animate-on-scroll opacity-0 translate-y-4 transition-all duration-700 ease-out delay-200">
+              <div className="flex items-center gap-4 w-full max-w-md">
+                <div className="flex-grow h-0.5 bg-gradient-to-r from-foreground/20 to-transparent"></div>
+                <div className="relative">
+                  <div className="w-12 h-12 rounded-full bg-primary/20 flex items-center justify-center">
+                    <div className="w-8 h-8 rounded-full bg-primary flex items-center justify-center">
+                      <ArrowRight className="h-5 w-5 text-primary-foreground" />
+                    </div>
+                  </div>
+                  <div className="absolute -bottom-6 left-1/2 transform -translate-x-1/2 text-xs font-medium text-foreground/60 whitespace-nowrap">
+                    Timeline
+                  </div>
+                </div>
+                <div className="flex-grow h-0.5 bg-gradient-to-l from-primary to-transparent"></div>
+              </div>
             </div>
-            
-            <div className="bg-white/10 p-6 rounded-lg text-center backdrop-blur-sm">
-              <h4 className="text-xl font-semibold mb-4">{t("events.conference.register.title")}</h4>
-              <p className="mb-6">{t("events.conference.register.description")}</p>
-              <Button 
-                className="bg-white text-[#0C9D6A] hover:bg-white/90 shadow-[0_0_15px_rgba(255,255,255,0.5)] transition-all hover:shadow-[0_0_20px_rgba(255,255,255,0.7)]"
-                asChild
-              >
-                <a href="https://forms.gle/foDo17E5vZWaF2TC8" target="_blank" rel="noopener noreferrer">
-                  {t("events.conference.register.cta")}
-                </a>
-              </Button>
+
+            {/* Upcoming Events Section */}
+            <div className="mt-12">
+              <h3 className="text-2xl font-bold mb-8 text-center text-primary">
+                {t("events.upcoming.title")}
+              </h3>
+              <div className="bg-gradient-to-br from-primary via-primary to-primary/80 p-8 rounded-lg shadow-lg max-w-4xl mx-auto animate-on-scroll opacity-0 translate-y-4 transition-all duration-700 ease-out delay-300 text-primary-foreground">
+                <div className="flex items-start gap-4">
+                  <div className="flex-shrink-0 w-3 h-3 rounded-full bg-primary-foreground mt-2 animate-pulse"></div>
+                  <div className="flex-grow">
+                    <h4 className="text-2xl font-bold mb-3">{t("events.planning2026.title")}</h4>
+                    <div className="flex flex-wrap gap-4 mb-4">
+                      <div className="bg-primary-foreground/20 px-3 py-1 rounded text-sm font-medium backdrop-blur-sm">{t("events.planning2026.date")}</div>
+                      <div className="bg-primary-foreground/20 px-3 py-1 rounded text-sm font-medium backdrop-blur-sm">{t("events.planning2026.location")}</div>
+                    </div>
+                    <p className="text-primary-foreground/90 mb-6 leading-relaxed">
+                      {t("events.planning2026.description")}
+                    </p>
+                    <Button 
+                      className="bg-primary-foreground text-primary hover:bg-primary-foreground/90 shadow-lg"
+                      asChild
+                    >
+                      <a href="#contact">
+                        {t("membership.pricing.cta")}
+                      </a>
+                    </Button>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
         </div>
       </section>
 
-      <section id="partner" className="py-20 bg-white">
+      <section id="partner" className="py-20 bg-background">
         <div className="container mx-auto px-4">
-          <h2 className="text-3xl md:text-4xl font-bold mb-12 text-center text-[#052e40] animate-on-scroll opacity-0 translate-y-4 transition-all duration-700 ease-out">
+          <h2 className="text-3xl md:text-4xl font-bold mb-12 text-center text-foreground animate-on-scroll opacity-0 translate-y-4 transition-all duration-700 ease-out">
             {t("partner.title")}
           </h2>
           <div className="grid md:grid-cols-2 gap-12 mt-8">
             <div className="animate-on-scroll opacity-0 translate-y-4 transition-all duration-700 ease-out">
-              <p className="text-lg text-[#052e40]/80 leading-relaxed mb-6">
+              <p className="text-lg text-foreground/80 leading-relaxed mb-6">
                 {t("partner.description1")}
               </p>
-              <p className="text-lg text-[#052e40]/80 leading-relaxed">
+              <p className="text-lg text-foreground/80 leading-relaxed">
                 {t("partner.description2")}
               </p>
             </div>
-            <div className="bg-gray-50 p-8 rounded-lg shadow-sm animate-on-scroll opacity-0 translate-y-4 transition-all duration-700 ease-out delay-100">
-              <h3 className="text-xl font-semibold text-[#052e40] mb-4">{t("partner.interest.title")}</h3>
-              <p className="text-lg text-[#052e40]/80 leading-relaxed mb-6">
+            <div className="bg-card p-8 rounded-lg shadow-sm animate-on-scroll opacity-0 translate-y-4 transition-all duration-700 ease-out delay-100">
+              <h3 className="text-xl font-semibold text-foreground mb-4">{t("partner.interest.title")}</h3>
+              <p className="text-lg text-foreground/80 leading-relaxed mb-6">
                 {t("partner.interest.description")}
               </p>
               <Button 
-                className="bg-[#0C9D6A] hover:bg-[#0C9D6A]/90 text-white w-full"
+                className="bg-primary hover:bg-primary/90 text-primary-foreground w-full"
                 asChild
               >
                 <a href="https://forms.gle/gU4GR2iWpJ22hiC26" target="_blank" rel="noopener noreferrer">
@@ -314,20 +663,20 @@ const Index = () => {
         </div>
       </section>
 
-      <section id="contact" className="py-20 bg-gray-50">
+      <section id="contact" className="py-20 bg-muted/30">
         <div className="container mx-auto px-4">
-          <h2 className="text-3xl md:text-4xl font-bold mb-12 text-center text-[#052e40] animate-on-scroll opacity-0 translate-y-4 transition-all duration-700 ease-out">
+          <h2 className="text-3xl md:text-4xl font-bold mb-12 text-center text-foreground animate-on-scroll opacity-0 translate-y-4 transition-all duration-700 ease-out">
             {t("contact.title")}
           </h2>
           <div className="max-w-4xl mx-auto">
             <div className="grid md:grid-cols-2 gap-8">
-              <div className="bg-white p-8 rounded-lg shadow-md animate-on-scroll opacity-0 translate-y-4 transition-all duration-700 ease-out delay-100">
-                <h3 className="text-xl font-semibold text-[#052e40] mb-4">{t("contact.form.title")}</h3>
-                <p className="text-lg text-[#052e40]/80 leading-relaxed mb-6">
+              <div className="bg-card p-8 rounded-lg shadow-md animate-on-scroll opacity-0 translate-y-4 transition-all duration-700 ease-out delay-100">
+                <h3 className="text-xl font-semibold text-foreground mb-4">{t("contact.form.title")}</h3>
+                <p className="text-lg text-foreground/80 leading-relaxed mb-6">
                   {t("contact.form.description")}
                 </p>
                 <Button 
-                  className="bg-[#0C9D6A] hover:bg-[#0C9D6A]/90 text-white w-full"
+                  className="bg-primary hover:bg-primary/90 text-primary-foreground w-full"
                   asChild
                 >
                   <a href="https://docs.google.com/forms/d/1QH_opmysVjtPv_IE7ECKRqbW0t49Jv7QON6xG69l0Qk/edit" target="_blank" rel="noopener noreferrer">
@@ -336,9 +685,9 @@ const Index = () => {
                 </Button>
               </div>
               
-              <div className="bg-white p-8 rounded-lg shadow-md animate-on-scroll opacity-0 translate-y-4 transition-all duration-700 ease-out delay-200">
-                <h3 className="text-xl font-semibold text-[#052e40] mb-4">{t("contact.discord.title")}</h3>
-                <p className="text-lg text-[#052e40]/80 leading-relaxed mb-6">
+              <div className="bg-card p-8 rounded-lg shadow-md animate-on-scroll opacity-0 translate-y-4 transition-all duration-700 ease-out delay-200">
+                <h3 className="text-xl font-semibold text-foreground mb-4">{t("contact.discord.title")}</h3>
+                <p className="text-lg text-foreground/80 leading-relaxed mb-6">
                   {t("contact.discord.description")}
                 </p>
                 <Button 
@@ -355,70 +704,49 @@ const Index = () => {
         </div>
       </section>
 
-      <footer className="py-12 bg-[#052e40] text-white">
-        <div className="container mx-auto px-4">
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
-            <div className="md:col-span-1">
-              <div className="flex flex-col items-center md:items-start">
-                <div className="w-24 h-24 mb-4">
-                  <img 
-                    src={getLogoPath()} 
-                    alt="BAMAS Logo"
-                    style={{ borderRadius: '1rem' }}
-                    className="w-full h-full object-contain"
-                  />
-                </div>
-                <h3 className="text-xl font-bold mb-2">BAMAS</h3>
-                <p className="text-sm text-white/70">{t("hero.subtitle")}</p>
-              </div>
-            </div>
-            
-            <div className="md:col-span-1">
-            </div>
-            
-            <div className="md:col-span-1">
-              <h4 className="text-lg font-semibold mb-4 border-b border-white/20 pb-2">{t("footer.resources")}</h4>
-              <ul className="space-y-2">
-                <li><a href="#home" className="hover:text-[#0C9D6A] transition-colors">{t("nav.home")}</a></li>
-                <li><a href="#about" className="hover:text-[#0C9D6A] transition-colors">{t("nav.about")}</a></li>
-                <li><a href="#mission" className="hover:text-[#0C9D6A] transition-colors">{t("nav.mission")}</a></li>
-                <li><a href="#membership" className="hover:text-[#0C9D6A] transition-colors">{t("nav.membership")}</a></li>
-                <li><a href="#events" className="hover:text-[#0C9D6A] transition-colors">{t("nav.events")}</a></li>
-              </ul>
-            </div>
-            
-            <div className="md:col-span-1">
-              <h4 className="text-lg font-semibold mb-4 border-b border-white/20 pb-2">{t("footer.contact")}</h4>
-              <ul className="space-y-2">
-                <li>
-                  <div className="flex space-x-4 mt-4">
-                    <a href="https://www.linkedin.com/company/bulgarian-additive-manufacturing-association/" target="_blank" rel="noopener noreferrer" className="text-white hover:text-[#0C9D6A] transition-colors">
-                      <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-linkedin">
-                        <path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"/>
-                        <rect width="4" height="12" x="2" y="9"/>
-                        <circle cx="4" cy="4" r="2"/>
-                      </svg>
-                    </a>
-                    <a href="https://discord.com/invite/WBkGh3nz" target="_blank" rel="noopener noreferrer" className="text-white hover:text-[#0C9D6A] transition-colors">
-                      <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
-                        <path d="M20.317 4.37a19.791 19.791 0 0 0-4.885-1.515a.074.074 0 0 0-.079.037c-.21.375-.444.864-.608 1.25a18.27 18.27 0 0 0-5.487 0a12.64 12.64 0 0 0-.617-1.25a.077.077 0 0 0-.079-.037A19.736 19.736 0 0 0 3.677 4.37a.07.07 0 0 0-.032.027C.533 9.046-.32 13.58.099 18.057a.082.082 0 0 0 .031.057a19.9 19.9 0 0 0 5.993 3.03a.078.078 0 0 0 .084-.028a14.09 14.09 0 0 0 1.226-1.994a.076.076 0 0 0-.041-.106a13.107 13.107 0 0 1-1.872-.892a.077.077 0 0 1-.008-.128a10.2 10.2 0 0 0 .372-.292a.074.074 0 0 1 .077-.01c3.928 1.793 8.18 1.793 12.062 0a.074.074 0 0 1 .078.01c.12.098.246.198.373.292a.077.077 0 0 1-.006.127a12.299 12.299 0 0 1-1.873.892a.077.077 0 0 0-.041.107c.36.698.772 1.362 1.225 1.993a.076.076 0 0 0 .084.028a19.839 19.839 0 0 0 6.002-3.03a.077.077 0 0 0 .032-.054c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 0 0-.031-.03zM8.02 15.33c-1.183 0-2.157-1.085-2.157-2.419c0-1.333.956-2.419 2.157-2.419c1.21 0 2.176 1.096 2.157 2.42c0 1.333-.956 2.418-2.157 2.418zm7.975 0c-1.183 0-2.157-1.085-2.157-2.419c0-1.333.955-2.419 2.157-2.419c1.21 0 2.176 1.096 2.157 2.42c0 1.333-.946 2.418-2.157 2.418z"/>
-                      </svg>
-                    </a>
-                  </div>
-                </li>
-              </ul>
-            </div>
-          </div>
-          
-          <div className="border-t border-white/10 mt-8 pt-6 text-center">
-            <p>{t("footer.copyright").replace("{year}", new Date().getFullYear().toString())}</p>
-            <p className="mt-2 text-sm">
-              <a href="#" className="hover:text-[#0C9D6A] transition-colors">{t("footer.privacy")}</a> • 
-              <a href="#" className="hover:text-[#0C9D6A] transition-colors ml-2">{t("footer.terms")}</a>
-            </p>
-          </div>
-        </div>
-      </footer>
+      <FooterSection
+        translations={{
+          newsletter: {
+            title: "Stay Connected",
+            description: "Join our newsletter for the latest updates and exclusive offers.",
+            placeholder: "Enter your email",
+            subscribe: "Subscribe"
+          },
+          quickLinks: {
+            title: t("footer.resources"),
+            home: t("nav.home"),
+            about: t("nav.about"),
+            mission: t("nav.mission"),
+            membership: t("nav.membership"),
+            events: t("nav.events"),
+            contact: t("nav.contact")
+          },
+          contact: {
+            title: t("footer.contact"),
+            address: "Sofia, Bulgaria",
+            email: "info@bamas.xyz"
+          },
+          followUs: {
+            title: "Follow Us",
+            linkedin: "Connect with us on LinkedIn"
+          },
+          copyright: t("footer.copyright").replace("{year}", new Date().getFullYear().toString()),
+          privacy: t("footer.privacy"),
+          terms: t("footer.terms"),
+          cookieSettings: "Cookie Settings"
+        }}
+        socialLinks={{
+          linkedin: "https://www.linkedin.com/company/bulgarian-additive-manufacturing-association/"
+        }}
+        currentLanguage={language}
+        onLanguageChange={setLanguage}
+        onNewsletterSubmit={(email) => {
+          toast({
+            title: "Newsletter Subscription",
+            description: `Thank you for subscribing with ${email}! We'll keep you updated.`,
+          });
+        }}
+      />
     </div>
   );
 };

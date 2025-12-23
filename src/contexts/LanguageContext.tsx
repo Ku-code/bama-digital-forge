@@ -21,9 +21,11 @@ export const LanguageProvider: React.FC<{ children: React.ReactNode }> = ({ chil
       try {
         setIsLoading(true);
         const translationModule = await import(`../translations/${language}.json`);
-        setTranslations(translationModule.default);
+        setTranslations(translationModule.default || {});
       } catch (error) {
         console.error("Error loading translations:", error);
+        // Set empty translations as fallback to prevent infinite loading
+        setTranslations({});
       } finally {
         setIsLoading(false);
       }

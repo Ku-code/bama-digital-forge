@@ -18,8 +18,28 @@
     <meta name="twitter:image" content="/lovable-uploads/BamasMain.png" />
   </head>
 
-  <body>
-    <div id="root"></div>
+  <body style="margin: 0; padding: 0; min-height: 100vh;">
+    <script>
+      // Always start in dark mode unless user explicitly enabled light mode
+      (function() {
+        const stored = localStorage.getItem('darkMode');
+        // Only apply light mode if user explicitly set it to false
+        if (stored === 'false') {
+          // Ensure light mode - remove dark class
+          document.documentElement.classList.remove('dark');
+        } else {
+          // Default to dark mode - add dark class
+          document.documentElement.classList.add('dark');
+          // Set darkMode to true if not already set
+          if (stored === null) {
+            localStorage.setItem('darkMode', 'true');
+          }
+        }
+        // Background color is handled by CSS variables via bg-background class
+        // No need to set inline styles - CSS will handle theme switching
+      })();
+    </script>
+    <div id="root" style="min-height: 100vh;"></div>
     <!-- IMPORTANT: DO NOT REMOVE THIS SCRIPT TAG OR THIS VERY COMMENT! -->
     <script src="https://cdn.gpteng.co/gptengineer.js" type="module"></script>
     <script type="module" src="/src/main.tsx"></script>

@@ -15,7 +15,11 @@ const LanguageSwitcher: React.FC = () => {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button variant="ghost" size="icon" className="text-[#052e40] hover:text-[#0C9D6A]">
+        <Button 
+          variant="ghost" 
+          size="icon" 
+          className="text-foreground hover:text-primary hover:bg-primary/10 border border-border/50 dark:border-border dark:bg-muted/30 dark:hover:bg-muted/50 transition-all duration-200"
+        >
           <Globe className="h-5 w-5" />
           <span className="sr-only">{t('nav.language')}</span>
         </Button>
@@ -23,13 +27,13 @@ const LanguageSwitcher: React.FC = () => {
       <DropdownMenuContent align="end">
         <DropdownMenuItem 
           onClick={() => setLanguage('en')}
-          className={language === 'en' ? 'bg-gray-100' : ''}
+          className={language === 'en' ? 'bg-primary/10 text-primary font-semibold' : ''}
         >
           {t('nav.language.en')}
         </DropdownMenuItem>
         <DropdownMenuItem 
           onClick={() => setLanguage('bg')}
-          className={language === 'bg' ? 'bg-gray-100' : ''}
+          className={language === 'bg' ? 'bg-primary/10 text-primary font-semibold' : ''}
         >
           {t('nav.language.bg')}
         </DropdownMenuItem>

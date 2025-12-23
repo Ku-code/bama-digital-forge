@@ -55,7 +55,7 @@ const Navbar = () => {
 
   return (
     <header
-      className={`fixed top-0 w-full z-50 transition-all duration-300 ${isScrolled ? "bg-white/90 shadow-md backdrop-blur-sm py-2" : "bg-transparent py-4"
+      className={`fixed top-0 w-full z-50 transition-all duration-300 ${isScrolled ? "bg-background/90 shadow-md backdrop-blur-sm py-2 border-b border-border/40" : "bg-transparent py-4"
         }`}
     >
       <div className="container mx-auto px-4 flex items-center justify-between">
@@ -78,13 +78,13 @@ const Navbar = () => {
                 <a
                   href={link.href}
                   className={`text-sm font-medium transition-colors ${activeSection === link.href.substring(1)
-                    ? "text-[#e62f29]"
-                    : "text-[#052e40] hover:text-[#0C9D6A]"
+                    ? "text-destructive"
+                    : "text-foreground hover:text-primary"
                     }`}
                 >
                   {link.name}
                   {activeSection === link.href.substring(1) && (
-                    <span className="block h-0.5 mt-1 bg-[#e62f29]"></span>
+                    <span className="block h-0.5 mt-1 bg-destructive"></span>
                   )}
                 </a>
               </li>
@@ -97,7 +97,7 @@ const Navbar = () => {
         <div className="md:hidden flex items-center space-x-2">
           <LanguageSwitcher />
           <button
-            className="text-[#052e40] p-2"
+            className="text-foreground p-2"
             onClick={toggleMenu}
             aria-label="Toggle menu"
           >
@@ -108,7 +108,7 @@ const Navbar = () => {
 
       {/* Mobile Navigation */}
       {isMenuOpen && (
-        <div className="md:hidden bg-white shadow-lg">
+        <div className="md:hidden bg-background shadow-lg border-t border-border">
           <nav className="container mx-auto px-4 py-4">
             <ul className="space-y-4">
               {navLinks.map((link) => (
@@ -116,8 +116,8 @@ const Navbar = () => {
                   <a
                     href={link.href}
                     className={`block text-lg font-medium transition-colors ${activeSection === link.href.substring(1)
-                      ? "text-[#e62f29]"
-                      : "text-[#052e40] hover:text-[#0C9D6A]"
+                      ? "text-destructive"
+                      : "text-foreground hover:text-primary"
                       }`}
                     onClick={closeMenu}
                   >

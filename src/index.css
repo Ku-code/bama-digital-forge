@@ -35,6 +35,36 @@
 
     --radius: 0.5rem;
   }
+
+  .dark {
+    --background: 222 47% 11%;
+    --foreground: 213 31% 91%;
+
+    --card: 222 47% 11%;
+    --card-foreground: 213 31% 91%;
+
+    --popover: 222 47% 11%;
+    --popover-foreground: 213 31% 91%;
+
+    --primary: 159 88% 33%;
+    --primary-foreground: 0 0% 100%;
+
+    --secondary: 217 33% 17%;
+    --secondary-foreground: 213 31% 91%;
+
+    --muted: 217 33% 17%;
+    --muted-foreground: 215 20% 65%;
+
+    --accent: 217 33% 17%;
+    --accent-foreground: 213 31% 91%;
+
+    --destructive: 0 63% 31%;
+    --destructive-foreground: 213 31% 91%;
+
+    --border: 217 33% 17%;
+    --input: 217 33% 17%;
+    --ring: 159 88% 33%;
+  }
 }
 
 @layer base {
@@ -47,16 +77,34 @@
   body {
     @apply bg-background text-foreground;
     font-feature-settings: "rlig" 1, "calt" 1;
+    min-height: 100vh;
   }
+  
+  #root {
+    min-height: 100vh;
+    background-color: hsl(var(--background));
+    color: hsl(var(--foreground));
+  }
+  
+  /* Light mode variables (only applied when dark class is removed) */
+  :root:not(.dark) {
+    --background: 0 0% 100%;
+    --foreground: 198 78% 14%;
+  }
+  
 }
 
 .animate-on-scroll {
   @apply transform transition-all duration-700 ease-out;
 }
 
+.animation-delay-500 {
+  animation-delay: 500ms;
+}
+
 /* Headers */
 h1, h2, h3, h4, h5, h6 {
-  @apply font-bold text-[#052e40];
+  @apply font-bold text-foreground;
 }
 
 /* Button hover effect */

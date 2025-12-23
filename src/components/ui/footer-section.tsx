@@ -1,0 +1,373 @@
+import * as React from "react"
+import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
+import { Switch } from "@/components/ui/switch"
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip"
+import { Facebook, Instagram, Linkedin, Moon, Send, Sun, Twitter, Languages } from "lucide-react"
+
+// Import the logo
+const addlianceLogo = "/addliancelogo.png"
+
+interface FooterSectionProps {
+  translations?: {
+    newsletter?: {
+      title?: string
+      description?: string
+      placeholder?: string
+      subscribe?: string
+    }
+    quickLinks?: {
+      title?: string
+      home?: string
+      about?: string
+      mission?: string
+      membership?: string
+      events?: string
+      contact?: string
+    }
+    contact?: {
+      title?: string
+      address?: string
+      city?: string
+      phone?: string
+      email?: string
+    }
+    followUs?: {
+      title?: string
+      facebook?: string
+      twitter?: string
+      instagram?: string
+      linkedin?: string
+    }
+    darkMode?: string
+    language?: string
+    copyright?: string
+    privacy?: string
+    terms?: string
+    cookieSettings?: string
+  }
+  onNewsletterSubmit?: (email: string) => void
+  socialLinks?: {
+    facebook?: string
+    twitter?: string
+    instagram?: string
+    linkedin?: string
+  }
+  currentLanguage?: "en" | "bg"
+  onLanguageChange?: (lang: "en" | "bg") => void
+}
+
+function FooterSection({ 
+  translations,
+  onNewsletterSubmit,
+  socialLinks,
+  currentLanguage = "en",
+  onLanguageChange
+}: FooterSectionProps) {
+  const [isDarkMode, setIsDarkMode] = React.useState(() => {
+    // Default to dark mode, only use light mode if explicitly set by user via toggle
+    if (typeof window !== "undefined") {
+      const stored = localStorage.getItem("darkMode")
+      // Return false only if explicitly set to "false" by user, otherwise default to true (dark mode)
+      return stored !== "false"
+    }
+    // Always default to dark mode
+    return true
+  })
+  const [email, setEmail] = React.useState("")
+
+  // Initialize dark mode state on mount
+  React.useEffect(() => {
+    if (typeof window !== "undefined") {
+      // Ensure dark class matches the state
+      if (isDarkMode) {
+        document.documentElement.classList.add("dark")
+      } else {
+        document.documentElement.classList.remove("dark")
+      }
+    }
+  }, [])
+
+  // Update dark mode when toggle changes
+  React.useEffect(() => {
+    if (typeof window !== "undefined") {
+      if (isDarkMode) {
+        document.documentElement.classList.add("dark")
+        localStorage.setItem("darkMode", "true")
+      } else {
+        document.documentElement.classList.remove("dark")
+        localStorage.setItem("darkMode", "false")
+      }
+    }
+  }, [isDarkMode])
+
+  const handleDarkModeToggle = (checked: boolean) => {
+    setIsDarkMode(checked)
+  }
+
+  const handleLanguageToggle = (checked: boolean) => {
+    const newLang = checked ? "bg" : "en"
+    if (onLanguageChange) {
+      onLanguageChange(newLang)
+    }
+  }
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault()
+    if (onNewsletterSubmit && email) {
+      onNewsletterSubmit(email)
+      setEmail("")
+    }
+  }
+
+  return (
+    <footer className="relative border-t bg-background text-foreground transition-colors duration-300">
+      <div className="container mx-auto px-4 py-12 md:px-6 lg:px-8">
+        <div className="grid gap-12 md:grid-cols-2 lg:grid-cols-4">
+          <div className="relative">
+            <h2 className="mb-4 text-3xl font-bold tracking-tight">
+              {translations?.newsletter?.title || "Stay Connected"}
+            </h2>
+            <p className="mb-6 text-muted-foreground">
+              {translations?.newsletter?.description || "Join our newsletter for the latest updates and exclusive offers."}
+            </p>
+            <form className="relative" onSubmit={handleSubmit}>
+              <Input
+                type="email"
+                placeholder={translations?.newsletter?.placeholder || "Enter your email"}
+                className="pr-12 backdrop-blur-sm"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+              />
+              <Button
+                type="submit"
+                size="icon"
+                className="absolute right-1 top-1 h-8 w-8 rounded-full bg-primary text-primary-foreground transition-transform hover:scale-105"
+              >
+                <Send className="h-4 w-4" />
+                <span className="sr-only">{translations?.newsletter?.subscribe || "Subscribe"}</span>
+              </Button>
+            </form>
+            <div className="absolute -right-4 top-0 h-24 w-24 rounded-full bg-primary/10 blur-2xl" />
+          </div>
+          <div>
+            <h3 className="mb-4 text-lg font-semibold">
+              {translations?.quickLinks?.title || "Quick Links"}
+            </h3>
+            <nav className="space-y-2 text-sm">
+              <a href="#home" className="block transition-colors hover:text-primary">
+                {translations?.quickLinks?.home || "Home"}
+              </a>
+              <a href="#about" className="block transition-colors hover:text-primary">
+                {translations?.quickLinks?.about || "About Us"}
+              </a>
+              <a href="#mission" className="block transition-colors hover:text-primary">
+                {translations?.quickLinks?.mission || "Our Mission"}
+              </a>
+              <a href="#membership" className="block transition-colors hover:text-primary">
+                {translations?.quickLinks?.membership || "Membership"}
+              </a>
+              <a href="#events" className="block transition-colors hover:text-primary">
+                {translations?.quickLinks?.events || "Events"}
+              </a>
+              <a href="#contact" className="block transition-colors hover:text-primary">
+                {translations?.quickLinks?.contact || "Contact"}
+              </a>
+            </nav>
+          </div>
+          <div>
+            <h3 className="mb-4 text-lg font-semibold">
+              {translations?.contact?.title || "Contact Us"}
+            </h3>
+            <address className="space-y-2 text-sm not-italic">
+              <p>{translations?.contact?.address || "Sofia, Bulgaria"}</p>
+              <p>{translations?.contact?.city || ""}</p>
+              <p>{translations?.contact?.phone || ""}</p>
+              <p>{translations?.contact?.email || "info@bamas.xyz"}</p>
+              <div className="flex items-center gap-3 mt-4">
+                <div className="flex items-center gap-2">
+                  <span className="text-2xl leading-none" title="Bulgaria" aria-label="Bulgaria">🇧🇬</span>
+                  <span className="text-xs text-muted-foreground">BG</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <span className="text-2xl leading-none" title="European Union" aria-label="European Union">🇪🇺</span>
+                  <span className="text-xs text-muted-foreground">EU</span>
+                </div>
+              </div>
+              <div className="mt-6 pt-4 border-t border-border/40">
+                <div className="mb-3">
+                  <img 
+                    src="/addliancelogo.png"
+                    alt="Addliance Logo" 
+                    className="h-16 w-auto object-contain"
+                    style={{ 
+                      maxWidth: '240px',
+                      display: 'block',
+                      visibility: 'visible',
+                      opacity: 1
+                    }}
+                    onError={(e) => {
+                      console.error('Addliance logo failed to load. Attempted path:', e.currentTarget.src);
+                    }}
+                    onLoad={(e) => {
+                      console.log('Addliance logo loaded successfully');
+                    }}
+                  />
+                </div>
+                <p className="text-xs text-muted-foreground leading-relaxed mt-2">
+                  Part of Addliance - The European AM Hub
+                </p>
+              </div>
+            </address>
+          </div>
+          <div className="relative">
+            <h3 className="mb-4 text-lg font-semibold">
+              {translations?.followUs?.title || "Follow Us"}
+            </h3>
+            <div className="mb-6 flex space-x-4">
+              {socialLinks?.linkedin && (
+                <TooltipProvider>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Button 
+                        variant="outline" 
+                        size="icon" 
+                        className="rounded-full"
+                        asChild
+                      >
+                        <a href={socialLinks.linkedin} target="_blank" rel="noopener noreferrer">
+                          <Linkedin className="h-4 w-4" />
+                          <span className="sr-only">{translations?.followUs?.linkedin || "LinkedIn"}</span>
+                        </a>
+                      </Button>
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      <p>{translations?.followUs?.linkedin || "Connect with us on LinkedIn"}</p>
+                    </TooltipContent>
+                  </Tooltip>
+                </TooltipProvider>
+              )}
+              {socialLinks?.facebook && (
+                <TooltipProvider>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Button 
+                        variant="outline" 
+                        size="icon" 
+                        className="rounded-full"
+                        asChild
+                      >
+                        <a href={socialLinks.facebook} target="_blank" rel="noopener noreferrer">
+                          <Facebook className="h-4 w-4" />
+                          <span className="sr-only">{translations?.followUs?.facebook || "Facebook"}</span>
+                        </a>
+                      </Button>
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      <p>{translations?.followUs?.facebook || "Follow us on Facebook"}</p>
+                    </TooltipContent>
+                  </Tooltip>
+                </TooltipProvider>
+              )}
+              {socialLinks?.twitter && (
+                <TooltipProvider>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Button 
+                        variant="outline" 
+                        size="icon" 
+                        className="rounded-full"
+                        asChild
+                      >
+                        <a href={socialLinks.twitter} target="_blank" rel="noopener noreferrer">
+                          <Twitter className="h-4 w-4" />
+                          <span className="sr-only">{translations?.followUs?.twitter || "Twitter"}</span>
+                        </a>
+                      </Button>
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      <p>{translations?.followUs?.twitter || "Follow us on Twitter"}</p>
+                    </TooltipContent>
+                  </Tooltip>
+                </TooltipProvider>
+              )}
+              {socialLinks?.instagram && (
+                <TooltipProvider>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Button 
+                        variant="outline" 
+                        size="icon" 
+                        className="rounded-full"
+                        asChild
+                      >
+                        <a href={socialLinks.instagram} target="_blank" rel="noopener noreferrer">
+                          <Instagram className="h-4 w-4" />
+                          <span className="sr-only">{translations?.followUs?.instagram || "Instagram"}</span>
+                        </a>
+                      </Button>
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      <p>{translations?.followUs?.instagram || "Follow us on Instagram"}</p>
+                    </TooltipContent>
+                  </Tooltip>
+                </TooltipProvider>
+              )}
+            </div>
+            <div className="space-y-4">
+              <div className="flex items-center space-x-2">
+                <Sun className="h-4 w-4" />
+                <Switch
+                  id="dark-mode"
+                  checked={isDarkMode}
+                  onCheckedChange={handleDarkModeToggle}
+                />
+                <Moon className="h-4 w-4" />
+                <Label htmlFor="dark-mode" className="sr-only">
+                  {translations?.darkMode || "Toggle dark mode"}
+                </Label>
+              </div>
+              <div className="flex items-center space-x-2">
+                <span className="text-sm font-medium">EN</span>
+                <Switch
+                  id="language-toggle"
+                  checked={currentLanguage === "bg"}
+                  onCheckedChange={handleLanguageToggle}
+                />
+                <span className="text-sm font-medium">BG</span>
+                <Languages className="h-4 w-4 ml-1" />
+                <Label htmlFor="language-toggle" className="sr-only">
+                  {translations?.language || "Toggle language"}
+                </Label>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div className="mt-12 flex flex-col items-center justify-between gap-4 border-t pt-8 text-center md:flex-row">
+          <p className="text-sm text-muted-foreground">
+            {translations?.copyright || `© ${new Date().getFullYear()} BAMAS. All rights reserved.`}
+          </p>
+          <nav className="flex gap-4 text-sm">
+            <a href="/privacy-policy" className="transition-colors hover:text-primary">
+              {translations?.privacy || "Privacy Policy"}
+            </a>
+            <a href="/terms-of-use" className="transition-colors hover:text-primary">
+              {translations?.terms || "Terms of Service"}
+            </a>
+            <a href="/cookie-policy" className="transition-colors hover:text-primary">
+              {translations?.cookieSettings || "Cookie Policy"}
+            </a>
+          </nav>
+        </div>
+      </div>
+    </footer>
+  )
+}
+
+export { FooterSection }

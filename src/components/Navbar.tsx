@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo, useCallback } from "react";
 import { Menu, X } from "./ui/icons";
 import { useLanguage } from "@/contexts/LanguageContext";
 import LanguageSwitcher from "./LanguageSwitcher";
@@ -9,24 +9,32 @@ const Navbar = () => {
   const [activeSection, setActiveSection] = useState("home");
   const { t, language } = useLanguage();
 
-  // Update scroll state
+  // Update scroll state with throttling for performance
   useEffect(() => {
+    let ticking = false;
+    
     const handleScroll = () => {
-      setIsScrolled(window.scrollY > 50);
+      if (!ticking) {
+        window.requestAnimationFrame(() => {
+          setIsScrolled(window.scrollY > 50);
 
-      // Find the current active section
-      const sections = document.querySelectorAll("section[id]");
-      sections.forEach(section => {
-        // Use getBoundingClientRect() instead of offsetTop for better TypeScript compatibility
-        const sectionTop = section.getBoundingClientRect().top + window.scrollY;
-        const sectionHeight = section.clientHeight;
-        if (window.scrollY >= (sectionTop - 300) && window.scrollY < (sectionTop + sectionHeight - 300)) {
-          setActiveSection(section.getAttribute("id") || "");
-        }
-      });
+          // Find the current active section (throttled)
+          const sections = document.querySelectorAll("section[id]");
+          sections.forEach(section => {
+            const rect = section.getBoundingClientRect();
+            const sectionTop = rect.top + window.scrollY;
+            const sectionHeight = rect.height;
+            if (window.scrollY >= (sectionTop - 300) && window.scrollY < (sectionTop + sectionHeight - 300)) {
+              setActiveSection(section.getAttribute("id") || "");
+            }
+          });
+          ticking = false;
+        });
+        ticking = true;
+      }
     };
 
-    window.addEventListener("scroll", handleScroll);
+    window.addEventListener("scroll", handleScroll, { passive: true });
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
@@ -39,19 +47,19 @@ const Navbar = () => {
     { name: t("nav.contact"), href: "#contact" },
   ];
 
-  const toggleMenu = () => {
-    setIsMenuOpen(!isMenuOpen);
-  };
+  const toggleMenu = useCallback(() => {
+    setIsMenuOpen(prev => !prev);
+  }, []);
 
-  const closeMenu = () => {
+  const closeMenu = useCallback(() => {
     setIsMenuOpen(false);
-  };
+  }, []);
 
-  const getLogoPath = () => {
+  const logoPath = useMemo(() => {
     return language === 'bg' 
       ? '/lovable-uploads/BAMAS_Logo_bg.png'
       : '/lovable-uploads/6e77d85a-74ad-47e5-b141-a339ec981d57.png';
-  };
+  }, [language]);
 
   return (
     <header
@@ -62,10 +70,12 @@ const Navbar = () => {
         <a href="#home" className="flex items-center">
           <div className="h-12 w-12">
             <img
-              src={getLogoPath()}
+              src={logoPath}
               alt="BAMAS Logo"
               style={{ borderRadius: '1rem' }}
               className="w-full h-full object-contain"
+              loading="eager"
+              fetchPriority="high"
             />
           </div>
         </a>

@@ -96,6 +96,14 @@
 
 .animate-on-scroll {
   @apply transform transition-all duration-700 ease-out;
+  will-change: transform, opacity;
+}
+
+/* Optimize animations for performance */
+@media (prefers-reduced-motion: reduce) {
+  .animate-on-scroll {
+    transition: none;
+  }
 }
 
 .animation-delay-500 {
@@ -105,6 +113,41 @@
 /* Headers */
 h1, h2, h3, h4, h5, h6 {
   @apply font-bold text-foreground;
+}
+
+/* Performance optimizations */
+* {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+img {
+  image-rendering: -webkit-optimize-contrast;
+  image-rendering: crisp-edges;
+}
+
+/* Optimize transforms for GPU acceleration */
+.transform, .translate-y-4, .translate-y-0 {
+  will-change: transform;
+  transform: translateZ(0);
+  backface-visibility: hidden;
+}
+
+/* Optimize scroll performance */
+html {
+  scroll-behavior: smooth;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+  
+  * {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
 }
 
 /* Button hover effect */

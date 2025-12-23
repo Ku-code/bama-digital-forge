@@ -1,4 +1,4 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useMemo, useCallback } from "react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { 
@@ -32,10 +32,15 @@ const Index = () => {
           if (entry.isIntersecting) {
             entry.target.classList.add('opacity-100');
             entry.target.classList.add('translate-y-0');
+            // Unobserve after animation to improve performance
+            observer.unobserve(entry.target);
           }
         });
       }, 
-      { threshold: 0.1 }
+      { 
+        threshold: 0.1,
+        rootMargin: '50px'
+      }
     );
 
     const animatedElements = document.querySelectorAll('.animate-on-scroll');
@@ -46,20 +51,20 @@ const Index = () => {
     };
   }, []);
 
-  const handleFormSubmit = (e: React.FormEvent<HTMLFormElement>, formType: string) => {
+  const handleFormSubmit = useCallback((e: React.FormEvent<HTMLFormElement>, formType: string) => {
     e.preventDefault();
     toast({
       title: "Form Submitted",
       description: `Your ${formType} information has been received. We'll be in touch soon.`,
     });
     e.currentTarget.reset();
-  };
+  }, [toast]);
 
-  const getLogoPath = () => {
+  const logoPath = useMemo(() => {
     return language === 'bg' 
       ? '/lovable-uploads/BAMAS_Logo_bg.png'
       : '/lovable-uploads/6e77d85a-74ad-47e5-b141-a339ec981d57.png';
-  };
+  }, [language]);
 
   return (
     <div className="min-h-screen bg-background">
@@ -195,7 +200,8 @@ const Index = () => {
             backgroundRepeat: 'no-repeat',
             backgroundPosition: 'center center',
             backgroundSize: 'auto 70%',
-            opacity: 0.12
+            opacity: 0.12,
+            willChange: 'auto'
           }}
         />
         

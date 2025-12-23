@@ -11,9 +11,6 @@ import {
 } from "@/components/ui/tooltip"
 import { Facebook, Instagram, Linkedin, Moon, Send, Sun, Twitter, Languages } from "lucide-react"
 
-// Import the logo
-const addlianceLogo = "/addliancelogo.png"
-
 interface FooterSectionProps {
   translations?: {
     newsletter?: {
@@ -107,16 +104,16 @@ function FooterSection({
     }
   }, [isDarkMode])
 
-  const handleDarkModeToggle = (checked: boolean) => {
+  const handleDarkModeToggle = React.useCallback((checked: boolean) => {
     setIsDarkMode(checked)
-  }
+  }, [])
 
-  const handleLanguageToggle = (checked: boolean) => {
+  const handleLanguageToggle = React.useCallback((checked: boolean) => {
     const newLang = checked ? "bg" : "en"
     if (onLanguageChange) {
       onLanguageChange(newLang)
     }
-  }
+  }, [onLanguageChange])
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
@@ -208,16 +205,10 @@ function FooterSection({
                     className="h-16 w-auto object-contain"
                     style={{ 
                       maxWidth: '240px',
-                      display: 'block',
-                      visibility: 'visible',
-                      opacity: 1
+                      display: 'block'
                     }}
-                    onError={(e) => {
-                      console.error('Addliance logo failed to load. Attempted path:', e.currentTarget.src);
-                    }}
-                    onLoad={(e) => {
-                      console.log('Addliance logo loaded successfully');
-                    }}
+                    loading="lazy"
+                    decoding="async"
                   />
                 </div>
                 <p className="text-xs text-muted-foreground leading-relaxed mt-2">

@@ -16,6 +16,10 @@ const Globe: React.FC<{
   radius: number;
 }> = ({ rotationSpeed, radius }) => {
   const groupRef = useRef<THREE.Group>(null!);
+  
+  // Adaptive geometry quality based on device
+  const isMobile = typeof window !== 'undefined' && window.innerWidth < 768;
+  const segments = isMobile ? 32 : 64;
 
   useFrame(() => {
     if (groupRef.current) {
@@ -28,7 +32,7 @@ const Globe: React.FC<{
   return (
     <group ref={groupRef}>
       <mesh>
-        <sphereGeometry args={[radius, 64, 64]} />
+        <sphereGeometry args={[radius, segments, segments]} />
         <meshBasicMaterial
           color="hsl(var(--foreground))"
           transparent
@@ -66,7 +70,11 @@ const DotGlobeHero = React.forwardRef<
       </div>
       
       <div className="absolute inset-0 z-0 pointer-events-none">
-        <Canvas>
+        <Canvas
+          dpr={[1, 2]}
+          performance={{ min: 0.5 }}
+          gl={{ antialias: false, alpha: true }}
+        >
           <PerspectiveCamera makeDefault position={[0, 0, 3]} fov={75} />
           <ambientLight intensity={0.5} />
           <pointLight position={[10, 10, 10]} intensity={1} />

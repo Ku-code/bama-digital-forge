@@ -188,31 +188,34 @@ function FooterSection({
               <p>{translations?.contact?.phone || ""}</p>
               <p>{translations?.contact?.email || "info@bamas.xyz"}</p>
               <div className="flex items-center gap-3 mt-4">
-                <div className="flex items-center gap-2">
-                  <span className="text-2xl leading-none" title="Bulgaria" aria-label="Bulgaria">🇧🇬</span>
-                  <span className="text-xs text-muted-foreground">BG</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <span className="text-2xl leading-none" title="European Union" aria-label="European Union">🇪🇺</span>
-                  <span className="text-xs text-muted-foreground">EU</span>
-                </div>
+                <span className="text-2xl leading-none" title="Bulgaria" aria-label="Bulgaria">🇧🇬</span>
+                <span className="text-2xl leading-none" title="European Union" aria-label="European Union">🇪🇺</span>
               </div>
               <div className="mt-6 pt-4 border-t border-border/40">
                 <div className="mb-3">
                   <img 
                     src="/addliancelogo.png"
                     alt="Addliance Logo" 
-                    className="h-16 w-auto object-contain"
+                    className="h-20 w-auto object-contain opacity-100"
                     style={{ 
-                      maxWidth: '240px',
-                      display: 'block'
+                      maxWidth: '280px',
+                      minHeight: '60px',
+                      display: 'block',
+                      visibility: 'visible',
+                      filter: 'none'
                     }}
                     loading="lazy"
                     decoding="async"
+                    onError={(e) => {
+                      console.error('Addliance logo failed to load. Attempted path:', e.currentTarget.src);
+                    }}
+                    onLoad={(e) => {
+                      console.log('Addliance logo loaded successfully');
+                    }}
                   />
                 </div>
                 <p className="text-xs text-muted-foreground leading-relaxed mt-2">
-                  Part of Addliance - The European AM Hub
+                  (Add)liance - The European Additive Manufacturing Hub
                 </p>
               </div>
             </address>

@@ -7,12 +7,6 @@
         "mcp"
       ]
     },
-    "github": {
-      "command": "/Users/kuzo/.local/bin/github-mcp-server",
-      "env": {
-        "GITHUB_PERSONAL_ACCESS_TOKEN": ""
-      }
-    },
     "context7": {
       "url": "https://mcp.context7.com/mcp",
       "headers": {

@@ -48,6 +48,7 @@ interface FooterSectionProps {
     privacy?: string
     terms?: string
     cookieSettings?: string
+    addliance?: string
   }
   onNewsletterSubmit?: (email: string) => void
   socialLinks?: {
@@ -129,7 +130,7 @@ function FooterSection({
         <div className="grid gap-12 md:grid-cols-2 lg:grid-cols-4">
           <div className="relative">
             <h2 className="mb-4 text-3xl font-bold tracking-tight">
-              {translations?.newsletter?.title || "Stay Connected"}
+              {translations?.newsletter?.title || "Join BAMAS"}
             </h2>
             <p className="mb-6 text-muted-foreground">
               {translations?.newsletter?.description || "Join our newsletter for the latest updates and exclusive offers."}
@@ -138,7 +139,7 @@ function FooterSection({
               <Input
                 type="email"
                 placeholder={translations?.newsletter?.placeholder || "Enter your email"}
-                className="pr-12 backdrop-blur-sm"
+                className="pr-12 backdrop-blur-sm rounded-full"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
               />
@@ -192,30 +193,41 @@ function FooterSection({
                 <span className="text-2xl leading-none" title="European Union" aria-label="European Union">🇪🇺</span>
               </div>
               <div className="mt-6 pt-4 border-t border-border/40">
-                <div className="mb-3">
-                  <img 
-                    src="/addliancelogo.png"
-                    alt="Addliance Logo" 
-                    className="h-20 w-auto object-contain opacity-100"
-                    style={{ 
-                      maxWidth: '280px',
-                      minHeight: '60px',
-                      display: 'block',
-                      visibility: 'visible',
-                      filter: 'none'
-                    }}
-                    loading="lazy"
-                    decoding="async"
-                    onError={(e) => {
-                      console.error('Addliance logo failed to load. Attempted path:', e.currentTarget.src);
-                    }}
-                    onLoad={(e) => {
-                      console.log('Addliance logo loaded successfully');
-                    }}
-                  />
+                <div className="mb-3 flex items-center">
+                  <a 
+                    href="https://addliance.eu/" 
+                    target="_blank" 
+                    rel="noopener noreferrer"
+                    className="inline-block hover:opacity-80 transition-opacity"
+                  >
+                    <img 
+                      src="/addliancelogo.png"
+                      alt="Addliance Logo" 
+                      className="h-16 w-auto object-contain rounded-sm"
+                      style={{ 
+                        maxWidth: '250px',
+                        height: 'auto',
+                        display: 'block',
+                        visibility: 'visible',
+                        opacity: 1,
+                        filter: 'none',
+                        imageRendering: 'auto',
+                        borderRadius: '4px'
+                      }}
+                      loading="eager"
+                      decoding="async"
+                      onError={(e) => {
+                        console.error('Addliance logo failed to load. Attempted path:', e.currentTarget.src);
+                        console.error('Full URL:', window.location.origin + e.currentTarget.src);
+                      }}
+                      onLoad={(e) => {
+                        console.log('Addliance logo loaded successfully from:', e.currentTarget.src);
+                      }}
+                    />
+                  </a>
                 </div>
                 <p className="text-xs text-muted-foreground leading-relaxed mt-2">
-                  (Add)liance - The European Additive Manufacturing Hub
+                  {translations?.addliance || "Part of (Add)liance - The European Additive Manufacturing Hub"}
                 </p>
               </div>
             </address>

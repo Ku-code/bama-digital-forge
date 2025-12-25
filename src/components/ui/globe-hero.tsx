@@ -16,10 +16,40 @@ const Globe: React.FC<{
   radius: number;
 }> = ({ rotationSpeed, radius }) => {
   const groupRef = useRef<THREE.Group>(null!);
+  const materialRef = useRef<THREE.MeshBasicMaterial>(null!);
   
-  // Adaptive geometry quality based on device
+  // Adaptive geometry quality and size based on device
   const isMobile = typeof window !== 'undefined' && window.innerWidth < 768;
   const segments = isMobile ? 32 : 64;
+  // Make globe bigger - scale up the radius
+  const scaledRadius = radius * 1.5;
+
+  // Check if dark mode is active and set color accordingly
+  React.useEffect(() => {
+    const updateColor = () => {
+      if (materialRef.current) {
+        const isDark = document.documentElement.classList.contains('dark');
+        // White color for dark mode, red color for light mode
+        if (isDark) {
+          materialRef.current.color.setStyle('#FFFFFF'); // White color
+        } else {
+          // Red color - using a vibrant red that's visible on light backgrounds
+          materialRef.current.color.setStyle('#E62F29'); // Red color
+        }
+      }
+    };
+
+    updateColor();
+    
+    // Watch for dark mode changes
+    const observer = new MutationObserver(updateColor);
+    observer.observe(document.documentElement, {
+      attributes: true,
+      attributeFilter: ['class']
+    });
+
+    return () => observer.disconnect();
+  }, []);
 
   useFrame(() => {
     if (groupRef.current) {
@@ -32,9 +62,9 @@ const Globe: React.FC<{
   return (
     <group ref={groupRef}>
       <mesh>
-        <sphereGeometry args={[radius, segments, segments]} />
+        <sphereGeometry args={[scaledRadius, segments, segments]} />
         <meshBasicMaterial
-          color="hsl(var(--foreground))"
+          ref={materialRef}
           transparent
           opacity={0.15}
           wireframe
@@ -51,7 +81,7 @@ const DotGlobeHero = React.forwardRef<
   DotGlobeHeroProps
 >(({
   rotationSpeed = 0.005,
-  globeRadius = 1,
+  globeRadius = 1.134,
   className,
   children,
   ...props

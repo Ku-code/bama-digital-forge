@@ -19,7 +19,7 @@ import { DotGlobeHero } from "@/components/ui/globe-hero";
 import { FooterSection } from "@/components/ui/footer-section";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { motion } from "framer-motion";
-import { ArrowRight, Zap as ZapIcon, Target, Rocket as RocketIcon, Eye } from "lucide-react";
+import { ArrowRight, Zap as ZapIcon, Target, Rocket as RocketIcon } from "lucide-react";
 
 const Index = () => {
   const { toast } = useToast();
@@ -94,7 +94,7 @@ const Index = () => {
               >
                 <div className="absolute inset-0 rounded-full bg-gradient-to-r from-primary/10 via-transparent to-primary/10 animate-pulse" />
                 <div className="w-2 h-2 bg-primary rounded-full animate-ping" />
-                <span className="relative z-10 text-sm font-bold text-primary tracking-wider uppercase">BAMAS</span>
+                <span className="relative z-10 text-sm font-bold text-primary tracking-wider uppercase">{t("hero.badge")}</span>
                 <div className="w-2 h-2 bg-primary rounded-full animate-ping animation-delay-500" />
               </motion.div>
               
@@ -234,102 +234,135 @@ const Index = () => {
             <div className="w-24 h-1 bg-gradient-to-r from-transparent via-primary to-transparent mx-auto"></div>
           </div>
 
-          {/* Vision Section - Full Width Hero Style */}
-          <div className="max-w-5xl mx-auto mb-20 animate-on-scroll opacity-0 translate-y-4 transition-all duration-700 ease-out delay-100">
-            <motion.div
-              initial={{ opacity: 0, y: 30 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.8, delay: 0.2 }}
-              className="relative"
-            >
-              <div className="bg-gradient-to-br from-primary/10 via-primary/5 to-transparent p-12 rounded-2xl border border-primary/20 shadow-xl backdrop-blur-sm">
-                <div className="flex items-start gap-6">
-                  <div className="flex-shrink-0">
-                    <div className="w-16 h-16 rounded-2xl bg-primary/20 flex items-center justify-center">
-                      <Eye className="h-8 w-8 text-primary" />
+          {/* Vision and Mission Side by Side */}
+          <div className="max-w-6xl mx-auto mb-16">
+            <div className="grid md:grid-cols-2 gap-8 mb-16">
+              {/* Vision Card */}
+              <motion.div
+                initial={{ opacity: 0, x: -30 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ duration: 0.8, delay: 0.2 }}
+                className="animate-on-scroll opacity-0 translate-y-4 transition-all duration-700 ease-out delay-100"
+              >
+                <Card className="h-full bg-gradient-to-br from-primary/10 via-primary/5 to-transparent border-2 border-primary/20 shadow-xl hover:shadow-2xl transition-all duration-300">
+                  <div className="p-8">
+                    <div className="flex items-center gap-4 mb-6">
+                      <div className="w-12 h-12 rounded-xl bg-primary/20 flex items-center justify-center">
+                        <Target className="h-6 w-6 text-primary" />
+                      </div>
+                      <h3 className="text-2xl md:text-3xl font-bold text-foreground">
+                        {t("mission.vision.title")}
+                      </h3>
                     </div>
-                  </div>
-                  <div className="flex-grow">
-                    <h3 className="text-3xl md:text-4xl font-bold text-foreground mb-4 flex items-center gap-3">
-                      {t("mission.vision.title")}
-                      <span className="text-primary text-2xl">👁️</span>
-                    </h3>
-                    <p className="text-xl text-foreground/80 leading-relaxed">
+                    <p className="text-lg text-foreground/80 leading-relaxed">
                       {t("mission.vision.description")}
                     </p>
                   </div>
-                </div>
-              </div>
-            </motion.div>
-          </div>
+                </Card>
+              </motion.div>
 
-          {/* Mission Section - Grid Layout */}
-          <div className="max-w-6xl mx-auto">
-            <div className="text-center mb-12 animate-on-scroll opacity-0 translate-y-4 transition-all duration-700 ease-out delay-200">
-              <h3 className="text-3xl md:text-4xl font-bold text-foreground mb-4 flex items-center justify-center gap-3">
-                <RocketIcon className="h-8 w-8 text-primary" />
-                {t("mission.mission.title")}
-              </h3>
-              <p className="text-lg text-foreground/60 max-w-2xl mx-auto">
-                {t("mission.mission.subtitle")}
-              </p>
+              {/* Mission Card */}
+              <motion.div
+                initial={{ opacity: 0, x: 30 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ duration: 0.8, delay: 0.3 }}
+                className="animate-on-scroll opacity-0 translate-y-4 transition-all duration-700 ease-out delay-200"
+              >
+                <Card className="h-full bg-gradient-to-br from-accent/10 via-accent/5 to-transparent border-2 border-accent/20 shadow-xl hover:shadow-2xl transition-all duration-300">
+                  <div className="p-8">
+                    <div className="flex items-center gap-4 mb-6">
+                      <div className="w-12 h-12 rounded-xl bg-accent/20 flex items-center justify-center">
+                        <RocketIcon className="h-6 w-6 text-accent-foreground" />
+                      </div>
+                      <h3 className="text-2xl md:text-3xl font-bold text-foreground">
+                        {t("mission.mission.title")}
+                      </h3>
+                    </div>
+                    <p className="text-base text-foreground/70 mb-4">
+                      {t("mission.mission.subtitle")}
+                    </p>
+                    <div className="space-y-3">
+                      {[
+                        t("mission.mission.item1"),
+                        t("mission.mission.item2"),
+                        t("mission.mission.item3"),
+                        t("mission.mission.item4")
+                      ].map((item, idx) => (
+                        <div key={idx} className="flex items-start gap-3">
+                          <div className="w-1.5 h-1.5 rounded-full bg-primary mt-2 flex-shrink-0"></div>
+                          <p className="text-sm text-foreground/80 leading-relaxed">{item}</p>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </Card>
+              </motion.div>
             </div>
 
-            <div className="grid md:grid-cols-2 gap-6">
-              {[
-                {
-                  icon: <Users className="h-8 w-8" />,
-                  text: t("mission.mission.item1"),
-                  color: "from-accent/20 to-accent/10",
-                  borderColor: "border-accent/30",
-                  iconBg: "bg-accent/20",
-                  iconColor: "text-accent-foreground"
-                },
-                {
-                  icon: <Rocket className="h-8 w-8" />,
-                  text: t("mission.mission.item2"),
-                  color: "from-primary/20 to-primary/10",
-                  borderColor: "border-primary/30",
-                  iconBg: "bg-primary/20",
-                  iconColor: "text-primary"
-                },
-                {
-                  icon: <Lightbulb className="h-8 w-8" />,
-                  text: t("mission.mission.item3"),
-                  color: "from-secondary/20 to-secondary/10",
-                  borderColor: "border-secondary/30",
-                  iconBg: "bg-secondary/20",
-                  iconColor: "text-secondary-foreground"
-                },
-                {
-                  icon: <Globe className="h-8 w-8" />,
-                  text: t("mission.mission.item4"),
-                  color: "from-primary/20 via-primary/15 to-primary/10",
-                  borderColor: "border-primary/30",
-                  iconBg: "bg-primary/20",
-                  iconColor: "text-primary"
-                }
-              ].map((item, index) => (
-                <motion.div
-                  key={index}
-                  initial={{ opacity: 0, y: 30 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.6, delay: 0.3 + index * 0.1 }}
-                  className="animate-on-scroll opacity-0 translate-y-4 transition-all duration-700 ease-out"
-                  style={{transitionDelay: `${300 + index * 100}ms`}}
-                >
-                  <Card className={`h-full bg-card border-2 ${item.borderColor} hover:shadow-xl transition-all duration-300 hover:scale-[1.02] bg-gradient-to-br ${item.color}`}>
-                    <div className="p-8">
-                      <div className={`w-16 h-16 rounded-xl ${item.iconBg} flex items-center justify-center mb-6 ${item.iconColor}`}>
-                        {item.icon}
+            {/* Mission Pillars Grid */}
+            <div className="max-w-6xl mx-auto">
+              <div className="text-center mb-12 animate-on-scroll opacity-0 translate-y-4 transition-all duration-700 ease-out delay-300">
+                <h3 className="text-2xl md:text-3xl font-bold text-foreground mb-3">
+                  {t("mission.mission.title")} {t("mission.mission.subtitle").split(" ").slice(-2).join(" ")}
+                </h3>
+              </div>
+
+              <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+                {[
+                  {
+                    icon: <Users className="h-7 w-7" />,
+                    text: t("mission.mission.item1"),
+                    color: "from-accent/20 to-accent/10",
+                    borderColor: "border-accent/30",
+                    iconBg: "bg-accent/20",
+                    iconColor: "text-accent-foreground"
+                  },
+                  {
+                    icon: <Rocket className="h-7 w-7" />,
+                    text: t("mission.mission.item2"),
+                    color: "from-primary/20 to-primary/10",
+                    borderColor: "border-primary/30",
+                    iconBg: "bg-primary/20",
+                    iconColor: "text-primary"
+                  },
+                  {
+                    icon: <Lightbulb className="h-7 w-7" />,
+                    text: t("mission.mission.item3"),
+                    color: "from-secondary/20 to-secondary/10",
+                    borderColor: "border-secondary/30",
+                    iconBg: "bg-secondary/20",
+                    iconColor: "text-secondary-foreground"
+                  },
+                  {
+                    icon: <Globe className="h-7 w-7" />,
+                    text: t("mission.mission.item4"),
+                    color: "from-primary/20 via-primary/15 to-primary/10",
+                    borderColor: "border-primary/30",
+                    iconBg: "bg-primary/20",
+                    iconColor: "text-primary"
+                  }
+                ].map((item, index) => (
+                  <motion.div
+                    key={index}
+                    initial={{ opacity: 0, y: 30 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.6, delay: 0.4 + index * 0.1 }}
+                    className="animate-on-scroll opacity-0 translate-y-4 transition-all duration-700 ease-out"
+                    style={{transitionDelay: `${400 + index * 100}ms`}}
+                  >
+                    <Card className={`h-full bg-card border-2 ${item.borderColor} hover:shadow-xl transition-all duration-300 hover:scale-[1.02] bg-gradient-to-br ${item.color}`}>
+                      <div className="p-6">
+                        <div className={`w-14 h-14 rounded-xl ${item.iconBg} flex items-center justify-center mb-4 ${item.iconColor}`}>
+                          {item.icon}
+                        </div>
+                        <p className="text-base text-foreground leading-relaxed font-medium">
+                          {item.text}
+                        </p>
                       </div>
-                      <p className="text-lg text-foreground leading-relaxed font-medium">
-                        {item.text}
-                      </p>
-                    </div>
-                  </Card>
-                </motion.div>
-              ))}
+                    </Card>
+                  </motion.div>
+                ))}
+              </div>
             </div>
           </div>
         </div>
@@ -713,10 +746,10 @@ const Index = () => {
       <FooterSection
         translations={{
           newsletter: {
-            title: "Stay Connected",
-            description: "Join our newsletter for the latest updates and exclusive offers.",
-            placeholder: "Enter your email",
-            subscribe: "Subscribe"
+            title: t("footer.newsletter.title"),
+            description: t("footer.newsletter.description"),
+            placeholder: t("footer.newsletter.placeholder"),
+            subscribe: t("footer.newsletter.subscribe")
           },
           quickLinks: {
             title: t("footer.resources"),
@@ -739,7 +772,8 @@ const Index = () => {
           copyright: t("footer.copyright").replace("{year}", new Date().getFullYear().toString()),
           privacy: t("footer.privacy"),
           terms: t("footer.terms"),
-          cookieSettings: "Cookie Settings"
+          cookieSettings: "Cookie Settings",
+          addliance: t("footer.addliance.text")
         }}
         socialLinks={{
           linkedin: "https://www.linkedin.com/company/bulgarian-additive-manufacturing-association/"

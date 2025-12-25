@@ -12,6 +12,7 @@
   "hero.title": "Bulgarian Additive Manufacturing Association",
   "hero.subtitle": "Uniting Innovation. Empowering Industry. Shaping the Future.",
   "hero.cta": "Become a Member",
+  "hero.badge": "BAMAS",
   
   "about.title": "About Us",
   "about.description": "The Bulgarian Additive Manufacturing Association (BAMAS) was established to address the pressing need for structured collaboration within Bulgaria's growing 3D printing ecosystem. As the industry evolves rapidly, we provide a neutral, non-commercial platform that fosters innovation and strategic growth.",
@@ -20,7 +21,7 @@
   "mission.vision.title": "Our Vision",
   "mission.vision.description": "To unify and amplify the Bulgarian additive manufacturing sector's capabilities in the global arena, establishing Bulgaria as a recognized center of excellence for 3D printing innovation and implementation.",
   "mission.mission.title": "Our Mission",
-  "mission.mission.subtitle": "Our mission is built on four core pillars that guide everything we do",
+  "mission.mission.subtitle": "Our mission is the path to an innovative future",
   "mission.purpose.badge": "Our Purpose",
   "mission.mission.item1": "Facilitate collaboration between companies, researchers, and institutions",
   "mission.mission.item2": "Advocate for technological progress and regulatory support",
@@ -102,5 +103,10 @@
   "footer.contact": "Contact",
   "footer.copyright": "© {year} Bulgarian Additive Manufacturing Association. All rights reserved.",
   "footer.privacy": "Privacy Policy",
-  "footer.terms": "Terms of Use"
+  "footer.terms": "Terms of Use",
+  "footer.newsletter.title": "Join BAMAS",
+  "footer.newsletter.description": "Join our newsletter for the latest updates and exclusive offers.",
+  "footer.newsletter.placeholder": "Enter your email",
+  "footer.newsletter.subscribe": "Subscribe",
+  "footer.addliance.text": "Part of (Add)liance - The European Additive Manufacturing Hub"
 } 

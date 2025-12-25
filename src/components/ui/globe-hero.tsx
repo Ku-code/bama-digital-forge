@@ -20,9 +20,9 @@ const Globe: React.FC<{
   
   // Adaptive geometry quality and size based on device
   const isMobile = typeof window !== 'undefined' && window.innerWidth < 768;
-  const segments = isMobile ? 32 : 64;
-  // Make globe bigger - scale up the radius
-  const scaledRadius = radius * 1.5;
+  const segments = isMobile ? 24 : 64;
+  // Scale radius based on device - smaller on mobile to fit screen
+  const scaledRadius = isMobile ? radius * 0.7 : radius * 1.5;
 
   // Check if dark mode is active and set color accordingly
   React.useEffect(() => {
@@ -95,17 +95,23 @@ const DotGlobeHero = React.forwardRef<
       )}
       {...props}
     >
-      <div className="relative z-10 flex flex-col items-center justify-center h-full">
+      <div className="relative z-10 flex flex-col items-center justify-center h-full px-4">
         {children}
       </div>
       
       <div className="absolute inset-0 z-0 pointer-events-none">
         <Canvas
-          dpr={[1, 2]}
+          dpr={[1, 1.5]}
           performance={{ min: 0.5 }}
-          gl={{ antialias: false, alpha: true }}
+          gl={{ 
+            antialias: false, 
+            alpha: true,
+            powerPreference: "high-performance",
+            stencil: false,
+            depth: false
+          }}
         >
-          <PerspectiveCamera makeDefault position={[0, 0, 3]} fov={75} />
+          <PerspectiveCamera makeDefault position={[0, 0, typeof window !== 'undefined' && window.innerWidth < 768 ? 3.5 : 3]} fov={typeof window !== 'undefined' && window.innerWidth < 768 ? 60 : 75} />
           <ambientLight intensity={0.5} />
           <pointLight position={[10, 10, 10]} intensity={1} />
           

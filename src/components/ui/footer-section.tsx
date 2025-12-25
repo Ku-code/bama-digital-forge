@@ -200,7 +200,7 @@ function FooterSection({
                     rel="noopener noreferrer"
                     className="inline-block hover:opacity-80 transition-opacity"
                   >
-                    <img 
+                    <img
                       src="/addliancelogo.png"
                       alt="Addliance Logo" 
                       className="h-16 w-auto object-contain rounded-sm"
@@ -214,7 +214,7 @@ function FooterSection({
                         imageRendering: 'auto',
                         borderRadius: '4px'
                       }}
-                      loading="eager"
+                      loading="lazy"
                       decoding="async"
                       onError={(e) => {
                         console.error('Addliance logo failed to load. Attempted path:', e.currentTarget.src);

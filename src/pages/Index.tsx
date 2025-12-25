@@ -1,4 +1,4 @@
-import { useEffect, useRef, useMemo, useCallback } from "react";
+import { useEffect, useRef, useMemo, useCallback, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { 
@@ -20,10 +20,12 @@ import { FooterSection } from "@/components/ui/footer-section";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { motion } from "framer-motion";
 import { ArrowRight, Zap as ZapIcon, Target, Rocket as RocketIcon } from "lucide-react";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 const Index = () => {
   const { toast } = useToast();
   const { t, language, setLanguage } = useLanguage();
+  const isMobile = useIsMobile();
 
   useEffect(() => {
     const observer = new IntersectionObserver(
@@ -79,7 +81,7 @@ const Index = () => {
           <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-primary/5 rounded-full blur-3xl animate-pulse" />
           <div className="absolute bottom-1/4 right-1/4 w-64 h-64 bg-primary/3 rounded-full blur-3xl animate-pulse" />
           
-          <div className="relative z-10 text-center space-y-12 max-w-5xl mx-auto px-6 py-12">
+          <div className="relative z-10 text-center space-y-8 md:space-y-12 max-w-5xl mx-auto px-4 md:px-6 py-8 md:py-12">
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
@@ -103,7 +105,7 @@ const Index = () => {
                   initial={{ opacity: 0, y: 30 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: 1, delay: 0.3 }}
-                  className="text-4xl md:text-6xl lg:text-7xl xl:text-8xl font-black tracking-tight leading-tight select-none"
+                  className="text-3xl sm:text-4xl md:text-6xl lg:text-7xl xl:text-8xl font-black tracking-tight leading-tight select-none"
                   style={{ fontFamily: 'Inter, system-ui, sans-serif' }}
                 >
                   <span className="block relative">
@@ -130,7 +132,7 @@ const Index = () => {
                 transition={{ duration: 0.8, delay: 0.8 }}
                 className="max-w-3xl mx-auto space-y-4"
               >
-                <p className="text-xl md:text-2xl text-muted-foreground leading-relaxed font-medium" 
+                <p className="text-base sm:text-xl md:text-2xl text-muted-foreground leading-relaxed font-medium px-4" 
                    style={{ fontFamily: 'Inter, system-ui, sans-serif' }}>
                   {t("hero.subtitle")}
                 </p>
@@ -150,7 +152,7 @@ const Index = () => {
                   y: -2
                 }}
                 whileTap={{ scale: 0.98 }}
-                className="group relative inline-flex items-center gap-3 px-8 py-4 bg-gradient-to-r from-primary via-primary to-primary/90 text-primary-foreground rounded-xl font-semibold text-lg shadow-xl hover:shadow-primary/30 transition-all duration-500 overflow-hidden border border-primary/20"
+                className="group relative inline-flex items-center gap-2 md:gap-3 px-6 md:px-8 py-3 md:py-4 bg-gradient-to-r from-primary via-primary to-primary/90 text-primary-foreground rounded-xl font-semibold text-sm md:text-lg shadow-xl hover:shadow-primary/30 transition-all duration-500 overflow-hidden border border-primary/20"
                 onClick={() => {
                   const membershipSection = document.getElementById('membership');
                   membershipSection?.scrollIntoView({ behavior: 'smooth' });
@@ -176,7 +178,7 @@ const Index = () => {
                   y: -2
                 }}
                 whileTap={{ scale: 0.98 }}
-                className="group relative inline-flex items-center gap-3 px-8 py-4 border-2 border-border/40 rounded-xl font-semibold text-lg hover:border-primary/40 transition-all duration-500 backdrop-blur-xl bg-background/60 hover:bg-background/90 shadow-lg overflow-hidden"
+                className="group relative inline-flex items-center gap-2 md:gap-3 px-6 md:px-8 py-3 md:py-4 border-2 border-border/40 rounded-xl font-semibold text-sm md:text-lg hover:border-primary/40 transition-all duration-500 backdrop-blur-xl bg-background/60 hover:bg-background/90 shadow-lg overflow-hidden"
                 onClick={() => {
                   const aboutSection = document.getElementById('about');
                   aboutSection?.scrollIntoView({ behavior: 'smooth' });
@@ -191,7 +193,7 @@ const Index = () => {
         </DotGlobeHero>
       </section>
 
-      <section id="about" className="py-20 bg-muted/30 relative overflow-hidden">
+      <section id="about" className="py-12 md:py-20 bg-muted/30 relative overflow-hidden">
         {/* Background image with reduced opacity - centered behind text */}
         <div 
           className="absolute inset-0 pointer-events-none z-0"
@@ -199,20 +201,20 @@ const Index = () => {
             backgroundImage: 'url(/bamas-map-logo.png)',
             backgroundRepeat: 'no-repeat',
             backgroundPosition: 'center 10%',
-            backgroundSize: 'auto 120%',
+            backgroundSize: isMobile ? 'auto 70%' : 'auto 120%',
             opacity: 0.25
           }}
         />
         
         <div className="container mx-auto px-4 relative z-10">
-          <h2 className="text-3xl md:text-4xl font-bold mb-12 text-center text-foreground animate-on-scroll opacity-0 translate-y-4 transition-all duration-700 ease-out">
+          <h2 className="text-2xl md:text-3xl lg:text-4xl font-bold mb-8 md:mb-12 text-center text-foreground animate-on-scroll opacity-0 translate-y-4 transition-all duration-700 ease-out px-4">
             {t("about.title")}
           </h2>
           <div className="max-w-3xl mx-auto animate-on-scroll opacity-0 translate-y-4 transition-all duration-700 ease-out delay-100">
-            <p className="text-lg text-foreground/80 leading-relaxed mb-6">
+            <p className="text-base md:text-lg text-foreground/80 leading-relaxed mb-4 md:mb-6 px-4">
               {t("about.description")}
             </p>
-            <p className="text-lg text-foreground/80 leading-relaxed">
+            <p className="text-base md:text-lg text-foreground/80 leading-relaxed px-4">
               {t("about.subtitle")}
             </p>
           </div>
@@ -253,7 +255,7 @@ const Index = () => {
                         {t("mission.vision.title")}
                       </h3>
                     </div>
-                    <p className="text-lg text-foreground/80 leading-relaxed">
+                    <p className="text-base md:text-lg text-foreground/80 leading-relaxed px-4">
                       {t("mission.vision.description")}
                     </p>
                   </div>
@@ -367,9 +369,9 @@ const Index = () => {
         </div>
       </section>
 
-      <section id="objectives" className="py-20 bg-muted/30">
+      <section id="objectives" className="py-12 md:py-20 bg-muted/30">
         <div className="container mx-auto px-4">
-          <h2 className="text-3xl md:text-4xl font-bold mb-12 text-center text-foreground animate-on-scroll opacity-0 translate-y-4 transition-all duration-700 ease-out">
+          <h2 className="text-2xl md:text-3xl lg:text-4xl font-bold mb-8 md:mb-12 text-center text-foreground animate-on-scroll opacity-0 translate-y-4 transition-all duration-700 ease-out px-4">
             {t("objectives.title")}
           </h2>
           <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6 mt-12">
@@ -409,7 +411,7 @@ const Index = () => {
         </div>
       </section>
 
-      <section id="membership-pricing" className="py-20 bg-muted/30">
+      <section id="membership-pricing" className="py-12 md:py-20 bg-muted/30">
         <div className="container mx-auto px-4">
           <h2 className="text-3xl md:text-4xl font-bold mb-4 text-center text-foreground animate-on-scroll opacity-0 translate-y-4 transition-all duration-700 ease-out">
             {t("membership.pricing.title")}
@@ -516,9 +518,9 @@ const Index = () => {
         </div>
       </section>
 
-      <section id="membership" className="py-20 bg-background">
+      <section id="membership" className="py-12 md:py-20 bg-background">
         <div className="container mx-auto px-4">
-          <h2 className="text-3xl md:text-4xl font-bold mb-12 text-center text-foreground animate-on-scroll opacity-0 translate-y-4 transition-all duration-700 ease-out">
+          <h2 className="text-2xl md:text-3xl lg:text-4xl font-bold mb-8 md:mb-12 text-center text-foreground animate-on-scroll opacity-0 translate-y-4 transition-all duration-700 ease-out px-4">
             {t("membership.title")}
           </h2>
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 mt-12">
@@ -570,9 +572,9 @@ const Index = () => {
         </div>
       </section>
 
-      <section id="events" className="py-20 bg-muted/30">
+      <section id="events" className="py-12 md:py-20 bg-muted/30">
         <div className="container mx-auto px-4">
-          <h2 className="text-3xl md:text-4xl font-bold mb-12 text-center text-foreground animate-on-scroll opacity-0 translate-y-4 transition-all duration-700 ease-out">
+          <h2 className="text-2xl md:text-3xl lg:text-4xl font-bold mb-8 md:mb-12 text-center text-foreground animate-on-scroll opacity-0 translate-y-4 transition-all duration-700 ease-out px-4">
             {t("events.title")}
           </h2>
           
@@ -648,23 +650,23 @@ const Index = () => {
         </div>
       </section>
 
-      <section id="partner" className="py-20 bg-background">
+      <section id="partner" className="py-12 md:py-20 bg-background">
         <div className="container mx-auto px-4">
-          <h2 className="text-3xl md:text-4xl font-bold mb-12 text-center text-foreground animate-on-scroll opacity-0 translate-y-4 transition-all duration-700 ease-out">
+          <h2 className="text-2xl md:text-3xl lg:text-4xl font-bold mb-8 md:mb-12 text-center text-foreground animate-on-scroll opacity-0 translate-y-4 transition-all duration-700 ease-out px-4">
             {t("partner.title")}
           </h2>
           <div className="grid md:grid-cols-2 gap-12 mt-8">
             <div className="animate-on-scroll opacity-0 translate-y-4 transition-all duration-700 ease-out">
-              <p className="text-lg text-foreground/80 leading-relaxed mb-6">
+              <p className="text-base md:text-lg text-foreground/80 leading-relaxed mb-4 md:mb-6 px-4">
                 {t("partner.description1")}
               </p>
-              <p className="text-lg text-foreground/80 leading-relaxed">
+              <p className="text-base md:text-lg text-foreground/80 leading-relaxed px-4">
                 {t("partner.description2")}
               </p>
             </div>
             <div className="bg-card p-8 rounded-lg shadow-sm animate-on-scroll opacity-0 translate-y-4 transition-all duration-700 ease-out delay-100">
               <h3 className="text-xl font-semibold text-foreground mb-4">{t("partner.interest.title")}</h3>
-              <p className="text-lg text-foreground/80 leading-relaxed mb-6">
+              <p className="text-base md:text-lg text-foreground/80 leading-relaxed mb-4 md:mb-6 px-4">
                 {t("partner.interest.description")}
               </p>
               <Button 
@@ -680,16 +682,16 @@ const Index = () => {
         </div>
       </section>
 
-      <section id="contact" className="py-20 bg-muted/30">
+      <section id="contact" className="py-12 md:py-20 bg-muted/30">
         <div className="container mx-auto px-4">
-          <h2 className="text-3xl md:text-4xl font-bold mb-12 text-center text-foreground animate-on-scroll opacity-0 translate-y-4 transition-all duration-700 ease-out">
+          <h2 className="text-2xl md:text-3xl lg:text-4xl font-bold mb-8 md:mb-12 text-center text-foreground animate-on-scroll opacity-0 translate-y-4 transition-all duration-700 ease-out px-4">
             {t("contact.title")}
           </h2>
           <div className="max-w-4xl mx-auto">
             <div className="grid md:grid-cols-2 gap-8">
               <div className="bg-card p-8 rounded-lg shadow-md animate-on-scroll opacity-0 translate-y-4 transition-all duration-700 ease-out delay-100">
                 <h3 className="text-xl font-semibold text-foreground mb-4">{t("contact.form.title")}</h3>
-                <p className="text-lg text-foreground/80 leading-relaxed mb-6">
+                <p className="text-base md:text-lg text-foreground/80 leading-relaxed mb-4 md:mb-6 px-4">
                   {t("contact.form.description")}
                 </p>
                 <Button 
@@ -704,7 +706,7 @@ const Index = () => {
               
               <div className="bg-card p-8 rounded-lg shadow-md animate-on-scroll opacity-0 translate-y-4 transition-all duration-700 ease-out delay-200">
                 <h3 className="text-xl font-semibold text-foreground mb-4">{t("contact.discord.title")}</h3>
-                <p className="text-lg text-foreground/80 leading-relaxed mb-6">
+                <p className="text-base md:text-lg text-foreground/80 leading-relaxed mb-4 md:mb-6 px-4">
                   {t("contact.discord.description")}
                 </p>
                 <Button 

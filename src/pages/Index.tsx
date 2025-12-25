@@ -192,16 +192,15 @@ const Index = () => {
       </section>
 
       <section id="about" className="py-20 bg-muted/30 relative overflow-hidden">
-        {/* Background image with reduced opacity - centered */}
+        {/* Background image with reduced opacity - centered behind text */}
         <div 
           className="absolute inset-0 pointer-events-none z-0"
           style={{
             backgroundImage: 'url(/bamas-map-logo.png)',
             backgroundRepeat: 'no-repeat',
-            backgroundPosition: 'center center',
-            backgroundSize: 'auto 70%',
-            opacity: 0.12,
-            willChange: 'auto'
+            backgroundPosition: 'center 10%',
+            backgroundSize: 'auto 120%',
+            opacity: 0.25
           }}
         />
         
@@ -577,91 +576,70 @@ const Index = () => {
             {t("events.title")}
           </h2>
           
-          {/* Timeline Container */}
-          <div className="max-w-6xl mx-auto">
-            {/* Past Events Section */}
-            <div className="mb-12">
-              <h3 className="text-2xl font-bold mb-8 text-center text-foreground/60">
-                {t("events.past.title")}
-              </h3>
-              <div className="bg-muted/70 p-8 rounded-lg shadow-sm max-w-4xl mx-auto border border-border/30 animate-on-scroll opacity-0 translate-y-4 transition-all duration-700 ease-out">
-                <div className="flex items-start gap-4">
-                  <div className="flex-shrink-0 w-3 h-3 rounded-full bg-foreground/30 mt-2"></div>
-                  <div className="flex-grow">
-                    <h4 className="text-xl font-bold text-foreground/60 mb-3">{t("events.conference.title")}</h4>
-                    <div className="flex flex-wrap gap-4 mb-4">
-                      <div className="bg-background/60 px-3 py-1 rounded text-sm font-medium text-foreground/50">{t("events.conference.date")}</div>
-                      <div className="bg-background/60 px-3 py-1 rounded text-sm font-medium text-foreground/50">{t("events.conference.location")}</div>
-                    </div>
-                    <div className="mb-6">
-                      <h5 className="text-base font-semibold mb-3 text-foreground/50">{t("events.conference.topics")}</h5>
-                      <ul className="grid md:grid-cols-2 gap-2">
-                        <li className="flex items-center text-sm text-foreground/40">
-                          <CircleCheck className="h-4 w-4 text-foreground/30 mr-2 flex-shrink-0" />
-                          <span>{t("events.conference.topic1")}</span>
-                        </li>
-                        <li className="flex items-center text-sm text-foreground/40">
-                          <CircleCheck className="h-4 w-4 text-foreground/30 mr-2 flex-shrink-0" />
-                          <span>{t("events.conference.topic2")}</span>
-                        </li>
-                        <li className="flex items-center text-sm text-foreground/40">
-                          <CircleCheck className="h-4 w-4 text-foreground/30 mr-2 flex-shrink-0" />
-                          <span>{t("events.conference.topic3")}</span>
-                        </li>
-                        <li className="flex items-center text-sm text-foreground/40">
-                          <CircleCheck className="h-4 w-4 text-foreground/30 mr-2 flex-shrink-0" />
-                          <span>{t("events.conference.topic4")}</span>
-                        </li>
-                      </ul>
+          {/* Timeline Container - Single Line Layout */}
+          <div className="max-w-7xl mx-auto">
+            <div className="flex flex-col md:flex-row items-center gap-4 md:gap-8">
+              {/* Past Events Section */}
+              <div className="flex-1 max-w-md animate-on-scroll opacity-0 translate-y-4 transition-all duration-700 ease-out">
+                <h3 className="text-lg font-semibold mb-4 text-center text-foreground/60">
+                  {t("events.past.title")}
+                </h3>
+                <div className="bg-muted/70 p-6 rounded-lg shadow-sm border border-border/30">
+                  <div className="flex items-start gap-3">
+                    <div className="flex-shrink-0 w-2 h-2 rounded-full bg-foreground/30 mt-2"></div>
+                    <div className="flex-grow">
+                      <h4 className="text-lg font-bold text-foreground/60 mb-2">{t("events.conference.title")}</h4>
+                      <div className="flex flex-wrap gap-2 mb-3">
+                        <div className="bg-background/60 px-2 py-1 rounded text-xs font-medium text-foreground/50">{t("events.conference.date")}</div>
+                        <div className="bg-background/60 px-2 py-1 rounded text-xs font-medium text-foreground/50">{t("events.conference.location")}</div>
+                      </div>
                     </div>
                   </div>
                 </div>
               </div>
-            </div>
 
-            {/* Timeline Arrow/Divider */}
-            <div className="flex items-center justify-center my-12 animate-on-scroll opacity-0 translate-y-4 transition-all duration-700 ease-out delay-200">
-              <div className="flex items-center gap-4 w-full max-w-md">
-                <div className="flex-grow h-0.5 bg-gradient-to-r from-foreground/20 to-transparent"></div>
-                <div className="relative">
-                  <div className="w-12 h-12 rounded-full bg-primary/20 flex items-center justify-center">
-                    <div className="w-8 h-8 rounded-full bg-primary flex items-center justify-center">
-                      <ArrowRight className="h-5 w-5 text-primary-foreground" />
+              {/* Timeline Arrow/Divider */}
+              <div className="flex-shrink-0 flex items-center justify-center animate-on-scroll opacity-0 translate-y-4 transition-all duration-700 ease-out delay-200">
+                <div className="flex flex-col md:flex-row items-center gap-2 md:gap-4">
+                  <div className="hidden md:block flex-grow h-0.5 w-12 bg-gradient-to-r from-foreground/20 to-transparent"></div>
+                  <div className="relative">
+                    <div className="w-10 h-10 md:w-12 md:h-12 rounded-full bg-primary/20 flex items-center justify-center">
+                      <div className="w-6 h-6 md:w-8 md:h-8 rounded-full bg-primary flex items-center justify-center">
+                        <ArrowRight className="h-3 w-3 md:h-5 md:w-5 text-primary-foreground" />
+                      </div>
                     </div>
                   </div>
-                  <div className="absolute -bottom-6 left-1/2 transform -translate-x-1/2 text-xs font-medium text-foreground/60 whitespace-nowrap">
-                    Timeline
-                  </div>
+                  <div className="hidden md:block flex-grow h-0.5 w-12 bg-gradient-to-l from-primary to-transparent"></div>
                 </div>
-                <div className="flex-grow h-0.5 bg-gradient-to-l from-primary to-transparent"></div>
               </div>
-            </div>
 
-            {/* Upcoming Events Section */}
-            <div className="mt-12">
-              <h3 className="text-2xl font-bold mb-8 text-center text-primary">
-                {t("events.upcoming.title")}
-              </h3>
-              <div className="bg-gradient-to-br from-primary via-primary to-primary/80 p-8 rounded-lg shadow-lg max-w-4xl mx-auto animate-on-scroll opacity-0 translate-y-4 transition-all duration-700 ease-out delay-300 text-primary-foreground">
-                <div className="flex items-start gap-4">
-                  <div className="flex-shrink-0 w-3 h-3 rounded-full bg-primary-foreground mt-2 animate-pulse"></div>
-                  <div className="flex-grow">
-                    <h4 className="text-2xl font-bold mb-3">{t("events.planning2026.title")}</h4>
-                    <div className="flex flex-wrap gap-4 mb-4">
-                      <div className="bg-primary-foreground/20 px-3 py-1 rounded text-sm font-medium backdrop-blur-sm">{t("events.planning2026.date")}</div>
-                      <div className="bg-primary-foreground/20 px-3 py-1 rounded text-sm font-medium backdrop-blur-sm">{t("events.planning2026.location")}</div>
+              {/* Upcoming Events Section */}
+              <div className="flex-1 max-w-md animate-on-scroll opacity-0 translate-y-4 transition-all duration-700 ease-out delay-300">
+                <h3 className="text-lg font-semibold mb-4 text-center text-primary">
+                  {t("events.upcoming.title")}
+                </h3>
+                <div className="bg-gradient-to-br from-primary via-primary to-primary/80 p-6 rounded-lg shadow-lg text-primary-foreground">
+                  <div className="flex items-start gap-3">
+                    <div className="flex-shrink-0 w-2 h-2 rounded-full bg-primary-foreground mt-2 animate-pulse"></div>
+                    <div className="flex-grow">
+                      <h4 className="text-lg font-bold mb-2">{t("events.planning2026.title")}</h4>
+                      <div className="flex flex-wrap gap-2 mb-3">
+                        <div className="bg-primary-foreground/20 px-2 py-1 rounded text-xs font-medium backdrop-blur-sm">{t("events.planning2026.date")}</div>
+                        <div className="bg-primary-foreground/20 px-2 py-1 rounded text-xs font-medium backdrop-blur-sm">{t("events.planning2026.location")}</div>
+                      </div>
+                      <p className="text-primary-foreground/90 text-sm leading-relaxed mb-4">
+                        {t("events.planning2026.description")}
+                      </p>
+                      <Button 
+                        size="sm"
+                        className="bg-primary-foreground text-primary hover:bg-primary-foreground/90 shadow-lg text-xs"
+                        asChild
+                      >
+                        <a href="#contact">
+                          {t("membership.pricing.cta")}
+                        </a>
+                      </Button>
                     </div>
-                    <p className="text-primary-foreground/90 mb-6 leading-relaxed">
-                      {t("events.planning2026.description")}
-                    </p>
-                    <Button 
-                      className="bg-primary-foreground text-primary hover:bg-primary-foreground/90 shadow-lg"
-                      asChild
-                    >
-                      <a href="#contact">
-                        {t("membership.pricing.cta")}
-                      </a>
-                    </Button>
                   </div>
                 </div>
               </div>

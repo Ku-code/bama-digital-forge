@@ -16,11 +16,11 @@ const LanguageSwitcher: React.FC = () => {
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <Button 
-          variant="ghost" 
-          size="icon" 
-          className="text-foreground hover:text-primary hover:bg-primary/10 border border-border/50 dark:border-border dark:bg-muted/30 dark:hover:bg-muted/50 transition-all duration-200"
+          variant="outline" 
+          size="sm" 
+          className="rounded-full border-border/50 hover:border-primary/50 hover:bg-primary/5 transition-all duration-200 h-9 w-9 p-0"
         >
-          <Globe className="h-5 w-5" />
+          <Globe className="h-4 w-4" />
           <span className="sr-only">{t('nav.language')}</span>
         </Button>
       </DropdownMenuTrigger>

@@ -1,7 +1,9 @@
 import { useState, useEffect, useMemo, useCallback } from "react";
+import { Link } from "react-router-dom";
 import { Menu, X } from "./ui/icons";
 import { useLanguage } from "@/contexts/LanguageContext";
 import LanguageSwitcher from "./LanguageSwitcher";
+import { Button } from "./ui/button";
 
 const Navbar = () => {
   const [isScrolled, setIsScrolled] = useState(false);
@@ -100,14 +102,47 @@ const Navbar = () => {
               </li>
             ))}
           </ul>
-          <LanguageSwitcher />
+          <div className="flex items-center gap-3 ml-6 pl-6 border-l border-border/40">
+            <LanguageSwitcher />
+            <div className="flex items-center gap-2">
+              <Link to="/login">
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  className="rounded-full border-border/50 hover:border-primary/50 hover:bg-primary/5 transition-all duration-200"
+                >
+                  {t("nav.login")}
+                </Button>
+              </Link>
+              <Link to="/register">
+                <Button 
+                  size="sm" 
+                  className="rounded-full shadow-sm hover:shadow-md transition-all duration-200"
+                >
+                  {t("nav.register")}
+                </Button>
+              </Link>
+            </div>
+          </div>
         </nav>
 
         {/* Mobile Menu Button */}
-        <div className="md:hidden flex items-center space-x-2">
+        <div className="md:hidden flex items-center gap-2">
           <LanguageSwitcher />
+          <div className="flex items-center gap-2 border-l border-border/40 pl-2">
+            <Link to="/login">
+              <Button variant="ghost" size="sm" className="h-8 px-3 text-xs rounded-full">
+                {t("nav.login")}
+              </Button>
+            </Link>
+            <Link to="/register">
+              <Button size="sm" className="h-8 px-3 text-xs rounded-full">
+                {t("nav.register")}
+              </Button>
+            </Link>
+          </div>
           <button
-            className="text-foreground p-2"
+            className="text-foreground p-2 ml-2"
             onClick={toggleMenu}
             aria-label="Toggle menu"
           >
@@ -135,6 +170,24 @@ const Navbar = () => {
                   </a>
                 </li>
               ))}
+              <li>
+                <Link
+                  to="/login"
+                  className="block text-lg font-medium transition-colors text-foreground hover:text-primary"
+                  onClick={closeMenu}
+                >
+                  {t("nav.login")}
+                </Link>
+              </li>
+              <li>
+                <Link
+                  to="/register"
+                  className="block text-lg font-medium transition-colors text-foreground hover:text-primary"
+                  onClick={closeMenu}
+                >
+                  {t("nav.register")}
+                </Link>
+              </li>
             </ul>
           </nav>
         </div>

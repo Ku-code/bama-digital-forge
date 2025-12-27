@@ -9,12 +9,15 @@ import { Separator } from "@/components/ui/separator";
 import Navbar from "@/components/Navbar";
 import { FooterSection } from "@/components/ui/footer-section";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/hooks/use-toast";
+import { decodeJWT } from "@/lib/jwt";
 import { UserPlus, Mail, Lock, User, X, ArrowLeft } from "lucide-react";
 
 const Register = () => {
   const { t, language, setLanguage } = useLanguage();
   const { toast } = useToast();
+  const { login } = useAuth();
   const navigate = useNavigate();
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
@@ -39,21 +42,44 @@ const Register = () => {
     // Simulate registration - replace with actual API call
     setTimeout(() => {
       setIsLoading(false);
+      // Create user object from form data
+      const userData = {
+        id: `email_${Date.now()}`,
+        name: name,
+        email: email,
+        provider: 'email' as const,
+      };
+      login(userData);
       toast({
         title: t("auth.register.success.title") || "Registration Successful",
         description: t("auth.register.success.description") || "Your account has been created successfully!",
       });
-      navigate("/");
+      navigate("/dashboard");
     }, 1000);
   };
 
   const handleGoogleSuccess = (credentialResponse: any) => {
     console.log("Google Registration Success:", credentialResponse);
-    toast({
-      title: t("auth.register.success.title") || "Registration Successful",
-      description: t("auth.google.success") || "Successfully registered with Google!",
-    });
-    navigate("/");
+    
+    // Decode JWT token to get user info
+    if (credentialResponse.credential) {
+      const decoded = decodeJWT(credentialResponse.credential);
+      if (decoded) {
+        const userData = {
+          id: decoded.sub || `google_${Date.now()}`,
+          name: decoded.name || decoded.given_name || 'User',
+          email: decoded.email || '',
+          image: decoded.picture,
+          provider: 'google' as const,
+        };
+        login(userData);
+        toast({
+          title: t("auth.register.success.title") || "Registration Successful",
+          description: t("auth.google.success") || "Successfully registered with Google!",
+        });
+        navigate("/dashboard");
+      }
+    }
   };
 
   const handleGoogleError = () => {

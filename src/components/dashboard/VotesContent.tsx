@@ -1,0 +1,881 @@
+import { useState, useEffect } from "react";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { Checkbox } from "@/components/ui/checkbox";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import { Separator } from "@/components/ui/separator";
+import { Progress } from "@/components/ui/progress";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { useLanguage } from "@/contexts/LanguageContext";
+import { useAuth } from "@/contexts/AuthContext";
+import { useToast } from "@/hooks/use-toast";
+import { logHistory } from "@/lib/history";
+import { CheckSquare, Plus, Vote, BarChart3, Users, X, Edit, Trash2, MoreVertical } from "lucide-react";
+import { format } from "date-fns";
+
+interface PollOption {
+  id: string;
+  text: string;
+  votes: string[]; // Array of user IDs who voted for this option
+}
+
+interface Poll {
+  id: string;
+  title: string;
+  description?: string;
+  type: "single" | "multiple"; // Single choice or multiple choice
+  options: PollOption[];
+  createdBy: string;
+  createdByName: string;
+  createdByImage?: string;
+  createdAt: string;
+  endDate?: string;
+  isActive: boolean;
+}
+
+const STORAGE_KEY = "bamas_polls";
+
+const VotesContent = () => {
+  const { t } = useLanguage();
+  const { user } = useAuth();
+  const { toast } = useToast();
+  const [polls, setPolls] = useState<Poll[]>([]);
+  const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
+  const [isEditDialogOpen, setIsEditDialogOpen] = useState<string | null>(null);
+  const [editingPoll, setEditingPoll] = useState<Poll | null>(null);
+  const [deletePollId, setDeletePollId] = useState<string | null>(null);
+  const [selectedVotes, setSelectedVotes] = useState<{ [pollId: string]: string[] }>({});
+  const [showResults, setShowResults] = useState<{ [pollId: string]: boolean }>({});
+  const [newPoll, setNewPoll] = useState({
+    title: "",
+    description: "",
+    type: "single" as "single" | "multiple",
+    options: [""],
+    endDate: "",
+  });
+
+  // Load polls from localStorage
+  useEffect(() => {
+    const stored = localStorage.getItem(STORAGE_KEY);
+    if (stored) {
+      try {
+        const loadedPolls = JSON.parse(stored);
+        // Don't filter expired polls - show all polls
+        setPolls(loadedPolls);
+      } catch (error) {
+        console.error("Error loading polls:", error);
+      }
+    }
+  }, []);
+
+  // Save polls to localStorage
+  const savePolls = (updatedPolls: Poll[]) => {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(updatedPolls));
+    setPolls(updatedPolls);
+  };
+
+  const handleAddOption = () => {
+    setNewPoll({ ...newPoll, options: [...newPoll.options, ""] });
+  };
+
+  const handleRemoveOption = (index: number) => {
+    if (newPoll.options.length > 1) {
+      const updatedOptions = newPoll.options.filter((_, i) => i !== index);
+      setNewPoll({ ...newPoll, options: updatedOptions });
+    }
+  };
+
+  const handleOptionChange = (index: number, value: string) => {
+    const updatedOptions = [...newPoll.options];
+    updatedOptions[index] = value;
+    setNewPoll({ ...newPoll, options: updatedOptions });
+  };
+
+  const handleCreatePoll = () => {
+    if (!newPoll.title.trim()) {
+      toast({
+        title: t("dashboard.votes.create.error.title") || "Validation Error",
+        description: t("dashboard.votes.create.error.titleRequired") || "Please enter a poll title.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    const validOptions = newPoll.options.filter((opt) => opt.trim() !== "");
+    if (validOptions.length < 2) {
+      toast({
+        title: t("dashboard.votes.create.error.title") || "Validation Error",
+        description: t("dashboard.votes.create.error.optionsRequired") || "Please add at least 2 options.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    const pollOptions: PollOption[] = validOptions.map((opt, index) => ({
+      id: `option_${Date.now()}_${index}`,
+      text: opt.trim(),
+      votes: [],
+    }));
+
+    const newPollItem: Poll = {
+      id: `poll_${Date.now()}`,
+      title: newPoll.title.trim(),
+      description: newPoll.description.trim() || undefined,
+      type: newPoll.type,
+      options: pollOptions,
+      createdBy: user?.id || "",
+      createdByName: user?.name || "Unknown User",
+      createdByImage: user?.image,
+      createdAt: new Date().toISOString(),
+      endDate: newPoll.endDate || undefined,
+      isActive: true,
+    };
+
+    const updatedPolls = [newPollItem, ...polls];
+    savePolls(updatedPolls);
+
+    // Log history
+    if (user) {
+      logHistory(
+        "vote",
+        "Created poll",
+        `Created poll "${newPollItem.title}"`,
+        user.id,
+        user.name,
+        user.image,
+        { pollId: newPollItem.id, pollType: newPollItem.type }
+      );
+    }
+
+    toast({
+      title: t("dashboard.votes.create.success.title") || "Poll Created",
+      description: t("dashboard.votes.create.success.description") || "Your poll has been created successfully!",
+    });
+
+    // Reset form
+    setNewPoll({
+      title: "",
+      description: "",
+      type: "single",
+      options: [""],
+      endDate: "",
+    });
+    setIsCreateDialogOpen(false);
+  };
+
+  const handleEditPoll = (poll: Poll) => {
+    setEditingPoll(poll);
+    // Format datetime-local input (YYYY-MM-DDTHH:mm)
+    let formattedEndDate = "";
+    if (poll.endDate) {
+      const date = new Date(poll.endDate);
+      const year = date.getFullYear();
+      const month = String(date.getMonth() + 1).padStart(2, "0");
+      const day = String(date.getDate()).padStart(2, "0");
+      const hours = String(date.getHours()).padStart(2, "0");
+      const minutes = String(date.getMinutes()).padStart(2, "0");
+      formattedEndDate = `${year}-${month}-${day}T${hours}:${minutes}`;
+    }
+    setNewPoll({
+      title: poll.title,
+      description: poll.description || "",
+      type: poll.type,
+      options: poll.options.map((opt) => opt.text),
+      endDate: formattedEndDate,
+    });
+    setIsEditDialogOpen(poll.id);
+  };
+
+  const handleUpdatePoll = () => {
+    if (!editingPoll || !newPoll.title.trim()) {
+      toast({
+        title: t("dashboard.votes.create.error.title") || "Validation Error",
+        description: t("dashboard.votes.create.error.titleRequired") || "Please enter a poll title.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    const validOptions = newPoll.options.filter((opt) => opt.trim() !== "");
+    if (validOptions.length < 2) {
+      toast({
+        title: t("dashboard.votes.create.error.title") || "Validation Error",
+        description: t("dashboard.votes.create.error.optionsRequired") || "Please add at least 2 options.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    // Preserve existing votes for options that still exist
+    const updatedPolls = polls.map((poll) => {
+      if (poll.id === editingPoll.id) {
+        const updatedOptions: PollOption[] = validOptions.map((optText, index) => {
+          // Try to find existing option with same text to preserve votes
+          const existingOption = poll.options.find((opt) => opt.text === optText.trim());
+          if (existingOption) {
+            return existingOption;
+          }
+          // Create new option with empty votes
+          return {
+            id: `option_${Date.now()}_${index}`,
+            text: optText.trim(),
+            votes: [],
+          };
+        });
+
+        return {
+          ...poll,
+          title: newPoll.title.trim(),
+          description: newPoll.description.trim() || undefined,
+          type: newPoll.type,
+          options: updatedOptions,
+          endDate: newPoll.endDate || undefined,
+        };
+      }
+      return poll;
+    });
+
+    savePolls(updatedPolls);
+
+    // Log history
+    if (user) {
+      logHistory(
+        "vote",
+        "Updated poll",
+        `Updated poll "${newPoll.title.trim()}"`,
+        user.id,
+        user.name,
+        user.image,
+        { pollId: editingPoll.id }
+      );
+    }
+
+    toast({
+      title: t("dashboard.votes.update.success.title") || "Poll Updated",
+      description: t("dashboard.votes.update.success.description") || "Your poll has been updated successfully!",
+    });
+
+    // Reset form
+    setNewPoll({
+      title: "",
+      description: "",
+      type: "single",
+      options: [""],
+      endDate: "",
+    });
+    setIsEditDialogOpen(null);
+    setEditingPoll(null);
+  };
+
+  const handleDeletePoll = (pollId: string) => {
+    const pollToDelete = polls.find((p) => p.id === pollId);
+    if (!pollToDelete) return;
+
+    const updatedPolls = polls.filter((p) => p.id !== pollId);
+    savePolls(updatedPolls);
+    setDeletePollId(null);
+
+    // Log history
+    if (user && pollToDelete) {
+      logHistory(
+        "vote",
+        "Deleted poll",
+        `Deleted poll "${pollToDelete.title}"`,
+        user.id,
+        user.name,
+        user.image,
+        { pollId: pollToDelete.id }
+      );
+    }
+
+    toast({
+      title: t("dashboard.votes.delete.success.title") || "Poll Deleted",
+      description: t("dashboard.votes.delete.success.description") || "Poll has been deleted successfully!",
+    });
+  };
+
+  const isPollCreator = (poll: Poll): boolean => {
+    return user?.id === poll.createdBy;
+  };
+
+  const handleVote = (pollId: string, optionIds: string[]) => {
+    if (!user?.id) return;
+
+    const updatedPolls = polls.map((poll) => {
+      if (poll.id === pollId) {
+        // Remove user's previous votes from all options
+        const updatedOptions = poll.options.map((option) => ({
+          ...option,
+          votes: option.votes.filter((userId) => userId !== user.id),
+        }));
+
+        // Add user's new votes
+        optionIds.forEach((optionId) => {
+          const option = updatedOptions.find((opt) => opt.id === optionId);
+          if (option && !option.votes.includes(user.id)) {
+            option.votes.push(user.id);
+          }
+        });
+
+        return {
+          ...poll,
+          options: updatedOptions,
+        };
+      }
+      return poll;
+    });
+
+    savePolls(updatedPolls);
+    setSelectedVotes({ ...selectedVotes, [pollId]: optionIds });
+    setShowResults({ ...showResults, [pollId]: true });
+
+    toast({
+      title: t("dashboard.votes.vote.success.title") || "Vote Submitted",
+      description: t("dashboard.votes.vote.success.description") || "Your vote has been recorded!",
+    });
+  };
+
+  const getTotalVotes = (poll: Poll): number => {
+    return poll.options.reduce((total, option) => total + option.votes.length, 0);
+  };
+
+  const hasUserVoted = (poll: Poll): boolean => {
+    if (!user?.id) return false;
+    return poll.options.some((option) => option.votes.includes(user.id));
+  };
+
+  const getUserVotes = (poll: Poll): string[] => {
+    if (!user?.id) return [];
+    return poll.options
+      .filter((option) => option.votes.includes(user.id))
+      .map((option) => option.id);
+  };
+
+  const userInitials = user?.name
+    ?.split(" ")
+    .map((n) => n[0])
+    .join("")
+    .toUpperCase()
+    .slice(0, 2) || "U";
+
+  return (
+    <div className="space-y-4">
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-2">
+          <CheckSquare className="h-6 w-6" />
+          <h2 className="text-2xl font-bold">{t("dashboard.votes.title") || "Votes & Polls"}</h2>
+        </div>
+        <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
+          <DialogTrigger asChild>
+            <Button className="rounded-full">
+              <Plus className="mr-2 h-4 w-4" />
+              {t("dashboard.votes.create.button") || "Create Poll"}
+            </Button>
+          </DialogTrigger>
+          <DialogContent className="sm:max-w-[600px] max-h-[90vh] overflow-y-auto">
+            <DialogHeader>
+              <DialogTitle>{t("dashboard.votes.create.title") || "Create New Poll"}</DialogTitle>
+              <DialogDescription>
+                {t("dashboard.votes.create.description") || "Create a new poll for association members to vote on"}
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="space-y-2">
+                <Label htmlFor="poll-title">
+                  {t("dashboard.votes.create.form.title") || "Poll Title"} <span className="text-destructive">*</span>
+                </Label>
+                <Input
+                  id="poll-title"
+                  value={newPoll.title}
+                  onChange={(e) => setNewPoll({ ...newPoll, title: e.target.value })}
+                  placeholder={t("dashboard.votes.create.form.title.placeholder") || "Enter poll title"}
+                  className="rounded-full"
+                  required
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="poll-description">{t("dashboard.votes.create.form.description") || "Description"}</Label>
+                <Textarea
+                  id="poll-description"
+                  value={newPoll.description}
+                  onChange={(e) => setNewPoll({ ...newPoll, description: e.target.value })}
+                  placeholder={t("dashboard.votes.create.form.description.placeholder") || "Poll description (optional)"}
+                  className="min-h-[80px] rounded-lg"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label>{t("dashboard.votes.create.form.type") || "Poll Type"}</Label>
+                <RadioGroup
+                  value={newPoll.type}
+                  onValueChange={(value) => setNewPoll({ ...newPoll, type: value as "single" | "multiple" })}
+                  className="flex gap-4"
+                >
+                  <div className="flex items-center space-x-2">
+                    <RadioGroupItem value="single" id="type-single" />
+                    <Label htmlFor="type-single" className="cursor-pointer">
+                      {t("dashboard.votes.create.form.type.single") || "Single Choice"}
+                    </Label>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <RadioGroupItem value="multiple" id="type-multiple" />
+                    <Label htmlFor="type-multiple" className="cursor-pointer">
+                      {t("dashboard.votes.create.form.type.multiple") || "Multiple Choice"}
+                    </Label>
+                  </div>
+                </RadioGroup>
+              </div>
+              <div className="space-y-2">
+                <Label>{t("dashboard.votes.create.form.options") || "Options"} <span className="text-destructive">*</span></Label>
+                <div className="space-y-2">
+                  {newPoll.options.map((option, index) => (
+                    <div key={index} className="flex gap-2">
+                      <Input
+                        value={option}
+                        onChange={(e) => handleOptionChange(index, e.target.value)}
+                        placeholder={`${t("dashboard.votes.create.form.options.placeholder") || "Option"} ${index + 1}`}
+                        className="rounded-full"
+                      />
+                      {newPoll.options.length > 1 && (
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="icon"
+                          onClick={() => handleRemoveOption(index)}
+                          className="rounded-full"
+                        >
+                          <X className="h-4 w-4" />
+                        </Button>
+                      )}
+                    </div>
+                  ))}
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={handleAddOption}
+                    className="rounded-full"
+                  >
+                    <Plus className="mr-2 h-4 w-4" />
+                    {t("dashboard.votes.create.form.options.add") || "Add Option"}
+                  </Button>
+                </div>
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="poll-end-date">{t("dashboard.votes.create.form.endDate") || "End Date (Optional)"}</Label>
+                <Input
+                  id="poll-end-date"
+                  type="datetime-local"
+                  value={newPoll.endDate}
+                  onChange={(e) => setNewPoll({ ...newPoll, endDate: e.target.value })}
+                  className="rounded-full"
+                />
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setIsCreateDialogOpen(false)} className="rounded-full">
+                {t("dashboard.votes.create.cancel") || "Cancel"}
+              </Button>
+              <Button onClick={handleCreatePoll} className="rounded-full">
+                {t("dashboard.votes.create.submit") || "Create Poll"}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+      </div>
+
+      {/* Edit Poll Dialog */}
+      <Dialog open={isEditDialogOpen !== null} onOpenChange={(open) => {
+        if (!open) {
+          setIsEditDialogOpen(null);
+          setEditingPoll(null);
+          setNewPoll({
+            title: "",
+            description: "",
+            type: "single",
+            options: [""],
+            endDate: "",
+          });
+        }
+      }}>
+        <DialogContent className="sm:max-w-[600px] max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>{t("dashboard.votes.edit.title") || "Edit Poll"}</DialogTitle>
+            <DialogDescription>
+              {t("dashboard.votes.edit.description") || "Update your poll details"}
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label htmlFor="edit-poll-title">
+                {t("dashboard.votes.create.form.title") || "Poll Title"} <span className="text-destructive">*</span>
+              </Label>
+              <Input
+                id="edit-poll-title"
+                value={newPoll.title}
+                onChange={(e) => setNewPoll({ ...newPoll, title: e.target.value })}
+                placeholder={t("dashboard.votes.create.form.title.placeholder") || "Enter poll title"}
+                className="rounded-full"
+                required
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="edit-poll-description">{t("dashboard.votes.create.form.description") || "Description"}</Label>
+              <Textarea
+                id="edit-poll-description"
+                value={newPoll.description}
+                onChange={(e) => setNewPoll({ ...newPoll, description: e.target.value })}
+                placeholder={t("dashboard.votes.create.form.description.placeholder") || "Poll description (optional)"}
+                className="min-h-[80px] rounded-lg"
+              />
+            </div>
+            <div className="space-y-2">
+              <Label>{t("dashboard.votes.create.form.type") || "Poll Type"}</Label>
+              <RadioGroup
+                value={newPoll.type}
+                onValueChange={(value) => setNewPoll({ ...newPoll, type: value as "single" | "multiple" })}
+                className="flex gap-4"
+              >
+                <div className="flex items-center space-x-2">
+                  <RadioGroupItem value="single" id="edit-type-single" />
+                  <Label htmlFor="edit-type-single" className="cursor-pointer">
+                    {t("dashboard.votes.create.form.type.single") || "Single Choice"}
+                  </Label>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <RadioGroupItem value="multiple" id="edit-type-multiple" />
+                  <Label htmlFor="edit-type-multiple" className="cursor-pointer">
+                    {t("dashboard.votes.create.form.type.multiple") || "Multiple Choice"}
+                  </Label>
+                </div>
+              </RadioGroup>
+            </div>
+            <div className="space-y-2">
+              <Label>{t("dashboard.votes.create.form.options") || "Options"} <span className="text-destructive">*</span></Label>
+              <div className="space-y-2">
+                {newPoll.options.map((option, index) => (
+                  <div key={index} className="flex gap-2">
+                    <Input
+                      value={option}
+                      onChange={(e) => handleOptionChange(index, e.target.value)}
+                      placeholder={`${t("dashboard.votes.create.form.options.placeholder") || "Option"} ${index + 1}`}
+                      className="rounded-full"
+                    />
+                    {newPoll.options.length > 1 && (
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => handleRemoveOption(index)}
+                        className="rounded-full"
+                      >
+                        <X className="h-4 w-4" />
+                      </Button>
+                    )}
+                  </div>
+                ))}
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={handleAddOption}
+                  className="rounded-full"
+                >
+                  <Plus className="mr-2 h-4 w-4" />
+                  {t("dashboard.votes.create.form.options.add") || "Add Option"}
+                </Button>
+              </div>
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="edit-poll-end-date">{t("dashboard.votes.create.form.endDate") || "End Date (Optional)"}</Label>
+              <Input
+                id="edit-poll-end-date"
+                type="datetime-local"
+                value={newPoll.endDate}
+                onChange={(e) => setNewPoll({ ...newPoll, endDate: e.target.value })}
+                className="rounded-full"
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() => {
+                setIsEditDialogOpen(null);
+                setEditingPoll(null);
+                setNewPoll({
+                  title: "",
+                  description: "",
+                  type: "single",
+                  options: [""],
+                  endDate: "",
+                });
+              }}
+              className="rounded-full"
+            >
+              {t("dashboard.votes.create.cancel") || "Cancel"}
+            </Button>
+            <Button onClick={handleUpdatePoll} className="rounded-full">
+              {t("dashboard.votes.update.button") || "Update Poll"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Delete Confirmation Dialog */}
+      <AlertDialog open={deletePollId !== null} onOpenChange={(open) => !open && setDeletePollId(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>{t("dashboard.votes.delete.confirm.title") || "Delete Poll?"}</AlertDialogTitle>
+            <AlertDialogDescription>
+              {t("dashboard.votes.delete.confirm.description") || "Are you sure you want to delete this poll? This action cannot be undone."}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel className="rounded-full">
+              {t("dashboard.votes.delete.cancel") || "Cancel"}
+            </AlertDialogCancel>
+            <AlertDialogAction
+              onClick={() => deletePollId && handleDeletePoll(deletePollId)}
+              className="rounded-full bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              {t("dashboard.votes.delete.confirm.button") || "Delete"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {polls.length === 0 ? (
+        <Card>
+          <CardHeader>
+            <CardTitle>{t("dashboard.votes.active") || "Active Polls"}</CardTitle>
+            <CardDescription>
+              {t("dashboard.votes.description") || "Participate in association votes and polls"}
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <p className="text-muted-foreground">
+              {t("dashboard.votes.empty") || "No active polls at the moment."}
+            </p>
+          </CardContent>
+        </Card>
+      ) : (
+        <div className="space-y-4">
+          {polls.map((poll) => {
+            const totalVotes = getTotalVotes(poll);
+            const userVoted = hasUserVoted(poll);
+            const userSelectedVotes = selectedVotes[poll.id] || (userVoted ? getUserVotes(poll) : []);
+            const showPollResults = showResults[poll.id] || userVoted;
+
+            return (
+              <Card key={poll.id}>
+                <CardHeader>
+                  <div className="flex items-start justify-between">
+                    <div className="flex-1">
+                      <CardTitle className="text-xl">{poll.title}</CardTitle>
+                      {poll.description && (
+                        <CardDescription className="mt-2">{poll.description}</CardDescription>
+                      )}
+                      <div className="flex items-center gap-4 mt-2 text-sm text-muted-foreground">
+                        <div className="flex items-center gap-1">
+                          <Users className="h-4 w-4" />
+                          <span>{totalVotes} {t("dashboard.votes.votes") || "votes"}</span>
+                        </div>
+                        <div className="flex items-center gap-1">
+                          <Vote className="h-4 w-4" />
+                          <span>
+                            {poll.type === "single"
+                              ? t("dashboard.votes.type.single") || "Single Choice"
+                              : t("dashboard.votes.type.multiple") || "Multiple Choice"}
+                          </span>
+                        </div>
+                        {poll.endDate && (
+                          <div className="flex items-center gap-1">
+                            <CheckSquare className="h-4 w-4" />
+                            <span>
+                              {t("dashboard.votes.ends") || "Ends"}: {format(new Date(poll.endDate), "PPp")}
+                            </span>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <Avatar className="h-8 w-8">
+                        <AvatarImage src={poll.createdByImage} alt={poll.createdByName} />
+                        <AvatarFallback className="text-xs">
+                          {poll.createdByName
+                            .split(" ")
+                            .map((n) => n[0])
+                            .join("")
+                            .toUpperCase()
+                            .slice(0, 2)}
+                        </AvatarFallback>
+                      </Avatar>
+                      <span className="text-sm text-muted-foreground">{poll.createdByName}</span>
+                      {isPollCreator(poll) && (
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <Button variant="ghost" size="icon" className="h-8 w-8 rounded-full">
+                              <MoreVertical className="h-4 w-4" />
+                            </Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent align="end">
+                            <DropdownMenuItem onClick={() => handleEditPoll(poll)}>
+                              <Edit className="mr-2 h-4 w-4" />
+                              {t("dashboard.votes.edit.button") || "Edit Poll"}
+                            </DropdownMenuItem>
+                            <DropdownMenuItem
+                              onClick={() => setDeletePollId(poll.id)}
+                              className="text-destructive"
+                            >
+                              <Trash2 className="mr-2 h-4 w-4" />
+                              {t("dashboard.votes.delete.button") || "Delete Poll"}
+                            </DropdownMenuItem>
+                          </DropdownMenuContent>
+                        </DropdownMenu>
+                      )}
+                    </div>
+                  </div>
+                </CardHeader>
+                <CardContent>
+                  {!showPollResults ? (
+                    <div className="space-y-4">
+                      {poll.type === "single" ? (
+                        <RadioGroup
+                          value={userSelectedVotes[0] || ""}
+                          onValueChange={(value) => setSelectedVotes({ ...selectedVotes, [poll.id]: [value] })}
+                        >
+                          {poll.options.map((option) => (
+                            <div key={option.id} className="flex items-center space-x-2">
+                              <RadioGroupItem value={option.id} id={option.id} />
+                              <Label htmlFor={option.id} className="cursor-pointer flex-1">
+                                {option.text}
+                              </Label>
+                            </div>
+                          ))}
+                        </RadioGroup>
+                      ) : (
+                        <div className="space-y-3">
+                          {poll.options.map((option) => (
+                            <div key={option.id} className="flex items-center space-x-2">
+                              <Checkbox
+                                id={option.id}
+                                checked={userSelectedVotes.includes(option.id)}
+                                onCheckedChange={(checked) => {
+                                  const updated = checked
+                                    ? [...userSelectedVotes, option.id]
+                                    : userSelectedVotes.filter((id) => id !== option.id);
+                                  setSelectedVotes({ ...selectedVotes, [poll.id]: updated });
+                                }}
+                              />
+                              <Label htmlFor={option.id} className="cursor-pointer flex-1">
+                                {option.text}
+                              </Label>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                      <Button
+                        onClick={() => {
+                          if (userSelectedVotes.length === 0) {
+                            toast({
+                              title: t("dashboard.votes.vote.error.title") || "No Selection",
+                              description: t("dashboard.votes.vote.error.description") || "Please select at least one option.",
+                              variant: "destructive",
+                            });
+                            return;
+                          }
+                          handleVote(poll.id, userSelectedVotes);
+                        }}
+                        className="rounded-full"
+                      >
+                        <Vote className="mr-2 h-4 w-4" />
+                        {t("dashboard.votes.vote.button") || "Submit Vote"}
+                      </Button>
+                    </div>
+                  ) : (
+                    <div className="space-y-4">
+                      <div className="space-y-3">
+                        {poll.options.map((option) => {
+                          const voteCount = option.votes.length;
+                          const percentage = totalVotes > 0 ? (voteCount / totalVotes) * 100 : 0;
+                          const isUserVote = option.votes.includes(user?.id || "");
+
+                          return (
+                            <div key={option.id} className="space-y-2">
+                              <div className="flex items-center justify-between">
+                                <div className="flex items-center gap-2">
+                                  <span className="text-sm font-medium">{option.text}</span>
+                                  {isUserVote && (
+                                    <span className="text-xs text-primary font-medium">
+                                      ({t("dashboard.votes.yourVote") || "Your vote"})
+                                    </span>
+                                  )}
+                                </div>
+                                <span className="text-sm text-muted-foreground">
+                                  {voteCount} ({percentage.toFixed(1)}%)
+                                </span>
+                              </div>
+                              <Progress value={percentage} className="h-2" />
+                            </div>
+                          );
+                        })}
+                      </div>
+                      <div className="flex items-center justify-between pt-2 border-t">
+                        <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                          <BarChart3 className="h-4 w-4" />
+                          <span>
+                            {totalVotes} {totalVotes === 1 ? t("dashboard.votes.vote") || "vote" : t("dashboard.votes.votes") || "votes"}
+                          </span>
+                        </div>
+                        {!userVoted && (
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => setShowResults({ ...showResults, [poll.id]: false })}
+                            className="rounded-full"
+                          >
+                            {t("dashboard.votes.changeVote") || "Change Vote"}
+                          </Button>
+                        )}
+                      </div>
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+            );
+          })}
+        </div>
+      )}
+    </div>
+  );
+};
+
+export default VotesContent;

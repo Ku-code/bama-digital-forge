@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useNavigate, Link } from "react-router-dom";
+import { useNavigate, Link, useSearchParams } from "react-router-dom";
 import { GoogleLogin } from "@react-oauth/google";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -9,13 +9,17 @@ import { Separator } from "@/components/ui/separator";
 import Navbar from "@/components/Navbar";
 import { FooterSection } from "@/components/ui/footer-section";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/hooks/use-toast";
+import { decodeJWT } from "@/lib/jwt";
 import { LogIn, Mail, Lock, X, ArrowLeft } from "lucide-react";
 
 const Login = () => {
   const { t, language, setLanguage } = useLanguage();
   const { toast } = useToast();
+  const { login } = useAuth();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
@@ -27,21 +31,46 @@ const Login = () => {
     // Simulate login - replace with actual API call
     setTimeout(() => {
       setIsLoading(false);
+      // Create user object from form data
+      const userData = {
+        id: `email_${Date.now()}`,
+        name: email.split('@')[0], // Use email prefix as name for demo
+        email: email,
+        provider: 'email' as const,
+      };
+      login(userData);
       toast({
         title: t("auth.login.success.title") || "Login Successful",
         description: t("auth.login.success.description") || "Welcome back!",
       });
-      navigate("/");
+      const returnTo = searchParams.get('returnTo') || '/dashboard';
+      navigate(returnTo);
     }, 1000);
   };
 
   const handleGoogleSuccess = (credentialResponse: any) => {
     console.log("Google Login Success:", credentialResponse);
-    toast({
-      title: t("auth.login.success.title") || "Login Successful",
-      description: t("auth.google.success") || "Successfully logged in with Google!",
-    });
-    navigate("/");
+    
+    // Decode JWT token to get user info
+    if (credentialResponse.credential) {
+      const decoded = decodeJWT(credentialResponse.credential);
+      if (decoded) {
+        const userData = {
+          id: decoded.sub || `google_${Date.now()}`,
+          name: decoded.name || decoded.given_name || 'User',
+          email: decoded.email || '',
+          image: decoded.picture,
+          provider: 'google' as const,
+        };
+        login(userData);
+        toast({
+          title: t("auth.login.success.title") || "Login Successful",
+          description: t("auth.google.success") || "Successfully logged in with Google!",
+        });
+        const returnTo = searchParams.get('returnTo') || '/dashboard';
+        navigate(returnTo);
+      }
+    }
   };
 
   const handleGoogleError = () => {

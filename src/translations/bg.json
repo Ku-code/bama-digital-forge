@@ -161,6 +161,8 @@
   "dashboard.menu.budget": "Бюджет",
   "dashboard.menu.network": "Мрежа",
   "dashboard.menu.settings": "Настройки",
+  "dashboard.backToHome": "Обратно към началото",
+  "dashboard.home": "Начало",
   
   "dashboard.history.title": "История на дейностите",
   "dashboard.history.recent": "Последни дейности",

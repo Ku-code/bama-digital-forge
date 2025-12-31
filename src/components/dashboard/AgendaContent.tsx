@@ -18,33 +18,10 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/hooks/use-toast";
+import { logHistory } from "@/lib/history";
+import { loadAgendaItems, createAgendaItem, updateAgendaItem, deleteAgendaItem, addComment, AgendaItem, Comment } from "@/lib/agenda";
 import { Calendar, Plus, MessageSquare, Clock, User, Send } from "lucide-react";
 import { format } from "date-fns";
-
-interface Comment {
-  id: string;
-  userId: string;
-  userName: string;
-  userImage?: string;
-  text: string;
-  createdAt: string;
-}
-
-interface AgendaItem {
-  id: string;
-  title: string;
-  description: string;
-  date: string;
-  time: string;
-  location?: string;
-  createdBy: string;
-  createdByName: string;
-  createdByImage?: string;
-  createdAt: string;
-  comments: Comment[];
-}
-
-const STORAGE_KEY = "bamas_agenda_items";
 
 const AgendaContent = () => {
   const { t } = useLanguage();
@@ -62,25 +39,42 @@ const AgendaContent = () => {
     location: "",
   });
 
-  // Load agenda items from localStorage
+  // Load agenda items from Supabase
   useEffect(() => {
-    const stored = localStorage.getItem(STORAGE_KEY);
-    if (stored) {
-      try {
-        setAgendaItems(JSON.parse(stored));
-      } catch (error) {
-        console.error("Error loading agenda items:", error);
-      }
-    }
+    loadAgendaItemsFromDatabase();
   }, []);
 
-  // Save agenda items to localStorage
-  const saveAgendaItems = (items: AgendaItem[]) => {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(items));
-    setAgendaItems(items);
+  const loadAgendaItemsFromDatabase = async () => {
+    try {
+      const items = await loadAgendaItems();
+      // Convert to component format
+      const convertedItems: AgendaItem[] = items.map((item) => ({
+        ...item,
+        createdBy: item.created_by,
+        createdByName: item.created_by_name,
+        createdByImage: item.created_by_image,
+        createdAt: item.created_at,
+        comments: item.comments.map((c) => ({
+          id: c.id,
+          userId: c.user_id,
+          userName: c.user_name,
+          userImage: c.user_image,
+          text: c.text,
+          createdAt: c.created_at,
+        })),
+      }));
+      setAgendaItems(convertedItems);
+    } catch (error) {
+      console.error("Error loading agenda items:", error);
+      toast({
+        title: t("dashboard.agenda.error.title") || "Error",
+        description: t("dashboard.agenda.error.loadFailed") || "Failed to load agenda items. Please try again.",
+        variant: "destructive",
+      });
+    }
   };
 
-  const handleCreateAgenda = () => {
+  const handleCreateAgenda = async () => {
     if (!newAgenda.title || !newAgenda.date || !newAgenda.time) {
       toast({
         title: t("dashboard.agenda.create.error.title") || "Validation Error",
@@ -90,40 +84,60 @@ const AgendaContent = () => {
       return;
     }
 
-    const newItem: AgendaItem = {
-      id: `agenda_${Date.now()}`,
-      title: newAgenda.title,
-      description: newAgenda.description,
-      date: newAgenda.date,
-      time: newAgenda.time,
-      location: newAgenda.location,
-      createdBy: user?.id || "",
-      createdByName: user?.name || "Unknown User",
-      createdByImage: user?.image,
-      createdAt: new Date().toISOString(),
-      comments: [],
-    };
+    if (!user?.id) {
+      toast({
+        title: t("dashboard.agenda.create.error.title") || "Error",
+        description: t("dashboard.agenda.create.error.notLoggedIn") || "You must be logged in to create an agenda item.",
+        variant: "destructive",
+      });
+      return;
+    }
 
-    const updatedItems = [newItem, ...agendaItems];
-    saveAgendaItems(updatedItems);
+    try {
+      const newItem = await createAgendaItem({
+        title: newAgenda.title,
+        description: newAgenda.description,
+        date: newAgenda.date,
+        time: newAgenda.time,
+        location: newAgenda.location || undefined,
+        created_by: user.id,
+        created_by_name: user.name,
+        created_by_image: user.image,
+      });
 
-    toast({
-      title: t("dashboard.agenda.create.success.title") || "Agenda Created",
-      description: t("dashboard.agenda.create.success.description") || "Your agenda item has been created successfully!",
-    });
+      // Log history
+      if (user) {
+        await logHistory("agenda_created", user, newItem.id, newItem.title);
+      }
 
-    // Reset form
-    setNewAgenda({
-      title: "",
-      description: "",
-      date: "",
-      time: "",
-      location: "",
-    });
-    setIsCreateDialogOpen(false);
+      toast({
+        title: t("dashboard.agenda.create.success.title") || "Agenda Created",
+        description: t("dashboard.agenda.create.success.description") || "Your agenda item has been created successfully!",
+      });
+
+      // Reset form
+      setNewAgenda({
+        title: "",
+        description: "",
+        date: "",
+        time: "",
+        location: "",
+      });
+      setIsCreateDialogOpen(false);
+
+      // Reload agenda items
+      await loadAgendaItemsFromDatabase();
+    } catch (error: any) {
+      console.error("Error creating agenda item:", error);
+      toast({
+        title: t("dashboard.agenda.create.error.title") || "Error",
+        description: error.message || t("dashboard.agenda.create.error.description") || "Failed to create agenda item. Please try again.",
+        variant: "destructive",
+      });
+    }
   };
 
-  const handleAddComment = (agendaId: string) => {
+  const handleAddComment = async (agendaId: string) => {
     if (!commentText.trim()) {
       toast({
         title: t("dashboard.agenda.comment.error.title") || "Empty Comment",
@@ -133,32 +147,46 @@ const AgendaContent = () => {
       return;
     }
 
-    const newComment: Comment = {
-      id: `comment_${Date.now()}`,
-      userId: user?.id || "",
-      userName: user?.name || "Unknown User",
-      userImage: user?.image,
-      text: commentText.trim(),
-      createdAt: new Date().toISOString(),
-    };
+    if (!user?.id) {
+      toast({
+        title: t("dashboard.agenda.comment.error.title") || "Error",
+        description: t("dashboard.agenda.comment.error.notLoggedIn") || "You must be logged in to add a comment.",
+        variant: "destructive",
+      });
+      return;
+    }
 
-    const updatedItems = agendaItems.map((item) => {
-      if (item.id === agendaId) {
-        return {
-          ...item,
-          comments: [...item.comments, newComment],
-        };
+    try {
+      await addComment(agendaId, {
+        user_id: user.id,
+        user_name: user.name,
+        user_image: user.image,
+        text: commentText.trim(),
+      });
+
+      // Log history
+      const agendaItem = agendaItems.find((item) => item.id === agendaId);
+      if (agendaItem && user) {
+        await logHistory("agenda_commented", user, agendaId, agendaItem.title);
       }
-      return item;
-    });
 
-    saveAgendaItems(updatedItems);
-    setCommentText("");
-    setIsCommentDialogOpen(null);
-    toast({
-      title: t("dashboard.agenda.comment.success.title") || "Comment Added",
-      description: t("dashboard.agenda.comment.success.description") || "Your comment has been added!",
-    });
+      setCommentText("");
+      setIsCommentDialogOpen(null);
+      toast({
+        title: t("dashboard.agenda.comment.success.title") || "Comment Added",
+        description: t("dashboard.agenda.comment.success.description") || "Your comment has been added!",
+      });
+
+      // Reload agenda items
+      await loadAgendaItemsFromDatabase();
+    } catch (error: any) {
+      console.error("Error adding comment:", error);
+      toast({
+        title: t("dashboard.agenda.comment.error.title") || "Error",
+        description: error.message || t("dashboard.agenda.comment.error.description") || "Failed to add comment. Please try again.",
+        variant: "destructive",
+      });
+    }
   };
 
   const userInitials = user?.name

@@ -11,72 +11,73 @@ import { FooterSection } from "@/components/ui/footer-section";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/hooks/use-toast";
-import { decodeJWT } from "@/lib/jwt";
-import { LogIn, Mail, Lock, X, ArrowLeft } from "lucide-react";
+import { LogIn, Mail, Lock, X, ArrowLeft, Eye, EyeOff } from "lucide-react";
 
 const Login = () => {
   const { t, language, setLanguage } = useLanguage();
   const { toast } = useToast();
-  const { login } = useAuth();
+  const { signInWithEmail, signInWithGoogle } = useAuth();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
     
-    // Simulate login - replace with actual API call
-    setTimeout(() => {
-      setIsLoading(false);
-      // Create user object from form data
-      const userData = {
-        id: `email_${Date.now()}`,
-        name: email.split('@')[0], // Use email prefix as name for demo
-        email: email,
-        provider: 'email' as const,
-      };
-      login(userData);
+    try {
+      await signInWithEmail(email, password);
       toast({
         title: t("auth.login.success.title") || "Login Successful",
         description: t("auth.login.success.description") || "Welcome back!",
       });
       const returnTo = searchParams.get('returnTo') || '/dashboard';
       navigate(returnTo);
-    }, 1000);
+    } catch (error: any) {
+      const errorMessage = error.message || t("auth.login.error.description") || "Invalid email or password. Please check your credentials and try again.";
+      toast({
+        title: t("auth.login.error.title") || "Login Failed",
+        description: errorMessage,
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
   };
 
-  const handleGoogleSuccess = (credentialResponse: any) => {
+  const handleGoogleSuccess = async (credentialResponse: any) => {
     console.log("Google Login Success:", credentialResponse);
     
-    // Decode JWT token to get user info
     if (credentialResponse.credential) {
-      const decoded = decodeJWT(credentialResponse.credential);
-      if (decoded) {
-        const userData = {
-          id: decoded.sub || `google_${Date.now()}`,
-          name: decoded.name || decoded.given_name || 'User',
-          email: decoded.email || '',
-          image: decoded.picture,
-          provider: 'google' as const,
-        };
-        login(userData);
-        toast({
-          title: t("auth.login.success.title") || "Login Successful",
-          description: t("auth.google.success") || "Successfully logged in with Google!",
-        });
+      try {
+        setIsLoading(true);
+        await signInWithGoogle(credentialResponse.credential);
+    toast({
+      title: t("auth.login.success.title") || "Login Successful",
+      description: t("auth.google.success") || "Successfully logged in with Google!",
+    });
         const returnTo = searchParams.get('returnTo') || '/dashboard';
         navigate(returnTo);
+      } catch (error: any) {
+        const errorMessage = error.message || t("auth.google.error.description") || "Failed to login with Google. Please try again.";
+        toast({
+          title: t("auth.google.error.title") || "Login Failed",
+          description: errorMessage,
+          variant: "destructive",
+        });
+      } finally {
+        setIsLoading(false);
       }
     }
   };
 
   const handleGoogleError = () => {
     toast({
-      title: t("auth.google.error.title") || "Login Failed",
-      description: t("auth.google.error.description") || "Failed to login with Google. Please try again.",
+      title: t("auth.google.error.title") || "Google Login Failed",
+      description: t("auth.google.error.description") || "Failed to login with Google. Please try again or use email/password login.",
       variant: "destructive",
     });
   };
@@ -142,6 +143,7 @@ const Login = () => {
                       onChange={(e) => setEmail(e.target.value)}
                       className="pl-10 rounded-full"
                       required
+                      autoComplete="email"
                     />
                   </div>
                 </div>
@@ -151,13 +153,28 @@ const Login = () => {
                     <Lock className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
                     <Input
                       id="password"
-                      type="password"
+                      type={showPassword ? "text" : "password"}
                       placeholder={t("auth.password.placeholder") || "Enter your password"}
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
-                      className="pl-10 rounded-full"
+                      className="pl-10 pr-10 rounded-full"
                       required
+                      autoComplete="current-password"
                     />
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="icon"
+                      className="absolute right-1 top-1 h-8 w-8 rounded-full hover:bg-transparent"
+                      onClick={() => setShowPassword(!showPassword)}
+                      aria-label={showPassword ? "Hide password" : "Show password"}
+                    >
+                      {showPassword ? (
+                        <EyeOff className="h-4 w-4 text-muted-foreground" />
+                      ) : (
+                        <Eye className="h-4 w-4 text-muted-foreground" />
+                      )}
+                    </Button>
                   </div>
                 </div>
                 <Button 

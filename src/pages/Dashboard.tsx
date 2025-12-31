@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import {
   Sidebar,
   SidebarContent,
@@ -15,6 +15,7 @@ import {
   SidebarTrigger,
 } from "@/components/ui/sidebar";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Button } from "@/components/ui/button";
 import { useAuth } from "@/contexts/AuthContext";
 import { useLanguage } from "@/contexts/LanguageContext";
 import {
@@ -25,6 +26,8 @@ import {
   DollarSign,
   Users,
   Settings,
+  Home,
+  ArrowLeft,
 } from "lucide-react";
 import HistoryContent from "@/components/dashboard/HistoryContent";
 import VotesContent from "@/components/dashboard/VotesContent";
@@ -85,7 +88,7 @@ const Dashboard = () => {
       <div className="flex min-h-screen w-full">
         <Sidebar collapsible="icon">
           <SidebarHeader className="border-b border-sidebar-border">
-            <div className="flex items-center gap-2 px-2 py-2">
+            <div className="flex items-center justify-between gap-2 px-2 py-2">
               <div className="h-8 w-8 flex-shrink-0">
                 <img
                   src={logoPath}
@@ -144,6 +147,29 @@ const Dashboard = () => {
           </SidebarFooter>
         </Sidebar>
         <SidebarInset>
+          <header className="sticky top-0 z-10 flex h-16 shrink-0 items-center gap-2 border-b bg-background px-4">
+            <div className="flex items-center gap-2 flex-1">
+              <SidebarTrigger className="-ml-1" />
+              <div className="flex items-center gap-2 ml-auto">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  asChild
+                  className="gap-2"
+                >
+                  <Link to="/">
+                    <Home className="h-4 w-4" />
+                    <span className="hidden sm:inline">
+                      {t("dashboard.backToHome") || "Back to Home"}
+                    </span>
+                    <span className="sm:hidden">
+                      {t("dashboard.home") || "Home"}
+                    </span>
+                  </Link>
+                </Button>
+              </div>
+            </div>
+          </header>
           <div className="flex-1 p-6">
             <div className="max-w-7xl mx-auto">
               {renderContent()}

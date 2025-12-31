@@ -1,84 +1,127 @@
-interface HistoryItem {
+import { db } from './database';
+import { User } from '@/contexts/AuthContext';
+
+export type HistoryType =
+  | "document_created"
+  | "document_updated"
+  | "document_deleted"
+  | "document_imported_drive"
+  | "document_imported_computer"
+  | "vote_created"
+  | "vote_updated"
+  | "vote_deleted"
+  | "vote_submitted"
+  | "agenda_created"
+  | "agenda_updated"
+  | "agenda_deleted"
+  | "agenda_commented"
+  | "member_added"
+  | "member_approved"
+  | "member_rejected"
+  | "member_role_changed"
+  | "member_removed"
+  | "profile_updated"
+  | "other";
+
+export interface HistoryItem {
   id: string;
-  type: "document" | "vote" | "agenda" | "budget" | "network" | "settings" | "other";
-  action: string;
-  description: string;
-  userId: string;
-  userName: string;
-  userImage?: string;
-  timestamp: string;
-  metadata?: {
-    [key: string]: any;
-  };
+  type: HistoryType;
+  action?: string;
+  description?: string;
+  user_id: string | null;
+  user_name: string;
+  user_image?: string | null;
+  target_id?: string | null;
+  target_title?: string | null;
+  metadata?: Record<string, any>;
+  created_at: string;
 }
 
-const STORAGE_KEY = "bamas_history";
-const MAX_HISTORY_ITEMS = 1000; // Keep last 1000 items
-
-export const logHistory = (
-  type: HistoryItem["type"],
-  action: string,
-  description: string,
-  userId: string,
-  userName: string,
-  userImage?: string,
-  metadata?: { [key: string]: any }
-) => {
+/**
+ * Log a history item to Supabase
+ */
+export const logHistory = async (
+  type: HistoryType,
+  user: User | null,
+  targetId?: string,
+  targetTitle?: string,
+  metadata?: Record<string, any>
+): Promise<void> => {
   try {
-    const historyItem: HistoryItem = {
-      id: `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+    if (!user) {
+      console.warn('Cannot log history: no user provided');
+      return;
+    }
+
+    // Map history type to action and description
+    const actionMap: Record<HistoryType, { action: string; description: string }> = {
+      document_created: { action: 'Created document', description: `Created document "${targetTitle || targetId}"` },
+      document_updated: { action: 'Updated document', description: `Updated document "${targetTitle || targetId}"` },
+      document_deleted: { action: 'Deleted document', description: `Deleted document "${targetTitle || targetId}"` },
+      document_imported_drive: { action: 'Imported from Google Drive', description: `Imported document "${targetTitle || targetId}" from Google Drive` },
+      document_imported_computer: { action: 'Imported from computer', description: `Imported document "${targetTitle || targetId}" from computer` },
+      vote_created: { action: 'Created poll', description: `Created poll "${targetTitle || targetId}"` },
+      vote_updated: { action: 'Updated poll', description: `Updated poll "${targetTitle || targetId}"` },
+      vote_deleted: { action: 'Deleted poll', description: `Deleted poll "${targetTitle || targetId}"` },
+      vote_submitted: { action: 'Voted on poll', description: `Voted on poll "${targetTitle || targetId}"` },
+      agenda_created: { action: 'Created agenda', description: `Created agenda "${targetTitle || targetId}"` },
+      agenda_updated: { action: 'Updated agenda', description: `Updated agenda "${targetTitle || targetId}"` },
+      agenda_deleted: { action: 'Deleted agenda', description: `Deleted agenda "${targetTitle || targetId}"` },
+      agenda_commented: { action: 'Commented on agenda', description: `Commented on agenda "${targetTitle || targetId}"` },
+      member_added: { action: 'Added member', description: `Added member "${targetTitle || targetId}"` },
+      member_approved: { action: 'Approved member', description: `Approved member "${targetTitle || targetId}"` },
+      member_rejected: { action: 'Rejected member', description: `Rejected member "${targetTitle || targetId}"` },
+      member_role_changed: { action: 'Changed member role', description: `Changed role of "${targetTitle || targetId}"` },
+      member_removed: { action: 'Removed member', description: `Removed member "${targetTitle || targetId}"` },
+      profile_updated: { action: 'Updated profile', description: 'Updated their profile' },
+      other: { action: 'Other action', description: targetTitle || 'Performed an action' },
+    };
+
+    const { action, description } = actionMap[type] || actionMap.other;
+
+    await db.insert('activity_history', {
       type,
       action,
       description,
-      userId,
-      userName,
-      userImage,
-      timestamp: new Date().toISOString(),
-      metadata,
-    };
-
-    const stored = localStorage.getItem(STORAGE_KEY);
-    let history: HistoryItem[] = [];
-
-    if (stored) {
-      try {
-        history = JSON.parse(stored);
-      } catch (error) {
-        console.error("Error parsing history:", error);
-      }
-    }
-
-    // Add new item at the beginning
-    history.unshift(historyItem);
-
-    // Keep only the last MAX_HISTORY_ITEMS
-    if (history.length > MAX_HISTORY_ITEMS) {
-      history = history.slice(0, MAX_HISTORY_ITEMS);
-    }
-
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(history));
+      user_id: user.id,
+      user_name: user.name,
+      user_image: user.image || null,
+      target_id: targetId || null,
+      target_title: targetTitle || null,
+      metadata: metadata || null,
+    });
   } catch (error) {
-    console.error("Error logging history:", error);
+    console.error('Error logging history:', error);
+    // Don't throw - history logging should not break the main flow
   }
 };
 
-export const getHistory = (): HistoryItem[] => {
+/**
+ * Get history items from Supabase
+ */
+export const getHistory = async (limit: number = 1000): Promise<HistoryItem[]> => {
   try {
-    const stored = localStorage.getItem(STORAGE_KEY);
-    if (stored) {
-      return JSON.parse(stored);
-    }
+    const history = await db.fetchWithFilters(
+      'activity_history',
+      {},
+      { column: 'created_at', ascending: false }
+    );
+    return (history || []).slice(0, limit) as HistoryItem[];
   } catch (error) {
-    console.error("Error getting history:", error);
+    console.error('Error getting history:', error);
+    return [];
   }
-  return [];
 };
 
-export const clearHistory = () => {
+/**
+ * Clear all history (admin only - would need additional permission check)
+ */
+export const clearHistory = async (): Promise<void> => {
   try {
-    localStorage.removeItem(STORAGE_KEY);
+    // This would need to be implemented with proper admin check
+    // For now, we'll just log a warning
+    console.warn('clearHistory not implemented - requires admin permissions');
   } catch (error) {
-    console.error("Error clearing history:", error);
+    console.error('Error clearing history:', error);
   }
 };
-

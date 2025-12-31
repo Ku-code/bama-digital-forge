@@ -45,10 +45,9 @@ import { useLanguage } from "@/contexts/LanguageContext";
 import { useAuth, User, UserRole } from "@/contexts/AuthContext";
 import { useToast } from "@/hooks/use-toast";
 import { logHistory } from "@/lib/history";
+import { db } from "@/lib/database";
 import { Users, Plus, Check, X, Mail, Phone, MapPin, Globe, UserCheck, UserX, Clock } from "lucide-react";
 import { format } from "date-fns";
-
-const STORAGE_KEY = "bamas_members";
 
 const NetworkContent = () => {
   const { t } = useLanguage();
@@ -64,32 +63,44 @@ const NetworkContent = () => {
     role: "member" as UserRole,
   });
 
-  // Load members from localStorage
+  // Load members from Supabase
   useEffect(() => {
-    const stored = localStorage.getItem(STORAGE_KEY);
-    if (stored) {
-      try {
-        const loadedMembers = JSON.parse(stored);
-        setMembers(loadedMembers);
-      } catch (error) {
-        console.error("Error loading members:", error);
-      }
-    }
+    loadMembers();
   }, []);
 
-  // Save members to localStorage
-  const saveMembers = (updatedMembers: User[]) => {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(updatedMembers));
-    setMembers(updatedMembers);
-    
-    // Update current user if they're in the list
-    const currentUser = updatedMembers.find(m => m.id === user?.id);
-    if (currentUser && user) {
-      localStorage.setItem('user', JSON.stringify(currentUser));
+  const loadMembers = async () => {
+    try {
+      const dbUsers = await db.fetchAll('users');
+      // Convert database users to our User type
+      const convertedUsers: User[] = dbUsers.map((dbUser: any) => ({
+        id: dbUser.id,
+        name: dbUser.name,
+        email: dbUser.email,
+        image: dbUser.image || undefined,
+        provider: dbUser.provider || undefined,
+        bio: dbUser.bio || undefined,
+        hashtags: dbUser.hashtags || undefined,
+        location: dbUser.location || undefined,
+        website: dbUser.website || undefined,
+        phone: dbUser.phone || undefined,
+        role: dbUser.role || 'member',
+        status: dbUser.status || 'pending',
+        createdAt: dbUser.created_at,
+        approvedAt: dbUser.approved_at || undefined,
+        approvedBy: dbUser.approved_by || undefined,
+      }));
+      setMembers(convertedUsers);
+    } catch (error) {
+      console.error("Error loading members:", error);
+      toast({
+        title: t("dashboard.network.error.title") || "Error",
+        description: t("dashboard.network.error.loadFailed") || "Failed to load members. Please try again.",
+        variant: "destructive",
+      });
     }
   };
 
-  const handleAddMember = () => {
+  const handleAddMember = async () => {
     if (!newMember.name.trim() || !newMember.email.trim()) {
       toast({
         title: t("dashboard.network.add.error.title") || "Validation Error",
@@ -110,108 +121,138 @@ const NetworkContent = () => {
       return;
     }
 
-    const memberData: User = {
-      id: `member_${Date.now()}`,
-      name: newMember.name.trim(),
-      email: newMember.email.trim(),
-      phone: newMember.phone.trim() || undefined,
-      role: newMember.role,
-      status: 'approved',
-      createdAt: new Date().toISOString(),
-      approvedAt: new Date().toISOString(),
-      approvedBy: user?.id,
-    };
+    try {
+      // Generate a temporary ID for the new user
+      // Note: In a real app, you might want to create a Supabase Auth user first
+      const tempId = `member_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;
+      
+      const newUser = await db.insert('users', {
+        id: tempId,
+        name: newMember.name.trim(),
+        email: newMember.email.trim(),
+        phone: newMember.phone.trim() || null,
+        role: newMember.role,
+        status: 'approved',
+        provider: null,
+        bio: null,
+        hashtags: null,
+        location: null,
+        website: null,
+        image: null,
+        approved_at: new Date().toISOString(),
+        approved_by: user?.id || null,
+      });
 
-    const updatedMembers = [...members, memberData];
-    saveMembers(updatedMembers);
-
-    // Log history
-    if (user) {
-      logHistory(
-        "network",
-        "Added member",
-        `Added member "${memberData.name}"`,
-        user.id,
-        user.name,
-        user.image,
-        { memberId: memberData.id, memberEmail: memberData.email }
-      );
-    }
-
-    toast({
-      title: t("dashboard.network.add.success.title") || "Member Added",
-      description: t("dashboard.network.add.success.description") || "Member has been added successfully!",
-    });
-
-    // Reset form
-    setNewMember({
-      name: "",
-      email: "",
-      phone: "",
-      role: "member",
-    });
-    setIsAddDialogOpen(false);
-  };
-
-  const handleApproveMember = (memberId: string) => {
-    const updatedMembers = members.map((member) => {
-      if (member.id === memberId) {
-        return {
-          ...member,
-          status: 'approved' as const,
-          approvedAt: new Date().toISOString(),
-          approvedBy: user?.id,
-        };
+      // Log history
+      if (user) {
+        await logHistory(
+          "member_added",
+          user,
+          newUser.id,
+          newUser.name,
+          { role: newUser.role }
+        );
       }
-      return member;
-    });
 
-    saveMembers(updatedMembers);
+      toast({
+        title: t("dashboard.network.add.success.title") || "Member Added",
+        description: t("dashboard.network.add.success.description") || "Member has been added successfully!",
+      });
 
-    const approvedMember = members.find(m => m.id === memberId);
-    if (approvedMember && user) {
-      logHistory(
-        "network",
-        "Approved member",
-        `Approved member "${approvedMember.name}"`,
-        user.id,
-        user.name,
-        user.image,
-        { memberId: approvedMember.id }
-      );
+      // Reload members
+      await loadMembers();
+
+      // Reset form
+      setNewMember({
+        name: "",
+        email: "",
+        phone: "",
+        role: "member",
+      });
+      setIsAddDialogOpen(false);
+    } catch (error: any) {
+      console.error("Error adding member:", error);
+      toast({
+        title: t("dashboard.network.add.error.title") || "Error",
+        description: error.message || t("dashboard.network.add.error.description") || "Failed to add member. Please try again.",
+        variant: "destructive",
+      });
     }
-
-    toast({
-      title: t("dashboard.network.approve.success.title") || "Member Approved",
-      description: t("dashboard.network.approve.success.description") || "Member has been approved successfully!",
-    });
   };
 
-  const handleRejectMember = (memberId: string) => {
-    const rejectedMember = members.find(m => m.id === memberId);
-    const updatedMembers = members.filter((m) => m.id !== memberId);
-    saveMembers(updatedMembers);
-    setRejectMemberId(null);
+  const handleApproveMember = async (memberId: string) => {
+    try {
+      const approvedMember = members.find(m => m.id === memberId);
+      if (!approvedMember) return;
 
-    if (rejectedMember && user) {
-      logHistory(
-        "network",
-        "Rejected member",
-        `Rejected member "${rejectedMember.name}"`,
-        user.id,
-        user.name,
-        user.image,
-        { memberId: rejectedMember.id }
-      );
+      await db.update('users', memberId, {
+        status: 'approved',
+        approved_at: new Date().toISOString(),
+        approved_by: user?.id || null,
+      });
+
+      if (user) {
+        await logHistory(
+          "member_approved",
+          user,
+          memberId,
+          approvedMember.name
+        );
+      }
+
+      toast({
+        title: t("dashboard.network.approve.success.title") || "Member Approved",
+        description: t("dashboard.network.approve.success.description") || "Member has been approved successfully!",
+      });
+
+      await loadMembers();
+    } catch (error: any) {
+      console.error("Error approving member:", error);
+      toast({
+        title: t("dashboard.network.approve.error.title") || "Error",
+        description: error.message || t("dashboard.network.approve.error.description") || "Failed to approve member. Please try again.",
+        variant: "destructive",
+      });
     }
-
-    toast({
-      title: t("dashboard.network.reject.success.title") || "Member Rejected",
-      description: t("dashboard.network.reject.success.description") || "Member request has been rejected.",
-    });
   };
 
-  const handleUpdateMemberRole = (memberId: string, newRole: UserRole) => {
+  const handleRejectMember = async (memberId: string) => {
+    try {
+      const rejectedMember = members.find(m => m.id === memberId);
+      if (!rejectedMember) return;
+
+      await db.update('users', memberId, {
+        status: 'rejected',
+      });
+
+      setRejectMemberId(null);
+
+      if (user) {
+        await logHistory(
+          "member_rejected",
+          user,
+          memberId,
+          rejectedMember.name
+        );
+      }
+
+      toast({
+        title: t("dashboard.network.reject.success.title") || "Member Rejected",
+        description: t("dashboard.network.reject.success.description") || "Member request has been rejected.",
+      });
+
+      await loadMembers();
+    } catch (error: any) {
+      console.error("Error rejecting member:", error);
+      toast({
+        title: t("dashboard.network.reject.error.title") || "Error",
+        description: error.message || t("dashboard.network.reject.error.description") || "Failed to reject member. Please try again.",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleUpdateMemberRole = async (memberId: string, newRole: UserRole) => {
     // Prevent changing superadmin role
     const member = members.find(m => m.id === memberId);
     if (member?.role === 'superadmin' && !isSuperAdmin) {
@@ -223,32 +264,36 @@ const NetworkContent = () => {
       return;
     }
 
-    const updatedMembers = members.map((m) => {
-      if (m.id === memberId) {
-        return { ...m, role: newRole };
+    try {
+      await db.update('users', memberId, {
+        role: newRole,
+      });
+
+      const updatedMember = members.find(m => m.id === memberId);
+      if (updatedMember && user) {
+        await logHistory(
+          "member_role_changed",
+          user,
+          memberId,
+          updatedMember.name,
+          { oldRole: updatedMember.role, newRole }
+        );
       }
-      return m;
-    });
 
-    saveMembers(updatedMembers);
+      toast({
+        title: t("dashboard.network.role.success.title") || "Role Updated",
+        description: t("dashboard.network.role.success.description") || "Member role has been updated successfully!",
+      });
 
-    const updatedMember = updatedMembers.find(m => m.id === memberId);
-    if (updatedMember && user) {
-      logHistory(
-        "network",
-        "Updated member role",
-        `Updated role of "${updatedMember.name}" to ${newRole}`,
-        user.id,
-        user.name,
-        user.image,
-        { memberId: updatedMember.id, newRole }
-      );
+      await loadMembers();
+    } catch (error: any) {
+      console.error("Error updating member role:", error);
+      toast({
+        title: t("dashboard.network.role.error.title") || "Error",
+        description: error.message || t("dashboard.network.role.error.description") || "Failed to update role. Please try again.",
+        variant: "destructive",
+      });
     }
-
-    toast({
-      title: t("dashboard.network.role.success.title") || "Role Updated",
-      description: t("dashboard.network.role.success.description") || "Member role has been updated successfully!",
-    });
   };
 
   const pendingMembers = members.filter(m => m.status === 'pending');

@@ -38,30 +38,9 @@ import { useLanguage } from "@/contexts/LanguageContext";
 import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/hooks/use-toast";
 import { logHistory } from "@/lib/history";
+import { loadPolls, createPoll, updatePoll, deletePoll, submitVotes, getUserVotes, Poll, PollOption } from "@/lib/polls";
 import { CheckSquare, Plus, Vote, BarChart3, Users, X, Edit, Trash2, MoreVertical } from "lucide-react";
 import { format } from "date-fns";
-
-interface PollOption {
-  id: string;
-  text: string;
-  votes: string[]; // Array of user IDs who voted for this option
-}
-
-interface Poll {
-  id: string;
-  title: string;
-  description?: string;
-  type: "single" | "multiple"; // Single choice or multiple choice
-  options: PollOption[];
-  createdBy: string;
-  createdByName: string;
-  createdByImage?: string;
-  createdAt: string;
-  endDate?: string;
-  isActive: boolean;
-}
-
-const STORAGE_KEY = "bamas_polls";
 
 const VotesContent = () => {
   const { t } = useLanguage();
@@ -82,24 +61,50 @@ const VotesContent = () => {
     endDate: "",
   });
 
-  // Load polls from localStorage
+  // Load polls from Supabase
   useEffect(() => {
-    const stored = localStorage.getItem(STORAGE_KEY);
-    if (stored) {
-      try {
-        const loadedPolls = JSON.parse(stored);
-        // Don't filter expired polls - show all polls
-        setPolls(loadedPolls);
-      } catch (error) {
-        console.error("Error loading polls:", error);
-      }
-    }
+    loadPollsFromDatabase();
   }, []);
 
-  // Save polls to localStorage
-  const savePolls = (updatedPolls: Poll[]) => {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(updatedPolls));
-    setPolls(updatedPolls);
+  const loadPollsFromDatabase = async () => {
+    try {
+      const loadedPolls = await loadPolls();
+      // Convert to component format
+      const convertedPolls: Poll[] = loadedPolls.map((p) => ({
+        ...p,
+        createdBy: p.created_by,
+        createdByName: p.created_by_name,
+        createdByImage: p.created_by_image,
+        createdAt: p.created_at,
+        endDate: p.end_date,
+      }));
+      setPolls(convertedPolls);
+
+      // Load user votes for all polls
+      if (user?.id) {
+        const votesMap: { [pollId: string]: string[] } = {};
+        for (const poll of loadedPolls) {
+          const userVotes = await getUserVotes(poll.id, user.id);
+          votesMap[poll.id] = userVotes;
+        }
+        setSelectedVotes(votesMap);
+        // Show results for polls user has voted on
+        const showResultsMap: { [pollId: string]: boolean } = {};
+        Object.keys(votesMap).forEach((pollId) => {
+          if (votesMap[pollId].length > 0) {
+            showResultsMap[pollId] = true;
+          }
+        });
+        setShowResults(showResultsMap);
+      }
+    } catch (error) {
+      console.error("Error loading polls:", error);
+      toast({
+        title: t("dashboard.votes.error.title") || "Error",
+        description: t("dashboard.votes.error.loadFailed") || "Failed to load polls. Please try again.",
+        variant: "destructive",
+      });
+    }
   };
 
   const handleAddOption = () => {
@@ -119,7 +124,7 @@ const VotesContent = () => {
     setNewPoll({ ...newPoll, options: updatedOptions });
   };
 
-  const handleCreatePoll = () => {
+  const handleCreatePoll = async () => {
     if (!newPoll.title.trim()) {
       toast({
         title: t("dashboard.votes.create.error.title") || "Validation Error",
@@ -139,64 +144,68 @@ const VotesContent = () => {
       return;
     }
 
-    const pollOptions: PollOption[] = validOptions.map((opt, index) => ({
-      id: `option_${Date.now()}_${index}`,
-      text: opt.trim(),
-      votes: [],
-    }));
-
-    const newPollItem: Poll = {
-      id: `poll_${Date.now()}`,
-      title: newPoll.title.trim(),
-      description: newPoll.description.trim() || undefined,
-      type: newPoll.type,
-      options: pollOptions,
-      createdBy: user?.id || "",
-      createdByName: user?.name || "Unknown User",
-      createdByImage: user?.image,
-      createdAt: new Date().toISOString(),
-      endDate: newPoll.endDate || undefined,
-      isActive: true,
-    };
-
-    const updatedPolls = [newPollItem, ...polls];
-    savePolls(updatedPolls);
-
-    // Log history
-    if (user) {
-      logHistory(
-        "vote",
-        "Created poll",
-        `Created poll "${newPollItem.title}"`,
-        user.id,
-        user.name,
-        user.image,
-        { pollId: newPollItem.id, pollType: newPollItem.type }
-      );
+    if (!user?.id) {
+      toast({
+        title: t("dashboard.votes.create.error.title") || "Error",
+        description: t("dashboard.votes.create.error.notLoggedIn") || "You must be logged in to create a poll.",
+        variant: "destructive",
+      });
+      return;
     }
 
-    toast({
-      title: t("dashboard.votes.create.success.title") || "Poll Created",
-      description: t("dashboard.votes.create.success.description") || "Your poll has been created successfully!",
-    });
+    try {
+      const newPollItem = await createPoll(
+        {
+          title: newPoll.title.trim(),
+          description: newPoll.description.trim() || undefined,
+          type: newPoll.type,
+          end_date: newPoll.endDate || undefined,
+          created_by: user.id,
+          created_by_name: user.name,
+          created_by_image: user.image,
+        },
+        validOptions.map((opt) => opt.trim())
+      );
 
-    // Reset form
-    setNewPoll({
-      title: "",
-      description: "",
-      type: "single",
-      options: [""],
-      endDate: "",
-    });
-    setIsCreateDialogOpen(false);
+      // Log history
+      if (user) {
+        await logHistory("vote_created", user, newPollItem.id, newPollItem.title);
+      }
+
+      toast({
+        title: t("dashboard.votes.create.success.title") || "Poll Created",
+        description: t("dashboard.votes.create.success.description") || "Your poll has been created successfully!",
+      });
+
+      // Reset form
+      setNewPoll({
+        title: "",
+        description: "",
+        type: "single",
+        options: [""],
+        endDate: "",
+      });
+      setIsCreateDialogOpen(false);
+
+      // Reload polls
+      await loadPollsFromDatabase();
+    } catch (error: any) {
+      console.error("Error creating poll:", error);
+      toast({
+        title: t("dashboard.votes.create.error.title") || "Error",
+        description: error.message || t("dashboard.votes.create.error.description") || "Failed to create poll. Please try again.",
+        variant: "destructive",
+      });
+    }
   };
 
   const handleEditPoll = (poll: Poll) => {
     setEditingPoll(poll);
     // Format datetime-local input (YYYY-MM-DDTHH:mm)
     let formattedEndDate = "";
-    if (poll.endDate) {
-      const date = new Date(poll.endDate);
+    const endDate = (poll as any).endDate || (poll as any).end_date;
+    if (endDate) {
+      const date = new Date(endDate);
       const year = date.getFullYear();
       const month = String(date.getMonth() + 1).padStart(2, "0");
       const day = String(date.getDate()).padStart(2, "0");
@@ -214,7 +223,7 @@ const VotesContent = () => {
     setIsEditDialogOpen(poll.id);
   };
 
-  const handleUpdatePoll = () => {
+  const handleUpdatePoll = async () => {
     if (!editingPoll || !newPoll.title.trim()) {
       toast({
         title: t("dashboard.votes.create.error.title") || "Validation Error",
@@ -234,149 +243,143 @@ const VotesContent = () => {
       return;
     }
 
-    // Preserve existing votes for options that still exist
-    const updatedPolls = polls.map((poll) => {
-      if (poll.id === editingPoll.id) {
-        const updatedOptions: PollOption[] = validOptions.map((optText, index) => {
-          // Try to find existing option with same text to preserve votes
-          const existingOption = poll.options.find((opt) => opt.text === optText.trim());
-          if (existingOption) {
-            return existingOption;
-          }
-          // Create new option with empty votes
-          return {
-            id: `option_${Date.now()}_${index}`,
-            text: optText.trim(),
-            votes: [],
-          };
-        });
+    try {
+      // Format end date
+      let endDate: string | undefined = undefined;
+      if (newPoll.endDate) {
+        endDate = new Date(newPoll.endDate).toISOString();
+      }
 
-        return {
-          ...poll,
+      await updatePoll(
+        editingPoll.id,
+        {
           title: newPoll.title.trim(),
           description: newPoll.description.trim() || undefined,
           type: newPoll.type,
-          options: updatedOptions,
-          endDate: newPoll.endDate || undefined,
-        };
-      }
-      return poll;
-    });
-
-    savePolls(updatedPolls);
-
-    // Log history
-    if (user) {
-      logHistory(
-        "vote",
-        "Updated poll",
-        `Updated poll "${newPoll.title.trim()}"`,
-        user.id,
-        user.name,
-        user.image,
-        { pollId: editingPoll.id }
+          end_date: endDate,
+        },
+        validOptions.map((opt) => opt.trim())
       );
+
+      // Log history
+      if (user) {
+        await logHistory("vote_updated", user, editingPoll.id, editingPoll.title);
+      }
+
+      toast({
+        title: t("dashboard.votes.update.success.title") || "Poll Updated",
+        description: t("dashboard.votes.update.success.description") || "Your poll has been updated successfully!",
+      });
+
+      // Reset form
+      setNewPoll({
+        title: "",
+        description: "",
+        type: "single",
+        options: [""],
+        endDate: "",
+      });
+      setIsEditDialogOpen(null);
+      setEditingPoll(null);
+
+      // Reload polls
+      await loadPollsFromDatabase();
+    } catch (error: any) {
+      console.error("Error updating poll:", error);
+      toast({
+        title: t("dashboard.votes.update.error.title") || "Error",
+        description: error.message || t("dashboard.votes.update.error.description") || "Failed to update poll. Please try again.",
+        variant: "destructive",
+      });
     }
-
-    toast({
-      title: t("dashboard.votes.update.success.title") || "Poll Updated",
-      description: t("dashboard.votes.update.success.description") || "Your poll has been updated successfully!",
-    });
-
-    // Reset form
-    setNewPoll({
-      title: "",
-      description: "",
-      type: "single",
-      options: [""],
-      endDate: "",
-    });
-    setIsEditDialogOpen(null);
-    setEditingPoll(null);
   };
 
-  const handleDeletePoll = (pollId: string) => {
+  const handleDeletePoll = async (pollId: string) => {
     const pollToDelete = polls.find((p) => p.id === pollId);
     if (!pollToDelete) return;
 
-    const updatedPolls = polls.filter((p) => p.id !== pollId);
-    savePolls(updatedPolls);
-    setDeletePollId(null);
+    try {
+      await deletePoll(pollId);
+      setDeletePollId(null);
 
-    // Log history
-    if (user && pollToDelete) {
-      logHistory(
-        "vote",
-        "Deleted poll",
-        `Deleted poll "${pollToDelete.title}"`,
-        user.id,
-        user.name,
-        user.image,
-        { pollId: pollToDelete.id }
-      );
+      // Log history
+      if (user && pollToDelete) {
+        await logHistory("vote_deleted", user, pollId, pollToDelete.title);
+      }
+
+      toast({
+        title: t("dashboard.votes.delete.success.title") || "Poll Deleted",
+        description: t("dashboard.votes.delete.success.description") || "Poll has been deleted successfully!",
+      });
+
+      // Reload polls
+      await loadPollsFromDatabase();
+    } catch (error: any) {
+      console.error("Error deleting poll:", error);
+      toast({
+        title: t("dashboard.votes.delete.error.title") || "Error",
+        description: error.message || t("dashboard.votes.delete.error.description") || "Failed to delete poll. Please try again.",
+        variant: "destructive",
+      });
     }
-
-    toast({
-      title: t("dashboard.votes.delete.success.title") || "Poll Deleted",
-      description: t("dashboard.votes.delete.success.description") || "Poll has been deleted successfully!",
-    });
   };
 
   const isPollCreator = (poll: Poll): boolean => {
-    return user?.id === poll.createdBy;
+    const createdBy = (poll as any).createdBy || (poll as any).created_by;
+    return user?.id === createdBy;
   };
 
-  const handleVote = (pollId: string, optionIds: string[]) => {
-    if (!user?.id) return;
+  const handleVote = async (pollId: string, optionIds: string[]) => {
+    if (!user?.id) {
+      toast({
+        title: t("dashboard.votes.vote.error.title") || "Error",
+        description: t("dashboard.votes.vote.error.notLoggedIn") || "You must be logged in to vote.",
+        variant: "destructive",
+      });
+      return;
+    }
 
-    const updatedPolls = polls.map((poll) => {
-      if (poll.id === pollId) {
-        // Remove user's previous votes from all options
-        const updatedOptions = poll.options.map((option) => ({
-          ...option,
-          votes: option.votes.filter((userId) => userId !== user.id),
-        }));
+    try {
+      await submitVotes(pollId, optionIds, user.id);
 
-        // Add user's new votes
-        optionIds.forEach((optionId) => {
-          const option = updatedOptions.find((opt) => opt.id === optionId);
-          if (option && !option.votes.includes(user.id)) {
-            option.votes.push(user.id);
-          }
-        });
-
-        return {
-          ...poll,
-          options: updatedOptions,
-        };
+      // Log history
+      const poll = polls.find((p) => p.id === pollId);
+      if (poll && user) {
+        await logHistory("vote_submitted", user, pollId, poll.title);
       }
-      return poll;
-    });
 
-    savePolls(updatedPolls);
-    setSelectedVotes({ ...selectedVotes, [pollId]: optionIds });
-    setShowResults({ ...showResults, [pollId]: true });
+      setSelectedVotes({ ...selectedVotes, [pollId]: optionIds });
+      setShowResults({ ...showResults, [pollId]: true });
 
-    toast({
-      title: t("dashboard.votes.vote.success.title") || "Vote Submitted",
-      description: t("dashboard.votes.vote.success.description") || "Your vote has been recorded!",
-    });
+      toast({
+        title: t("dashboard.votes.vote.success.title") || "Vote Submitted",
+        description: t("dashboard.votes.vote.success.description") || "Your vote has been recorded!",
+      });
+
+      // Reload polls to get updated vote counts
+      await loadPollsFromDatabase();
+    } catch (error: any) {
+      console.error("Error submitting vote:", error);
+      toast({
+        title: t("dashboard.votes.vote.error.title") || "Error",
+        description: error.message || t("dashboard.votes.vote.error.description") || "Failed to submit vote. Please try again.",
+        variant: "destructive",
+      });
+    }
   };
 
   const getTotalVotes = (poll: Poll): number => {
-    return poll.options.reduce((total, option) => total + option.votes.length, 0);
+    return poll.options.reduce((total, option) => total + (option.votes?.length || 0), 0);
   };
 
   const hasUserVoted = (poll: Poll): boolean => {
     if (!user?.id) return false;
-    return poll.options.some((option) => option.votes.includes(user.id));
+    const userVotes = selectedVotes[poll.id] || [];
+    return userVotes.length > 0;
   };
 
-  const getUserVotes = (poll: Poll): string[] => {
-    if (!user?.id) return [];
-    return poll.options
-      .filter((option) => option.votes.includes(user.id))
-      .map((option) => option.id);
+  const getUserVotesForPoll = (poll: Poll): string[] => {
+    return selectedVotes[poll.id] || [];
   };
 
   const userInitials = user?.name
@@ -691,7 +694,7 @@ const VotesContent = () => {
           {polls.map((poll) => {
             const totalVotes = getTotalVotes(poll);
             const userVoted = hasUserVoted(poll);
-            const userSelectedVotes = selectedVotes[poll.id] || (userVoted ? getUserVotes(poll) : []);
+            const userSelectedVotes = selectedVotes[poll.id] || (userVoted ? getUserVotesForPoll(poll) : []);
             const showPollResults = showResults[poll.id] || userVoted;
 
             return (
@@ -716,11 +719,11 @@ const VotesContent = () => {
                               : t("dashboard.votes.type.multiple") || "Multiple Choice"}
                           </span>
                         </div>
-                        {poll.endDate && (
+                        {((poll as any).endDate || (poll as any).end_date) && (
                           <div className="flex items-center gap-1">
                             <CheckSquare className="h-4 w-4" />
                             <span>
-                              {t("dashboard.votes.ends") || "Ends"}: {format(new Date(poll.endDate), "PPp")}
+                              {t("dashboard.votes.ends") || "Ends"}: {format(new Date((poll as any).endDate || (poll as any).end_date), "PPp")}
                             </span>
                           </div>
                         )}
@@ -728,17 +731,17 @@ const VotesContent = () => {
                     </div>
                     <div className="flex items-center gap-2">
                       <Avatar className="h-8 w-8">
-                        <AvatarImage src={poll.createdByImage} alt={poll.createdByName} />
+                        <AvatarImage src={(poll as any).createdByImage || (poll as any).created_by_image} alt={(poll as any).createdByName || (poll as any).created_by_name} />
                         <AvatarFallback className="text-xs">
-                          {poll.createdByName
+                          {((poll as any).createdByName || (poll as any).created_by_name || "U")
                             .split(" ")
-                            .map((n) => n[0])
+                            .map((n: string) => n[0])
                             .join("")
                             .toUpperCase()
                             .slice(0, 2)}
                         </AvatarFallback>
                       </Avatar>
-                      <span className="text-sm text-muted-foreground">{poll.createdByName}</span>
+                      <span className="text-sm text-muted-foreground">{(poll as any).createdByName || (poll as any).created_by_name}</span>
                       {isPollCreator(poll) && (
                         <DropdownMenu>
                           <DropdownMenuTrigger asChild>

@@ -122,7 +122,7 @@ const App: React.FC = () => {
     <ErrorBoundary>
       <LanguageProvider>
         <AuthProvider>
-          <AppContent />
+        <AppContent />
         </AuthProvider>
       </LanguageProvider>
     </ErrorBoundary>

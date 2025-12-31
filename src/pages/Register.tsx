@@ -11,18 +11,19 @@ import { FooterSection } from "@/components/ui/footer-section";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/hooks/use-toast";
-import { decodeJWT } from "@/lib/jwt";
-import { UserPlus, Mail, Lock, User, X, ArrowLeft } from "lucide-react";
+import { UserPlus, Mail, Lock, User, X, ArrowLeft, Eye, EyeOff } from "lucide-react";
 
 const Register = () => {
   const { t, language, setLanguage } = useLanguage();
   const { toast } = useToast();
-  const { login } = useAuth();
+  const { signUpWithEmail, signInWithGoogle } = useAuth();
   const navigate = useNavigate();
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -30,8 +31,8 @@ const Register = () => {
     
     if (password !== confirmPassword) {
       toast({
-        title: t("auth.register.error.title") || "Error",
-        description: t("auth.register.error.passwordMatch") || "Passwords do not match",
+        title: t("auth.register.error.title") || "Validation Error",
+        description: t("auth.register.error.passwordMatch") || "Passwords do not match. Please make sure both password fields are identical.",
         variant: "destructive",
       });
       return;
@@ -39,53 +40,54 @@ const Register = () => {
 
     setIsLoading(true);
     
-    // Simulate registration - replace with actual API call
-    setTimeout(() => {
-      setIsLoading(false);
-      // Create user object from form data
-      const userData = {
-        id: `email_${Date.now()}`,
-        name: name,
-        email: email,
-        provider: 'email' as const,
-      };
-      login(userData);
+    try {
+      await signUpWithEmail(email, password, name);
       toast({
         title: t("auth.register.success.title") || "Registration Successful",
         description: t("auth.register.success.description") || "Your account has been created successfully!",
       });
       navigate("/dashboard");
-    }, 1000);
+    } catch (error: any) {
+      const errorMessage = error.message || t("auth.register.error.description") || "Failed to create account. Please check your information and try again.";
+      toast({
+        title: t("auth.register.error.title") || "Registration Failed",
+        description: errorMessage,
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
   };
 
-  const handleGoogleSuccess = (credentialResponse: any) => {
+  const handleGoogleSuccess = async (credentialResponse: any) => {
     console.log("Google Registration Success:", credentialResponse);
     
-    // Decode JWT token to get user info
     if (credentialResponse.credential) {
-      const decoded = decodeJWT(credentialResponse.credential);
-      if (decoded) {
-        const userData = {
-          id: decoded.sub || `google_${Date.now()}`,
-          name: decoded.name || decoded.given_name || 'User',
-          email: decoded.email || '',
-          image: decoded.picture,
-          provider: 'google' as const,
-        };
-        login(userData);
-        toast({
-          title: t("auth.register.success.title") || "Registration Successful",
-          description: t("auth.google.success") || "Successfully registered with Google!",
-        });
+      try {
+        setIsLoading(true);
+        await signInWithGoogle(credentialResponse.credential);
+    toast({
+      title: t("auth.register.success.title") || "Registration Successful",
+      description: t("auth.google.success") || "Successfully registered with Google!",
+    });
         navigate("/dashboard");
+      } catch (error: any) {
+        const errorMessage = error.message || t("auth.google.error.description") || "Failed to register with Google. Please try again.";
+        toast({
+          title: t("auth.google.error.title") || "Registration Failed",
+          description: errorMessage,
+          variant: "destructive",
+        });
+      } finally {
+        setIsLoading(false);
       }
     }
   };
 
   const handleGoogleError = () => {
     toast({
-      title: t("auth.google.error.title") || "Registration Failed",
-      description: t("auth.google.error.description") || "Failed to register with Google. Please try again.",
+      title: t("auth.google.error.title") || "Google Registration Failed",
+      description: t("auth.google.error.description") || "Failed to register with Google. Please try again or use email/password registration.",
       variant: "destructive",
     });
   };
@@ -175,14 +177,28 @@ const Register = () => {
                     <Lock className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
                     <Input
                       id="password"
-                      type="password"
+                      type={showPassword ? "text" : "password"}
                       placeholder={t("auth.password.placeholder") || "Enter your password"}
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
-                      className="pl-10 rounded-full"
+                      className="pl-10 pr-10 rounded-full"
                       required
                       minLength={6}
                     />
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="icon"
+                      className="absolute right-1 top-1 h-8 w-8 rounded-full hover:bg-transparent"
+                      onClick={() => setShowPassword(!showPassword)}
+                      aria-label={showPassword ? "Hide password" : "Show password"}
+                    >
+                      {showPassword ? (
+                        <EyeOff className="h-4 w-4 text-muted-foreground" />
+                      ) : (
+                        <Eye className="h-4 w-4 text-muted-foreground" />
+                      )}
+                    </Button>
                   </div>
                 </div>
                 <div className="space-y-2">
@@ -191,14 +207,28 @@ const Register = () => {
                     <Lock className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
                     <Input
                       id="confirmPassword"
-                      type="password"
+                      type={showConfirmPassword ? "text" : "password"}
                       placeholder={t("auth.password.confirm.placeholder") || "Confirm your password"}
                       value={confirmPassword}
                       onChange={(e) => setConfirmPassword(e.target.value)}
-                      className="pl-10 rounded-full"
+                      className="pl-10 pr-10 rounded-full"
                       required
                       minLength={6}
                     />
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="icon"
+                      className="absolute right-1 top-1 h-8 w-8 rounded-full hover:bg-transparent"
+                      onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                      aria-label={showConfirmPassword ? "Hide password" : "Show password"}
+                    >
+                      {showConfirmPassword ? (
+                        <EyeOff className="h-4 w-4 text-muted-foreground" />
+                      ) : (
+                        <Eye className="h-4 w-4 text-muted-foreground" />
+                      )}
+                    </Button>
                   </div>
                 </div>
                 <Button 

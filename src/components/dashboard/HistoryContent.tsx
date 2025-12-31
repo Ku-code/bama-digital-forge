@@ -21,29 +21,16 @@ import {
 } from "@/components/ui/popover";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useAuth } from "@/contexts/AuthContext";
+import { getHistory, HistoryItem } from "@/lib/history";
 import { Clock, Calendar as CalendarIcon, Filter, X, FileText, CheckSquare, CalendarDays, DollarSign, Users } from "lucide-react";
 import { format, startOfDay, endOfDay, isWithinInterval, parseISO } from "date-fns";
 import { cn } from "@/lib/utils";
-
-interface HistoryItem {
-  id: string;
-  type: "document" | "vote" | "agenda" | "budget" | "network" | "settings" | "other";
-  action: string;
-  description: string;
-  userId: string;
-  userName: string;
-  userImage?: string;
-  timestamp: string;
-  metadata?: {
-    [key: string]: any;
-  };
-}
-
-const STORAGE_KEY = "bamas_history";
+import { useToast } from "@/hooks/use-toast";
 
 const HistoryContent = () => {
   const { t } = useLanguage();
   const { user } = useAuth();
+  const { toast } = useToast();
   const [historyItems, setHistoryItems] = useState<HistoryItem[]>([]);
   const [filteredItems, setFilteredItems] = useState<HistoryItem[]>([]);
   const [startDate, setStartDate] = useState<Date | undefined>(undefined);
@@ -52,23 +39,51 @@ const HistoryContent = () => {
   const [endTime, setEndTime] = useState<string>("");
   const [selectedType, setSelectedType] = useState<string>("all");
 
-  // Load history from localStorage
+  // Load history from Supabase
   useEffect(() => {
-    const stored = localStorage.getItem(STORAGE_KEY);
-    if (stored) {
-      try {
-        const loadedHistory = JSON.parse(stored);
-        // Sort by timestamp (newest first)
-        const sorted = loadedHistory.sort((a: HistoryItem, b: HistoryItem) => 
-          new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
-        );
-        setHistoryItems(sorted);
-        setFilteredItems(sorted);
-      } catch (error) {
-        console.error("Error loading history:", error);
-      }
-    }
+    loadHistoryFromDatabase();
   }, []);
+
+  const loadHistoryFromDatabase = async () => {
+    try {
+      const loadedHistory = await getHistory();
+      // Convert to component format
+      const convertedHistory: HistoryItem[] = loadedHistory.map((item: any) => ({
+        id: item.id,
+        type: mapHistoryType(item.type),
+        action: item.action || "",
+        description: item.description || "",
+        userId: item.user_id || "",
+        userName: item.user_name || "",
+        userImage: item.user_image || undefined,
+        timestamp: item.created_at,
+        metadata: item.metadata || undefined,
+      }));
+      
+      // Sort by timestamp (newest first)
+      const sorted = convertedHistory.sort((a: HistoryItem, b: HistoryItem) => 
+        new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
+      );
+      setHistoryItems(sorted);
+      setFilteredItems(sorted);
+    } catch (error) {
+      console.error("Error loading history:", error);
+      toast({
+        title: t("dashboard.history.error.title") || "Error",
+        description: t("dashboard.history.error.loadFailed") || "Failed to load history. Please try again.",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const mapHistoryType = (type: string): "document" | "vote" | "agenda" | "budget" | "network" | "settings" | "other" => {
+    if (type.startsWith("document")) return "document";
+    if (type.startsWith("vote")) return "vote";
+    if (type.startsWith("agenda")) return "agenda";
+    if (type.startsWith("member")) return "network";
+    if (type.startsWith("profile")) return "settings";
+    return "other";
+  };
 
   // Apply filters
   useEffect(() => {

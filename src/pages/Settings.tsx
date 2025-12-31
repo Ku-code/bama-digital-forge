@@ -11,6 +11,7 @@ import { Badge } from "@/components/ui/badge";
 import { useAuth } from "@/contexts/AuthContext";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useToast } from "@/hooks/use-toast";
+import { storage } from "@/lib/storage";
 import { ArrowLeft, LogOut, Save, Upload, X, Globe, MapPin, Phone, Hash } from "lucide-react";
 import { Link } from "react-router-dom";
 
@@ -46,7 +47,7 @@ const Settings = () => {
     }
   }, [user]);
 
-  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
@@ -70,13 +71,40 @@ const Settings = () => {
       return;
     }
 
-    // Convert to base64 for storage
-    const reader = new FileReader();
-    reader.onloadend = () => {
-      const base64String = reader.result as string;
-      setImagePreview(base64String);
-    };
-    reader.readAsDataURL(file);
+    if (!user?.id) {
+      toast({
+        title: t("settings.profile.imageError.title") || "Error",
+        description: t("settings.profile.imageError.notLoggedIn") || "You must be logged in to upload images.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    try {
+      setIsLoading(true);
+      
+      // Upload to Supabase Storage
+      const fileExtension = file.name.split('.').pop() || 'jpg';
+      const filePath = `${user.id}/avatar.${fileExtension}`;
+      
+      await storage.uploadFile('avatars', filePath, file, {
+        contentType: file.type,
+        upsert: true, // Replace existing avatar
+      });
+
+      // Get public URL for preview
+      const publicUrl = storage.getPublicUrl('avatars', filePath);
+      setImagePreview(publicUrl);
+    } catch (error: any) {
+      console.error("Error uploading image:", error);
+      toast({
+        title: t("settings.profile.imageError.title") || "Upload Error",
+        description: error.message || t("settings.profile.imageError.uploadFailed") || "Failed to upload image. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const handleAddHashtag = (e: React.KeyboardEvent<HTMLInputElement>) => {
@@ -98,9 +126,36 @@ const Settings = () => {
     e.preventDefault();
     setIsLoading(true);
     
-    // Simulate save - replace with actual API call
-    setTimeout(() => {
-      updateUser({ 
+    try {
+      // If imagePreview is a URL (from Supabase Storage), extract the path
+      let imageUrl = imagePreview;
+      if (imagePreview && imagePreview.startsWith('http')) {
+        // Already a URL from Supabase Storage, use as is
+        imageUrl = imagePreview;
+      } else if (imagePreview && imagePreview.startsWith('data:')) {
+        // Base64 image - upload to Supabase Storage first
+        if (user?.id) {
+          try {
+            // Convert base64 to blob
+            const response = await fetch(imagePreview);
+            const blob = await response.blob();
+            const fileExtension = blob.type.split('/')[1] || 'jpg';
+            const filePath = `${user.id}/avatar.${fileExtension}`;
+            
+            await storage.uploadFile('avatars', filePath, blob, {
+              contentType: blob.type,
+              upsert: true,
+            });
+            
+            imageUrl = storage.getPublicUrl('avatars', filePath);
+          } catch (uploadError) {
+            console.error("Error uploading base64 image:", uploadError);
+            // Continue with base64 if upload fails (for backward compatibility)
+          }
+        }
+      }
+
+      await updateUser({ 
         name, 
         email, 
         bio,
@@ -108,23 +163,38 @@ const Settings = () => {
         location,
         website,
         phone,
-        image: imagePreview || undefined,
+        image: imageUrl || undefined,
       });
-      setIsLoading(false);
       toast({
         title: t("settings.save.success.title") || "Settings Saved",
         description: t("settings.save.success.description") || "Your settings have been updated successfully!",
       });
-    }, 1000);
+    } catch (error: any) {
+      toast({
+        title: t("settings.save.error.title") || "Error",
+        description: error.message || t("settings.save.error.description") || "Failed to save settings. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
   };
 
-  const handleLogout = () => {
-    logout();
-    toast({
-      title: t("settings.logout.success") || "Logged Out",
-      description: t("settings.logout.description") || "You have been logged out successfully.",
-    });
-    navigate("/");
+  const handleLogout = async () => {
+    try {
+      await logout();
+      toast({
+        title: t("settings.logout.success") || "Logged Out",
+        description: t("settings.logout.description") || "You have been logged out successfully.",
+      });
+      navigate("/");
+    } catch (error: any) {
+      toast({
+        title: t("settings.logout.error.title") || "Error",
+        description: error.message || t("settings.logout.error.description") || "Failed to logout. Please try again.",
+        variant: "destructive",
+      });
+    }
   };
 
   const userInitials = user?.name

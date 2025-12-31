@@ -41,6 +41,7 @@ import { useLanguage } from "@/contexts/LanguageContext";
 import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/hooks/use-toast";
 import { logHistory } from "@/lib/history";
+import { loadDocuments, createDocument, updateDocument, deleteDocument, uploadDocumentFile, getDocumentFileUrl, convertBase64ToFileAndUpload, Document as SupabaseDocument } from "@/lib/documents";
 import { FileText, Plus, ExternalLink, Search, Filter, X, File, Calendar, Edit, Save, Trash2, Grid3x3, Type, Upload, Download, HardDrive, Minus } from "lucide-react";
 import { format } from "date-fns";
 
@@ -59,7 +60,7 @@ interface Document {
   googleDriveLink?: string;
   content?: string; // For text documents
   tableData?: TableData; // For table documents
-  fileData?: string; // Base64 encoded file data for uploaded files
+  fileData?: string; // Base64 encoded file data for uploaded files (legacy - use filePath instead)
   fileName?: string; // Original file name
   fileSize?: number; // File size in bytes
   mimeType?: string; // MIME type of uploaded file
@@ -70,9 +71,8 @@ interface Document {
   createdAt: string;
   updatedAt?: string;
   fileType?: string;
+  filePath?: string; // Supabase Storage path
 }
-
-const STORAGE_KEY = "bamas_documents";
 const CATEGORIES = ["General", "Meeting Minutes", "Reports", "Policies", "Forms", "Presentations", "Notes", "Other"];
 
 const DocumentsContent = () => {
@@ -109,22 +109,45 @@ const DocumentsContent = () => {
   const [isDragging, setIsDragging] = useState(false);
   const dropZoneRef = useRef<HTMLDivElement>(null);
 
-  // Load documents from localStorage
+  // Load documents from Supabase
   useEffect(() => {
-    const stored = localStorage.getItem(STORAGE_KEY);
-    if (stored) {
-      try {
-        setDocuments(JSON.parse(stored));
-      } catch (error) {
-        console.error("Error loading documents:", error);
-      }
-    }
+    loadDocumentsFromDatabase();
   }, []);
 
-  // Save documents to localStorage
-  const saveDocuments = (updatedDocuments: Document[]) => {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(updatedDocuments));
-    setDocuments(updatedDocuments);
+  const loadDocumentsFromDatabase = async () => {
+    try {
+      const loadedDocs = await loadDocuments();
+      // Convert to component format
+      const convertedDocs: Document[] = loadedDocs.map((doc: SupabaseDocument) => ({
+        id: doc.id,
+        title: doc.title,
+        description: doc.description || undefined,
+        type: doc.type,
+        googleDriveLink: doc.google_drive_link || undefined,
+        content: doc.content || undefined,
+        tableData: doc.table_data || undefined,
+        fileData: undefined, // Don't load base64 - use file_path instead
+        fileName: doc.file_name || undefined,
+        fileSize: doc.file_size || undefined,
+        mimeType: doc.mime_type || undefined,
+        category: doc.category,
+        createdBy: doc.created_by,
+        createdByName: doc.created_by_name,
+        createdByImage: doc.created_by_image || undefined,
+        createdAt: doc.created_at,
+        updatedAt: doc.updated_at || undefined,
+        fileType: doc.mime_type || undefined,
+        filePath: doc.file_path, // Store file path for later use
+      }));
+      setDocuments(convertedDocs);
+    } catch (error) {
+      console.error("Error loading documents:", error);
+      toast({
+        title: t("dashboard.documents.error.title") || "Error",
+        description: t("dashboard.documents.error.loadFailed") || "Failed to load documents. Please try again.",
+        variant: "destructive",
+      });
+    }
   };
 
   // Extract Google Drive file ID from URL
@@ -175,7 +198,7 @@ const DocumentsContent = () => {
     return { headers, data };
   };
 
-  const handleCreateDocument = () => {
+  const handleCreateDocument = async () => {
     if (!newDocument.title.trim()) {
       toast({
         title: t("dashboard.documents.create.error.title") || "Validation Error",
@@ -185,114 +208,109 @@ const DocumentsContent = () => {
       return;
     }
 
-    let documentItem: Document;
-
-    if (createType === "googleDrive") {
-      if (!newDocument.googleDriveLink.trim()) {
-        toast({
-          title: t("dashboard.documents.create.error.title") || "Validation Error",
-          description: t("dashboard.documents.create.error.linkRequired") || "Please enter a Google Drive link.",
-          variant: "destructive",
-        });
-        return;
-      }
-
-      const fileId = extractDriveFileId(newDocument.googleDriveLink);
-      if (!fileId) {
-        toast({
-          title: t("dashboard.documents.create.error.title") || "Validation Error",
-          description: t("dashboard.documents.create.error.invalidLink") || "Please enter a valid Google Drive link.",
-          variant: "destructive",
-        });
-        return;
-      }
-
-      documentItem = {
-        id: `doc_${Date.now()}`,
-        title: newDocument.title.trim(),
-        description: newDocument.description.trim() || undefined,
-        type: "googleDrive",
-        googleDriveLink: newDocument.googleDriveLink.trim(),
-        category: newDocument.category,
-        createdBy: user?.id || "",
-        createdByName: user?.name || "Unknown User",
-        createdByImage: user?.image,
-        createdAt: new Date().toISOString(),
-        fileType: detectFileType(newDocument.googleDriveLink),
-      };
-    } else if (createType === "text") {
-      documentItem = {
-        id: `doc_${Date.now()}`,
-        title: newDocument.title.trim(),
-        description: newDocument.description.trim() || undefined,
-        type: "text",
-        content: newDocument.content.trim() || "",
-        category: newDocument.category,
-        createdBy: user?.id || "",
-        createdByName: user?.name || "Unknown User",
-        createdByImage: user?.image,
-        createdAt: new Date().toISOString(),
-        fileType: "Note",
-      };
-    } else {
-      // Table type
-      const tableData: TableData = {
-        rows: newDocument.tableRows,
-        cols: newDocument.tableCols,
-        headers: newDocument.tableHeaders,
-        data: newDocument.tableData,
-      };
-
-      documentItem = {
-        id: `doc_${Date.now()}`,
-        title: newDocument.title.trim(),
-        description: newDocument.description.trim() || undefined,
-        type: "table",
-        tableData,
-        category: newDocument.category,
-        createdBy: user?.id || "",
-        createdByName: user?.name || "Unknown User",
-        createdByImage: user?.image,
-        createdAt: new Date().toISOString(),
-        fileType: "Table",
-      };
+    if (!user?.id) {
+      toast({
+        title: t("dashboard.documents.create.error.title") || "Error",
+        description: t("dashboard.documents.create.error.notLoggedIn") || "You must be logged in to create a document.",
+        variant: "destructive",
+      });
+      return;
     }
 
-    const updatedDocuments = [documentItem, ...documents];
-    saveDocuments(updatedDocuments);
+    try {
+      let documentData: any = {
+        title: newDocument.title.trim(),
+        description: newDocument.description.trim() || undefined,
+        category: newDocument.category,
+        created_by: user.id,
+        created_by_name: user.name,
+        created_by_image: user.image,
+      };
 
-    // Log history
-    if (user) {
-      logHistory(
-        "document",
-        "Created document",
-        `Created "${documentItem.title}" (${documentItem.type})`,
-        user.id,
-        user.name,
-        user.image,
-        { documentId: documentItem.id, documentType: documentItem.type }
-      );
+      if (createType === "googleDrive") {
+        if (!newDocument.googleDriveLink.trim()) {
+          toast({
+            title: t("dashboard.documents.create.error.title") || "Validation Error",
+            description: t("dashboard.documents.create.error.linkRequired") || "Please enter a Google Drive link.",
+            variant: "destructive",
+          });
+          return;
+        }
+
+        const fileId = extractDriveFileId(newDocument.googleDriveLink);
+        if (!fileId) {
+          toast({
+            title: t("dashboard.documents.create.error.title") || "Validation Error",
+            description: t("dashboard.documents.create.error.invalidLink") || "Please enter a valid Google Drive link.",
+            variant: "destructive",
+          });
+          return;
+        }
+
+        documentData = {
+          ...documentData,
+          type: "googleDrive",
+          google_drive_link: newDocument.googleDriveLink.trim(),
+        };
+      } else if (createType === "text") {
+        documentData = {
+          ...documentData,
+          type: "text",
+          content: newDocument.content.trim() || "",
+        };
+      } else {
+        // Table type
+        const tableData: TableData = {
+          rows: newDocument.tableRows,
+          cols: newDocument.tableCols,
+          headers: newDocument.tableHeaders,
+          data: newDocument.tableData,
+        };
+
+        documentData = {
+          ...documentData,
+          type: "table",
+          table_data: tableData,
+        };
+      }
+
+      const createdDoc = await createDocument(documentData);
+
+      // Log history
+      if (user) {
+        await logHistory("document_created", user, createdDoc.id, createdDoc.title);
+      }
+
+      toast({
+        title: t("dashboard.documents.create.success.title") || "Document Created",
+        description: t("dashboard.documents.create.success.description") || "Your document has been created successfully!",
+      });
+
+      // Reset form
+      setNewDocument({
+        title: "",
+        description: "",
+        googleDriveLink: "",
+        content: "",
+        category: "General",
+        tableRows: 3,
+        tableCols: 3,
+        tableHeaders: [""],
+        tableData: [],
+      });
+      setCreateType("googleDrive");
+      setIsCreateDialogOpen(false);
+
+      // Reload documents
+      await loadDocumentsFromDatabase();
+    } catch (error: any) {
+      console.error("Error creating document:", error);
+      toast({
+        title: t("dashboard.documents.create.error.title") || "Error",
+        description: error.message || t("dashboard.documents.create.error.description") || "Failed to create document. Please try again.",
+        variant: "destructive",
+      });
     }
-
-    toast({
-      title: t("dashboard.documents.create.success.title") || "Document Created",
-      description: t("dashboard.documents.create.success.description") || "Your document has been created successfully!",
-    });
-
-    // Reset form
-    setNewDocument({
-      title: "",
-      description: "",
-      googleDriveLink: "",
-      content: "",
-      category: "General",
-      tableRows: 3,
-      tableCols: 3,
-      tableHeaders: [""],
-      tableData: [],
-    });
-    setCreateType("googleDrive");
-    setIsCreateDialogOpen(false);
   };
 
   const handleEditDocument = (doc: Document) => {
@@ -312,7 +330,7 @@ const DocumentsContent = () => {
     setIsEditDialogOpen(doc.id);
   };
 
-  const handleUpdateDocument = () => {
+  const handleUpdateDocument = async () => {
     if (!editingDocument || !newDocument.title.trim()) {
       toast({
         title: t("dashboard.documents.create.error.title") || "Validation Error",
@@ -322,86 +340,83 @@ const DocumentsContent = () => {
       return;
     }
 
-    const updatedDocuments = documents.map((doc) => {
-      if (doc.id === editingDocument.id) {
-        const updated: Document = {
-          ...doc,
-          title: newDocument.title.trim(),
-          description: newDocument.description.trim() || undefined,
-          category: newDocument.category,
-          updatedAt: new Date().toISOString(),
+    try {
+      const updates: any = {
+        title: newDocument.title.trim(),
+        description: newDocument.description.trim() || null,
+        category: newDocument.category,
+      };
+
+      if (editingDocument.type === "text") {
+        updates.content = newDocument.content.trim() || null;
+      } else if (editingDocument.type === "table") {
+        updates.table_data = {
+          rows: newDocument.tableRows,
+          cols: newDocument.tableCols,
+          headers: newDocument.tableHeaders,
+          data: newDocument.tableData,
         };
-
-        if (doc.type === "text") {
-          updated.content = newDocument.content.trim() || "";
-        } else if (doc.type === "table") {
-          updated.tableData = {
-            rows: newDocument.tableRows,
-            cols: newDocument.tableCols,
-            headers: newDocument.tableHeaders,
-            data: newDocument.tableData,
-          };
-        } else if (doc.type === "googleDrive" && newDocument.googleDriveLink) {
-          const fileId = extractDriveFileId(newDocument.googleDriveLink);
-          if (fileId) {
-            updated.googleDriveLink = newDocument.googleDriveLink.trim();
-            updated.fileType = detectFileType(newDocument.googleDriveLink);
-          }
+      } else if (editingDocument.type === "googleDrive" && newDocument.googleDriveLink) {
+        const fileId = extractDriveFileId(newDocument.googleDriveLink);
+        if (fileId) {
+          updates.google_drive_link = newDocument.googleDriveLink.trim();
         }
-
-        return updated;
       }
-      return doc;
-    });
 
-    saveDocuments(updatedDocuments);
-    setIsEditDialogOpen(null);
-    setEditingDocument(null);
+      await updateDocument(editingDocument.id, updates);
 
-    // Log history
-    if (user) {
-      const updatedDoc = updatedDocuments.find(doc => doc.id === editingDocument.id);
-      if (updatedDoc) {
-        logHistory(
-          "document",
-          "Updated document",
-          `Updated "${updatedDoc.title}"`,
-          user.id,
-          user.name,
-          user.image,
-          { documentId: updatedDoc.id, documentType: updatedDoc.type }
-        );
+      // Log history
+      if (user) {
+        await logHistory("document_updated", user, editingDocument.id, editingDocument.title);
       }
+
+      toast({
+        title: t("dashboard.documents.update.success.title") || "Document Updated",
+        description: t("dashboard.documents.update.success.description") || "Your document has been updated successfully!",
+      });
+
+      setIsEditDialogOpen(null);
+      setEditingDocument(null);
+
+      // Reload documents
+      await loadDocumentsFromDatabase();
+    } catch (error: any) {
+      console.error("Error updating document:", error);
+      toast({
+        title: t("dashboard.documents.update.error.title") || "Error",
+        description: error.message || t("dashboard.documents.update.error.description") || "Failed to update document. Please try again.",
+        variant: "destructive",
+      });
     }
-
-    toast({
-      title: t("dashboard.documents.update.success.title") || "Document Updated",
-      description: t("dashboard.documents.update.success.description") || "Your document has been updated successfully!",
-    });
   };
 
-  const handleDeleteDocument = (documentId: string) => {
+  const handleDeleteDocument = async (documentId: string) => {
     const docToDelete = documents.find((doc) => doc.id === documentId);
-    const updatedDocuments = documents.filter((doc) => doc.id !== documentId);
-    saveDocuments(updatedDocuments);
+    if (!docToDelete) return;
 
-    // Log history
-    if (user && docToDelete) {
-      logHistory(
-        "document",
-        "Deleted document",
-        `Deleted "${docToDelete.title}"`,
-        user.id,
-        user.name,
-        user.image,
-        { documentId: docToDelete.id, documentType: docToDelete.type }
-      );
+    try {
+      await deleteDocument(documentId, docToDelete.filePath);
+
+      // Log history
+      if (user && docToDelete) {
+        await logHistory("document_deleted", user, documentId, docToDelete.title);
+      }
+
+      toast({
+        title: t("dashboard.documents.delete.success.title") || "Document Deleted",
+        description: t("dashboard.documents.delete.success.description") || "Document has been removed.",
+      });
+
+      // Reload documents
+      await loadDocumentsFromDatabase();
+    } catch (error: any) {
+      console.error("Error deleting document:", error);
+      toast({
+        title: t("dashboard.documents.delete.error.title") || "Error",
+        description: error.message || t("dashboard.documents.delete.error.description") || "Failed to delete document. Please try again.",
+        variant: "destructive",
+      });
     }
-
-    toast({
-      title: t("dashboard.documents.delete.success.title") || "Document Deleted",
-      description: t("dashboard.documents.delete.success.description") || "Document has been removed.",
-    });
   };
 
   const handleTableHeaderChange = (index: number, value: string) => {
@@ -505,7 +520,7 @@ const DocumentsContent = () => {
     }
   };
 
-  const handleImportFromGoogleDrive = () => {
+  const handleImportFromGoogleDrive = async () => {
     if (!importDocument.title.trim()) {
       toast({
         title: t("dashboard.documents.create.error.title") || "Validation Error",
@@ -534,72 +549,106 @@ const DocumentsContent = () => {
       return;
     }
 
-    const documentItem: Document = {
-      id: `doc_${Date.now()}`,
-      title: importDocument.title.trim(),
-      description: importDocument.description.trim() || undefined,
-      type: "googleDrive",
-      googleDriveLink: importDocument.googleDriveLink.trim(),
-      category: importDocument.category,
-      createdBy: user?.id || "",
-      createdByName: user?.name || "Unknown User",
-      createdByImage: user?.image,
-      createdAt: new Date().toISOString(),
-      fileType: detectFileType(importDocument.googleDriveLink),
-    };
-
-    const updatedDocuments = [documentItem, ...documents];
-    saveDocuments(updatedDocuments);
-
-    // Log history
-    if (user) {
-      logHistory(
-        "document",
-        "Imported from Google Drive",
-        `Imported "${documentItem.title}" from Google Drive`,
-        user.id,
-        user.name,
-        user.image,
-        { documentId: documentItem.id, documentType: documentItem.type }
-      );
+    if (!user?.id) {
+      toast({
+        title: t("dashboard.documents.create.error.title") || "Error",
+        description: t("dashboard.documents.create.error.notLoggedIn") || "You must be logged in to import documents.",
+        variant: "destructive",
+      });
+      return;
     }
 
-    toast({
-      title: t("dashboard.documents.import.success.title") || "Document Imported",
-      description: t("dashboard.documents.import.success.description") || "Your document has been imported successfully!",
-    });
+    try {
+      const createdDoc = await createDocument({
+        title: importDocument.title.trim(),
+        description: importDocument.description.trim() || undefined,
+        type: "googleDrive",
+        google_drive_link: importDocument.googleDriveLink.trim(),
+        category: importDocument.category,
+        created_by: user.id,
+        created_by_name: user.name,
+        created_by_image: user.image,
+      });
 
-    // Reset form
-    setImportDocument({
-      title: "",
-      description: "",
-      googleDriveLink: "",
-      category: "General",
-    });
-    setIsImportDialogOpen(false);
+      // Log history
+      if (user) {
+        await logHistory("document_imported_drive", user, createdDoc.id, createdDoc.title);
+      }
+
+      toast({
+        title: t("dashboard.documents.import.success.title") || "Document Imported",
+        description: t("dashboard.documents.import.success.description") || "Your document has been imported successfully!",
+      });
+
+      // Reset form
+      setImportDocument({
+        title: "",
+        description: "",
+        googleDriveLink: "",
+        category: "General",
+      });
+      setIsImportDialogOpen(false);
+
+      // Reload documents
+      await loadDocumentsFromDatabase();
+    } catch (error: any) {
+      console.error("Error importing from Google Drive:", error);
+      toast({
+        title: t("dashboard.documents.import.error.title") || "Error",
+        description: error.message || t("dashboard.documents.import.error.description") || "Failed to import document. Please try again.",
+        variant: "destructive",
+      });
+    }
   };
 
-  const handleDownloadFile = (doc: Document) => {
-    if (!doc.fileData || !doc.fileName) return;
+  const handleDownloadFile = async (doc: Document) => {
+    if (!doc.fileName) return;
 
-    // Convert base64 to blob
-    const byteCharacters = atob(doc.fileData.split(',')[1]);
-    const byteNumbers = new Array(byteCharacters.length);
-    for (let i = 0; i < byteCharacters.length; i++) {
-      byteNumbers[i] = byteCharacters.charCodeAt(i);
+    try {
+      let fileUrl: string;
+
+      if (doc.filePath) {
+        // Get signed URL from Supabase Storage
+        fileUrl = await getDocumentFileUrl(doc.filePath);
+      } else if (doc.fileData) {
+        // Legacy: Convert base64 to blob (for old documents)
+        const byteCharacters = atob(doc.fileData.split(',')[1]);
+        const byteNumbers = new Array(byteCharacters.length);
+        for (let i = 0; i < byteCharacters.length; i++) {
+          byteNumbers[i] = byteCharacters.charCodeAt(i);
+        }
+        const byteArray = new Uint8Array(byteNumbers);
+        const blob = new Blob([byteArray], { type: doc.mimeType || "application/octet-stream" });
+        fileUrl = URL.createObjectURL(blob);
+      } else {
+        toast({
+          title: t("dashboard.documents.download.error.title") || "Error",
+          description: t("dashboard.documents.download.error.noFile") || "File not available for download.",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      // Create download link
+      const link = document.createElement('a');
+      link.href = fileUrl;
+      link.download = doc.fileName;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      
+      // Clean up object URL if it was created from base64
+      if (doc.fileData && !doc.filePath) {
+        URL.revokeObjectURL(fileUrl);
+      }
+    } catch (error: any) {
+      console.error("Error downloading file:", error);
+      toast({
+        title: t("dashboard.documents.download.error.title") || "Error",
+        description: error.message || t("dashboard.documents.download.error.description") || "Failed to download file. Please try again.",
+        variant: "destructive",
+      });
     }
-    const byteArray = new Uint8Array(byteNumbers);
-    const blob = new Blob([byteArray], { type: doc.mimeType || "application/octet-stream" });
-
-    // Create download link
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement('a');
-    link.href = url;
-    link.download = doc.fileName;
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-    URL.revokeObjectURL(url);
   };
 
   const formatFileSize = (bytes: number): string => {
@@ -611,6 +660,15 @@ const DocumentsContent = () => {
   };
 
   const processFile = async (file: File) => {
+    if (!user?.id) {
+      toast({
+        title: t("dashboard.documents.import.error.title") || "Error",
+        description: t("dashboard.documents.import.error.notLoggedIn") || "You must be logged in to upload files.",
+        variant: "destructive",
+      });
+      return;
+    }
+
     // Validate file size (max 10MB)
     const maxSize = 10 * 1024 * 1024; // 10MB
     if (file.size > maxSize) {
@@ -622,10 +680,10 @@ const DocumentsContent = () => {
       return;
     }
 
-    // Convert file to base64
-    const reader = new FileReader();
-    reader.onloadend = () => {
-      const base64String = reader.result as string;
+    try {
+      // Upload file to Supabase Storage
+      const uploadResult = await uploadDocumentFile(file, user.id);
+      
       const mimeType = file.type || "application/octet-stream";
       
       // Extract file extension and determine file type
@@ -644,54 +702,40 @@ const DocumentsContent = () => {
       // Use file name as title (without extension)
       const titleWithoutExt = fileName.replace(/\.[^/.]+$/, "");
 
-      const documentItem: Document = {
-        id: `doc_${Date.now()}`,
+      const createdDoc = await createDocument({
         title: titleWithoutExt,
         description: `${t("dashboard.documents.import.uploaded") || "Uploaded"}: ${fileName}`,
         type: "uploaded",
-        fileData: base64String,
-        fileName: fileName,
-        fileSize: file.size,
-        mimeType: mimeType,
+        file_path: uploadResult.path,
+        file_name: uploadResult.fileName,
+        file_size: uploadResult.fileSize,
+        mime_type: uploadResult.mimeType,
         category: "General",
-        createdBy: user?.id || "",
-        createdByName: user?.name || "Unknown User",
-        createdByImage: user?.image,
-        createdAt: new Date().toISOString(),
-        fileType: fileType,
-      };
-
-      const updatedDocuments = [documentItem, ...documents];
-      saveDocuments(updatedDocuments);
+        created_by: user.id,
+        created_by_name: user.name,
+        created_by_image: user.image,
+      });
 
       // Log history
       if (user) {
-        logHistory(
-          "document",
-          "Imported file",
-          `Imported "${documentItem.title}" from computer`,
-          user.id,
-          user.name,
-          user.image,
-          { documentId: documentItem.id, fileName: fileName, fileType: fileType }
-        );
+        await logHistory("document_imported_computer", user, createdDoc.id, createdDoc.title);
       }
 
       toast({
         title: t("dashboard.documents.import.success.title") || "File Imported",
         description: t("dashboard.documents.import.success.description") || "Your file has been imported successfully!",
       });
-    };
 
-    reader.onerror = () => {
+      // Reload documents
+      await loadDocumentsFromDatabase();
+    } catch (error: any) {
+      console.error("Error uploading file:", error);
       toast({
-        title: t("dashboard.documents.import.error.title") || "Import Error",
-        description: t("dashboard.documents.import.error.read") || "Failed to read file. Please try again.",
+        title: t("dashboard.documents.import.error.title") || "Error",
+        description: error.message || t("dashboard.documents.import.error.description") || "Failed to upload file. Please try again.",
         variant: "destructive",
       });
-    };
-
-    reader.readAsDataURL(file);
+    }
   };
 
   const handleDragEnter = (e: React.DragEvent) => {

@@ -1,9 +1,12 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import { supabase } from '@/lib/supabase';
+import type { User as SupabaseUser, Session } from '@supabase/supabase-js';
+import { db } from '@/lib/database';
 
 export type UserRole = 'superadmin' | 'admin' | 'member';
-export type MemberStatus = 'approved' | 'pending' | 'rejected';
+export type MemberStatus = 'pending' | 'approved' | 'rejected';
 
-interface User {
+export interface User {
   id: string;
   name: string;
   email: string;
@@ -26,9 +29,12 @@ interface AuthContextType {
   isAuthenticated: boolean;
   isAdmin: boolean;
   isSuperAdmin: boolean;
-  login: (userData: User) => void;
-  logout: () => void;
-  updateUser: (userData: Partial<User>) => void;
+  login: (userData: User) => Promise<void>;
+  logout: () => Promise<void>;
+  updateUser: (userData: Partial<User>) => Promise<void>;
+  signInWithEmail: (email: string, password: string) => Promise<void>;
+  signUpWithEmail: (email: string, password: string, name: string) => Promise<void>;
+  signInWithGoogle: (idToken: string) => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -41,80 +47,342 @@ export const useAuth = () => {
   return context;
 };
 
+// Export resetPassword function
+export type AuthContextType = {
+  user: User | null;
+  isLoading: boolean;
+  login: (userData: User) => Promise<void>;
+  logout: () => Promise<void>;
+  updateUser: (userData: Partial<User>) => Promise<void>;
+  signInWithEmail: (email: string, password: string) => Promise<void>;
+  signUpWithEmail: (email: string, password: string, name: string) => Promise<void>;
+  signInWithGoogle: (idToken: string) => Promise<void>;
+  resetPassword: (email: string) => Promise<void>;
+};
+
 interface AuthProviderProps {
   children: ReactNode;
 }
+
+// Helper function to convert Supabase user to our User type
+const convertSupabaseUserToUser = (dbUser: any): User => {
+  return {
+    id: dbUser.id,
+    name: dbUser.name,
+    email: dbUser.email,
+    image: dbUser.image || undefined,
+    provider: dbUser.provider || undefined,
+    bio: dbUser.bio || undefined,
+    hashtags: dbUser.hashtags || undefined,
+    location: dbUser.location || undefined,
+    website: dbUser.website || undefined,
+    phone: dbUser.phone || undefined,
+    role: dbUser.role || 'member',
+    status: dbUser.status || 'pending',
+    createdAt: dbUser.created_at,
+    approvedAt: dbUser.approved_at || undefined,
+    approvedBy: dbUser.approved_by || undefined,
+  };
+};
 
 export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
+  // Load user from Supabase on mount and listen for auth changes
   useEffect(() => {
-    // Load user from localStorage on mount
-    const storedUser = localStorage.getItem('user');
-    if (storedUser) {
-      try {
-        const parsedUser = JSON.parse(storedUser);
-        // If user doesn't have role, set as superadmin if first user, otherwise member
-        if (!parsedUser.role) {
-          const members = JSON.parse(localStorage.getItem('bamas_members') || '[]');
-          if (members.length === 0) {
-            parsedUser.role = 'superadmin';
-            parsedUser.status = 'approved';
-          } else {
-            parsedUser.role = 'member';
-            parsedUser.status = parsedUser.status || 'pending';
-          }
-          localStorage.setItem('user', JSON.stringify(parsedUser));
-        }
-        setUser(parsedUser);
-      } catch (error) {
-        console.error('Error parsing user data:', error);
-        localStorage.removeItem('user');
+    // Get initial session
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      if (session) {
+        loadUserFromDatabase(session.user.id);
+      } else {
+        setIsLoading(false);
       }
-    }
-    setIsLoading(false);
+    });
+
+    // Listen for auth changes
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange(async (event, session) => {
+      if (session) {
+        await loadUserFromDatabase(session.user.id);
+      } else {
+        setUser(null);
+        setIsLoading(false);
+      }
+    });
+
+    return () => {
+      subscription.unsubscribe();
+    };
   }, []);
 
-  const login = (userData: User) => {
-    // Check if this is a new user or existing
-    const existingMembers = JSON.parse(localStorage.getItem('bamas_members') || '[]');
-    const existingMember = existingMembers.find((m: User) => m.id === userData.id || m.email === userData.email);
-    
-    let finalUserData: User;
-    
-    if (existingMember) {
-      // Existing member - use their stored data
-      finalUserData = { ...existingMember, ...userData };
-    } else {
-      // New user - check if first user (superadmin) or regular (pending)
-      const isFirstUser = existingMembers.length === 0;
-      finalUserData = {
-        ...userData,
-        role: isFirstUser ? 'superadmin' : 'member',
-        status: isFirstUser ? 'approved' : 'pending',
-        createdAt: new Date().toISOString(),
-      };
+  const loadUserFromDatabase = async (userId: string) => {
+    try {
+      let dbUser = await db.fetchById('users', userId);
       
-      // Add to members list
-      const updatedMembers = [...existingMembers, finalUserData];
-      localStorage.setItem('bamas_members', JSON.stringify(updatedMembers));
+      if (!dbUser) {
+        // User doesn't exist in database yet - create it using the function
+        // This can happen if signup was interrupted or email confirmation is pending
+        const { data: authUser } = await supabase.auth.getUser();
+        if (authUser?.user) {
+          const userMetadata = authUser.user.user_metadata || {};
+          const { error: functionError } = await supabase.rpc('create_user_profile', {
+            user_id: userId,
+            user_name: userMetadata.name || authUser.user.email?.split('@')[0] || 'User',
+            user_email: authUser.user.email || '',
+            user_provider: authUser.user.app_metadata?.provider || 'email',
+            user_image: userMetadata.avatar_url || userMetadata.picture || null,
+          });
+
+          if (!functionError) {
+            // Retry fetching the user
+            dbUser = await db.fetchById('users', userId);
+          }
+        }
+      }
+
+      if (dbUser) {
+        setUser(convertSupabaseUserToUser(dbUser));
+      } else {
+        console.warn('User not found in database:', userId);
+        setUser(null);
+      }
+    } catch (error) {
+      console.error('Error loading user from database:', error);
+      setUser(null);
+    } finally {
+      setIsLoading(false);
     }
-    
-    setUser(finalUserData);
-    localStorage.setItem('user', JSON.stringify(finalUserData));
   };
 
-  const logout = () => {
+  const checkIfFirstUser = async (): Promise<boolean> => {
+    try {
+      const users = await db.fetchAll('users');
+      return users.length === 0;
+    } catch (error) {
+      console.error('Error checking if first user:', error);
+      return false;
+    }
+  };
+
+  const login = async (userData: User) => {
+    try {
+      // Check if user exists in database
+      let dbUser;
+      try {
+        dbUser = await db.fetchById('users', userData.id);
+      } catch (error) {
+        // User doesn't exist, will create below
+        dbUser = null;
+      }
+
+      if (dbUser) {
+        // Existing user - update with latest data and load
+        const updated = await db.update('users', userData.id, {
+          name: userData.name,
+          email: userData.email,
+          image: userData.image,
+          provider: userData.provider,
+        });
+        setUser(convertSupabaseUserToUser(updated));
+      } else {
+        // New user - use database function to create profile (bypasses RLS)
+        const { error: functionError } = await supabase.rpc('create_user_profile', {
+          user_id: userData.id,
+          user_name: userData.name,
+          user_email: userData.email,
+          user_provider: userData.provider || null,
+          user_image: userData.image || null,
+        });
+
+        if (functionError) {
+          console.error('Error creating user profile:', functionError);
+          throw functionError;
+        }
+
+        // Reload user from database
+        const newUser = await db.fetchById('users', userData.id);
+        if (newUser) {
+          setUser(convertSupabaseUserToUser(newUser));
+        }
+      }
+    } catch (error) {
+      console.error('Error in login:', error);
+      throw error;
+    }
+  };
+
+  const logout = async () => {
+    try {
+      const { error } = await supabase.auth.signOut();
+      if (error) throw error;
     setUser(null);
-    localStorage.removeItem('user');
+    } catch (error) {
+      console.error('Error logging out:', error);
+      throw error;
+    }
   };
 
-  const updateUser = (userData: Partial<User>) => {
-    if (user) {
-      const updatedUser = { ...user, ...userData };
-      setUser(updatedUser);
-      localStorage.setItem('user', JSON.stringify(updatedUser));
+  const updateUser = async (userData: Partial<User>) => {
+    if (!user) throw new Error('No user logged in');
+
+    try {
+      const updates: any = {};
+      if (userData.name !== undefined) updates.name = userData.name;
+      if (userData.email !== undefined) updates.email = userData.email;
+      if (userData.image !== undefined) updates.image = userData.image || null;
+      if (userData.bio !== undefined) updates.bio = userData.bio || null;
+      if (userData.hashtags !== undefined) updates.hashtags = userData.hashtags || null;
+      if (userData.location !== undefined) updates.location = userData.location || null;
+      if (userData.website !== undefined) updates.website = userData.website || null;
+      if (userData.phone !== undefined) updates.phone = userData.phone || null;
+
+      const updated = await db.update('users', user.id, updates);
+      setUser(convertSupabaseUserToUser(updated));
+    } catch (error) {
+      console.error('Error updating user:', error);
+      throw error;
+    }
+  };
+
+  const signInWithEmail = async (email: string, password: string) => {
+    try {
+      // Trim email to avoid whitespace issues
+      const trimmedEmail = email.trim().toLowerCase();
+      
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email: trimmedEmail,
+        password,
+      });
+
+      if (error) {
+        console.error('Supabase login error:', error);
+        
+        // Create user-friendly error message
+        let errorMessage = 'Invalid email or password. Please check your credentials and try again.';
+        
+        if (error.message.includes('Email not confirmed') || error.message.includes('email_not_confirmed')) {
+          errorMessage = 'Please confirm your email address before logging in. Check your inbox for the confirmation link from Supabase.';
+        } else if (error.message.includes('Invalid login credentials') || 
+                   error.message.includes('invalid_credentials') ||
+                   error.message.includes('Invalid login')) {
+          errorMessage = 'Invalid email or password. Please check your credentials. If you forgot your password, please reset it.';
+        } else if (error.message) {
+          errorMessage = error.message;
+        }
+        
+        const authError = new Error(errorMessage);
+        (authError as any).code = error.code;
+        throw authError;
+      }
+
+      if (data.user) {
+        // Ensure user profile exists in database
+        await loadUserFromDatabase(data.user.id);
+      } else {
+        throw new Error('Login failed: No user data returned');
+      }
+    } catch (error: any) {
+      console.error('Error signing in with email:', error);
+      throw error;
+    }
+  };
+  
+  const resetPassword = async (email: string) => {
+    try {
+      const { error } = await supabase.auth.resetPasswordForEmail(email.trim().toLowerCase(), {
+        redirectTo: `${window.location.origin}/reset-password`,
+      });
+      
+      if (error) throw error;
+    } catch (error: any) {
+      console.error('Error resetting password:', error);
+      throw error;
+    }
+  };
+
+  const signUpWithEmail = async (email: string, password: string, name: string) => {
+    try {
+      const { data, error } = await supabase.auth.signUp({
+        email,
+        password,
+        options: {
+          data: {
+            name,
+          },
+        },
+      });
+
+      if (error) throw error;
+
+      if (data.user) {
+        // Use database function to create user profile (bypasses RLS)
+        const { data: userId, error: functionError } = await supabase.rpc('create_user_profile', {
+          user_id: data.user.id,
+          user_name: name,
+          user_email: email,
+          user_provider: 'email',
+          user_image: null,
+        });
+
+        if (functionError) {
+          console.error('Error creating user profile:', functionError);
+          throw functionError;
+        }
+
+        // Wait a bit for the session to be established
+        await new Promise((resolve) => setTimeout(resolve, 500));
+
+        // Try to load user from database
+        await loadUserFromDatabase(data.user.id);
+      }
+    } catch (error: any) {
+      console.error('Error signing up with email:', error);
+      throw error;
+    }
+  };
+
+  const signInWithGoogle = async (idToken: string) => {
+    try {
+      const { data, error } = await supabase.auth.signInWithIdToken({
+        provider: 'google',
+        token: idToken,
+      });
+
+      if (error) throw error;
+
+      if (data.user) {
+        // Check if user exists in database, if not create
+        let dbUser;
+        try {
+          dbUser = await db.fetchById('users', data.user.id);
+        } catch (error) {
+          dbUser = null;
+        }
+
+        if (!dbUser) {
+          // Use database function to create user profile (bypasses RLS)
+          const userMetadata = data.user.user_metadata || {};
+          const { error: functionError } = await supabase.rpc('create_user_profile', {
+            user_id: data.user.id,
+            user_name: userMetadata.name || userMetadata.full_name || data.user.email?.split('@')[0] || 'User',
+            user_email: data.user.email || '',
+            user_provider: 'google',
+            user_image: userMetadata.avatar_url || userMetadata.picture || null,
+          });
+
+          if (functionError) {
+            console.error('Error creating user profile:', functionError);
+            throw functionError;
+          }
+        }
+
+        await loadUserFromDatabase(data.user.id);
+      }
+    } catch (error: any) {
+      console.error('Error signing in with Google:', error);
+      throw error;
     }
   };
 
@@ -139,6 +407,9 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         login,
         logout,
         updateUser,
+        signInWithEmail,
+        signUpWithEmail,
+        signInWithGoogle,
       }}
     >
       {children}

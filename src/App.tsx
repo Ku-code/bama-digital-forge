@@ -76,6 +76,13 @@ const AppContent: React.FC = () => {
 
   const googleClientId = import.meta.env.VITE_GOOGLE_CLIENT_ID || "";
   
+  // Check if Supabase is configured
+  const isSupabaseConfigured = !!(import.meta.env.VITE_SUPABASE_URL && import.meta.env.VITE_SUPABASE_ANON_KEY);
+  
+  if (!isSupabaseConfigured && import.meta.env.MODE === 'production') {
+    console.warn('⚠️ Supabase is not configured. Some features may not work.');
+  }
+  
   return (
     <GoogleOAuthProvider clientId={googleClientId}>
       <QueryClientProvider client={queryClient}>

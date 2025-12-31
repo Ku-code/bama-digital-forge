@@ -5,6 +5,8 @@ import { componentTagger } from "lovable-tagger";
 
 // https://vitejs.dev/config/
 export default defineConfig(({ mode }) => ({
+  // Base path for deployment (empty for root, or set to repo name for GitHub Pages)
+  base: process.env.BASE_PATH || '/',
   server: {
     host: "::",
     port: 8080,
@@ -20,6 +22,8 @@ export default defineConfig(({ mode }) => ({
     },
   },
   build: {
+    outDir: 'dist',
+    sourcemap: false,
     rollupOptions: {
       output: {
         manualChunks: {
@@ -30,6 +34,8 @@ export default defineConfig(({ mode }) => ({
       },
     },
     chunkSizeWarningLimit: 1000,
+    // Copy 404.html for GitHub Pages SPA routing
+    copyPublicDir: true,
   },
   optimizeDeps: {
     include: ['react', 'react-dom', 'react-router-dom'],

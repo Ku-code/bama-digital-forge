@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-import { supabase } from '@/lib/supabase';
+import { supabase, isSupabaseConfigured } from '@/lib/supabase';
 import type { User as SupabaseUser, Session } from '@supabase/supabase-js';
 import { db } from '@/lib/database';
 
@@ -91,14 +91,31 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
   // Load user from Supabase on mount and listen for auth changes
   useEffect(() => {
+    // Only initialize Supabase if it's configured
+    if (!isSupabaseConfigured()) {
+      console.warn('⚠️ Supabase is not configured. Authentication features will not work.');
+      setIsLoading(false);
+      return;
+    }
+
     // Get initial session
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      if (session) {
-        loadUserFromDatabase(session.user.id);
-      } else {
+    supabase.auth.getSession()
+      .then(({ data: { session }, error }) => {
+        if (error) {
+          console.error('Error getting session:', error);
+          setIsLoading(false);
+          return;
+        }
+        if (session) {
+          loadUserFromDatabase(session.user.id);
+        } else {
+          setIsLoading(false);
+        }
+      })
+      .catch((error) => {
+        console.error('Failed to get session:', error);
         setIsLoading(false);
-      }
-    });
+      });
 
     // Listen for auth changes
     const {

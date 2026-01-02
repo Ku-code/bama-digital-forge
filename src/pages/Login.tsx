@@ -75,9 +75,16 @@ const Login = () => {
   };
 
   const handleGoogleError = () => {
+    const googleClientId = import.meta.env.VITE_GOOGLE_CLIENT_ID;
+    let errorMessage = t("auth.google.error.description") || "Failed to login with Google. Please try again or use email/password login.";
+    
+    if (!googleClientId) {
+      errorMessage = "Google authentication is not configured. Please use email/password login or contact the administrator.";
+    }
+    
     toast({
       title: t("auth.google.error.title") || "Google Login Failed",
-      description: t("auth.google.error.description") || "Failed to login with Google. Please try again or use email/password login.",
+      description: errorMessage,
       variant: "destructive",
     });
   };
@@ -108,27 +115,35 @@ const Login = () => {
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
-              <GoogleLogin
-                onSuccess={handleGoogleSuccess}
-                onError={handleGoogleError}
-                useOneTap
-                theme="filled_black"
-                size="large"
-                text="signin_with"
-                shape="rectangular"
-                locale={language === "bg" ? "bg" : "en"}
-              />
-              
-              <div className="relative">
-                <div className="absolute inset-0 flex items-center">
-                  <Separator />
+              {import.meta.env.VITE_GOOGLE_CLIENT_ID ? (
+                <>
+                  <GoogleLogin
+                    onSuccess={handleGoogleSuccess}
+                    onError={handleGoogleError}
+                    useOneTap
+                    theme="filled_black"
+                    size="large"
+                    text="signin_with"
+                    shape="rectangular"
+                    locale={language === "bg" ? "bg" : "en"}
+                  />
+                  
+                  <div className="relative">
+                    <div className="absolute inset-0 flex items-center">
+                      <Separator />
+                    </div>
+                    <div className="relative flex justify-center text-xs uppercase">
+                      <span className="bg-card px-2 text-muted-foreground">
+                        {t("auth.or") || "Or continue with"}
+                      </span>
+                    </div>
+                  </div>
+                </>
+              ) : (
+                <div className="p-4 bg-muted rounded-lg text-center text-sm text-muted-foreground">
+                  {t("auth.google.notConfigured") || "Google authentication is not configured. Please use email/password login."}
                 </div>
-                <div className="relative flex justify-center text-xs uppercase">
-                  <span className="bg-card px-2 text-muted-foreground">
-                    {t("auth.or") || "Or continue with"}
-                  </span>
-                </div>
-              </div>
+              )}
 
               <form onSubmit={handleSubmit} className="space-y-4">
                 <div className="space-y-2">
@@ -175,6 +190,14 @@ const Login = () => {
                         <Eye className="h-4 w-4 text-muted-foreground" />
                       )}
                     </Button>
+                  </div>
+                  <div className="flex justify-end">
+                    <Link 
+                      to="/forgot-password" 
+                      className="text-sm text-primary hover:underline"
+                    >
+                      {t("auth.forgotPassword.link") || "Forgot Password?"}
+                    </Link>
                   </div>
                 </div>
                 <Button 

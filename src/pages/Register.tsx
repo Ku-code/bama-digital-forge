@@ -118,27 +118,35 @@ const Register = () => {
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
-              <GoogleLogin
-                onSuccess={handleGoogleSuccess}
-                onError={handleGoogleError}
-                useOneTap
-                theme="filled_black"
-                size="large"
-                text="signup_with"
-                shape="rectangular"
-                locale={language === "bg" ? "bg" : "en"}
-              />
-              
-              <div className="relative">
-                <div className="absolute inset-0 flex items-center">
-                  <Separator />
+              {import.meta.env.VITE_GOOGLE_CLIENT_ID ? (
+                <>
+                  <GoogleLogin
+                    onSuccess={handleGoogleSuccess}
+                    onError={handleGoogleError}
+                    useOneTap
+                    theme="filled_black"
+                    size="large"
+                    text="signup_with"
+                    shape="rectangular"
+                    locale={language === "bg" ? "bg" : "en"}
+                  />
+                  
+                  <div className="relative">
+                    <div className="absolute inset-0 flex items-center">
+                      <Separator />
+                    </div>
+                    <div className="relative flex justify-center text-xs uppercase">
+                      <span className="bg-card px-2 text-muted-foreground">
+                        {t("auth.or") || "Or continue with"}
+                      </span>
+                    </div>
+                  </div>
+                </>
+              ) : (
+                <div className="p-4 bg-muted rounded-lg text-center text-sm text-muted-foreground">
+                  {t("auth.google.notConfigured") || "Google authentication is not configured. Please use email/password registration."}
                 </div>
-                <div className="relative flex justify-center text-xs uppercase">
-                  <span className="bg-card px-2 text-muted-foreground">
-                    {t("auth.or") || "Or continue with"}
-                  </span>
-                </div>
-              </div>
+              )}
 
               <form onSubmit={handleSubmit} className="space-y-4">
                 <div className="space-y-2">

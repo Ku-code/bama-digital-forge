@@ -35,6 +35,7 @@ interface AuthContextType {
   signInWithEmail: (email: string, password: string) => Promise<void>;
   signUpWithEmail: (email: string, password: string, name: string) => Promise<void>;
   signInWithGoogle: (idToken: string) => Promise<void>;
+  resetPassword: (email: string) => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -45,19 +46,6 @@ export const useAuth = () => {
     throw new Error('useAuth must be used within an AuthProvider');
   }
   return context;
-};
-
-// Export resetPassword function
-export type AuthContextType = {
-  user: User | null;
-  isLoading: boolean;
-  login: (userData: User) => Promise<void>;
-  logout: () => Promise<void>;
-  updateUser: (userData: Partial<User>) => Promise<void>;
-  signInWithEmail: (email: string, password: string) => Promise<void>;
-  signUpWithEmail: (email: string, password: string, name: string) => Promise<void>;
-  signInWithGoogle: (idToken: string) => Promise<void>;
-  resetPassword: (email: string) => Promise<void>;
 };
 
 interface AuthProviderProps {
@@ -362,12 +350,35 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
   const signInWithGoogle = async (idToken: string) => {
     try {
+      if (!isSupabaseConfigured()) {
+        throw new Error('Supabase is not configured. Please check your environment variables.');
+      }
+
       const { data, error } = await supabase.auth.signInWithIdToken({
         provider: 'google',
         token: idToken,
       });
 
-      if (error) throw error;
+      if (error) {
+        console.error('Google OAuth error:', error);
+        
+        // Provide user-friendly error messages
+        let errorMessage = 'Failed to sign in with Google. Please try again.';
+        
+        if (error.message.includes('provider_disabled') || error.message.includes('Provider not enabled')) {
+          errorMessage = 'Google authentication is not enabled. Please contact the administrator or use email/password login.';
+        } else if (error.message.includes('invalid_token') || error.message.includes('Invalid token')) {
+          errorMessage = 'Invalid Google authentication token. Please try again.';
+        } else if (error.message.includes('network') || error.message.includes('fetch')) {
+          errorMessage = 'Network error. Please check your internet connection and try again.';
+        } else if (error.message) {
+          errorMessage = error.message;
+        }
+        
+        const authError = new Error(errorMessage);
+        (authError as any).code = error.code;
+        throw authError;
+      }
 
       if (data.user) {
         // Check if user exists in database, if not create
@@ -427,6 +438,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         signInWithEmail,
         signUpWithEmail,
         signInWithGoogle,
+        resetPassword,
       }}
     >
       {children}

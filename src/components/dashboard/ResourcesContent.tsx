@@ -26,7 +26,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/hooks/use-toast";
 import { logHistory } from "@/lib/history";
 import { loadResources, createResource, updateResource, deleteResource, uploadResourceFile, getResourceFileUrl, Resource as SupabaseResource } from "@/lib/resources";
-import { FileText, Plus, Search, Filter, X, File, Calendar, Edit, Save, Trash2, Upload, Download, LayoutGrid, List, Grid } from "lucide-react";
+import { FileText, Plus, Search, Filter, X, File, Calendar, Edit, Save, Trash2, Upload, Download, LayoutGrid, List, Grid, ArrowUpDown, ArrowUp, ArrowDown } from "lucide-react";
 import { format } from "date-fns";
 
 interface Resource {
@@ -58,6 +58,9 @@ const ResourcesContent = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState<string>("all");
   const [viewMode, setViewMode] = useState<"grid" | "list" | "icons">("grid");
+  const [sortBy, setSortBy] = useState<"date" | "name" | "size" | "category">("date");
+  const [sortOrder, setSortOrder] = useState<"asc" | "desc">("desc");
+  const [isLoading, setIsLoading] = useState(false);
   const [newResource, setNewResource] = useState({
     title: "",
     description: "",
@@ -74,6 +77,7 @@ const ResourcesContent = () => {
   }, []);
 
   const loadResourcesFromDatabase = async () => {
+    setIsLoading(true);
     try {
       const loadedResources = await loadResources();
       const convertedResources: Resource[] = loadedResources.map((resource: SupabaseResource) => ({
@@ -93,13 +97,20 @@ const ResourcesContent = () => {
         filePath: resource.file_path,
       }));
       setResources(convertedResources);
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error loading resources:", error);
+      const errorMessage = error?.message || error?.error?.message || "Unknown error";
       toast({
         title: t("dashboard.resources.error.title") || "Error",
-        description: t("dashboard.resources.error.loadFailed") || "Failed to load resources. Please try again.",
+        description: errorMessage.includes("relation") || errorMessage.includes("does not exist")
+          ? "Resources table not found. Please run the database migration first."
+          : errorMessage.includes("permission") || errorMessage.includes("policy")
+          ? "You don't have permission to access resources. Please contact an administrator."
+          : t("dashboard.resources.error.loadFailed") || "Failed to load resources. Please try again.",
         variant: "destructive",
       });
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -164,9 +175,16 @@ const ResourcesContent = () => {
       await loadResourcesFromDatabase();
     } catch (error: any) {
       console.error("Error uploading file:", error);
+      const errorMessage = error?.message || error?.error?.message || "Unknown error";
       toast({
         title: t("dashboard.resources.upload.error.title") || "Upload Failed",
-        description: error.message || t("dashboard.resources.upload.error.description") || "Failed to upload resource. Please try again.",
+        description: errorMessage.includes("bucket") || errorMessage.includes("not found")
+          ? "Storage bucket 'resources' not found. Please create it in Supabase Storage settings."
+          : errorMessage.includes("permission") || errorMessage.includes("policy")
+          ? "You don't have permission to upload resources. Please contact an administrator."
+          : errorMessage.includes("size") || errorMessage.includes("too large")
+          ? "File is too large. Please upload a smaller file."
+          : errorMessage || t("dashboard.resources.upload.error.description") || "Failed to upload resource. Please try again.",
         variant: "destructive",
       });
     }
@@ -427,15 +445,42 @@ const ResourcesContent = () => {
     };
   }, []);
 
-  // Filter resources based on search and category
-  const filteredResources = resources.filter((resource) => {
-    const matchesSearch =
-      resource.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      resource.description?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      resource.category.toLowerCase().includes(searchQuery.toLowerCase());
-    const matchesCategory = selectedCategory === "all" || resource.category === selectedCategory;
-    return matchesSearch && matchesCategory;
-  });
+  // Filter and sort resources
+  const filteredAndSortedResources = resources
+    .filter((resource) => {
+      const matchesSearch =
+        resource.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        resource.description?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        resource.category.toLowerCase().includes(searchQuery.toLowerCase());
+      const matchesCategory = selectedCategory === "all" || resource.category === selectedCategory;
+      return matchesSearch && matchesCategory;
+    })
+    .sort((a, b) => {
+      let comparison = 0;
+      
+      switch (sortBy) {
+        case "name":
+          comparison = a.title.localeCompare(b.title);
+          break;
+        case "date":
+          const dateA = new Date(a.updatedAt || a.createdAt).getTime();
+          const dateB = new Date(b.updatedAt || b.createdAt).getTime();
+          comparison = dateA - dateB;
+          break;
+        case "size":
+          const sizeA = a.fileSize || 0;
+          const sizeB = b.fileSize || 0;
+          comparison = sizeA - sizeB;
+          break;
+        case "category":
+          comparison = a.category.localeCompare(b.category);
+          break;
+        default:
+          comparison = 0;
+      }
+      
+      return sortOrder === "asc" ? comparison : -comparison;
+    });
 
   const formatFileSize = (bytes?: number): string => {
     if (!bytes) return "Unknown";
@@ -482,66 +527,97 @@ const ResourcesContent = () => {
         </Button>
       </div>
 
-      {/* Search and Filter */}
-      {resources.length > 0 && (
-        <div className="flex gap-4 items-center flex-wrap">
-          <div className="relative flex-1 min-w-[200px]">
-            <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-            <Input
-              placeholder={t("dashboard.resources.search.placeholder") || "Search resources..."}
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="pl-10 rounded-full"
-            />
-          </div>
-          <Select value={selectedCategory} onValueChange={setSelectedCategory}>
-            <SelectTrigger className="w-[180px] rounded-full">
-              <Filter className="mr-2 h-4 w-4" />
-              <SelectValue placeholder={t("dashboard.resources.filter.category") || "All Categories"} />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">{t("dashboard.resources.filter.all") || "All Categories"}</SelectItem>
-              {CATEGORIES.map((category) => (
-                <SelectItem key={category} value={category}>
-                  {category}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-          {/* View Toggle Buttons */}
-          <div className="flex items-center gap-1 border rounded-full p-1 bg-muted/50">
-            <Button
-              variant={viewMode === "grid" ? "default" : "ghost"}
-              size="sm"
-              onClick={() => setViewMode("grid")}
-              className="rounded-full h-8 w-8 p-0"
-              aria-label="Grid view"
-            >
-              <LayoutGrid className="h-4 w-4" />
-            </Button>
-            <Button
-              variant={viewMode === "list" ? "default" : "ghost"}
-              size="sm"
-              onClick={() => setViewMode("list")}
-              className="rounded-full h-8 w-8 p-0"
-              aria-label="List view"
-            >
-              <List className="h-4 w-4" />
-            </Button>
-            <Button
-              variant={viewMode === "icons" ? "default" : "ghost"}
-              size="sm"
-              onClick={() => setViewMode("icons")}
-              className="rounded-full h-8 w-8 p-0"
-              aria-label="Icons view"
-            >
-              <Grid className="h-4 w-4" />
-            </Button>
-          </div>
+      {/* Search, Filter, Sort, and View Controls */}
+      <div className="flex gap-4 items-center flex-wrap">
+        <div className="relative flex-1 min-w-[200px]">
+          <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+          <Input
+            placeholder={t("dashboard.resources.search.placeholder") || "Search resources..."}
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="pl-10 rounded-full"
+          />
         </div>
-      )}
+        <Select value={selectedCategory} onValueChange={setSelectedCategory}>
+          <SelectTrigger className="w-[180px] rounded-full">
+            <Filter className="mr-2 h-4 w-4" />
+            <SelectValue placeholder={t("dashboard.resources.filter.category") || "All Categories"} />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">{t("dashboard.resources.filter.all") || "All Categories"}</SelectItem>
+            {CATEGORIES.map((category) => (
+              <SelectItem key={category} value={category}>
+                {category}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+        <Select value={sortBy} onValueChange={(value) => setSortBy(value as typeof sortBy)}>
+          <SelectTrigger className="w-[150px] rounded-full">
+            <ArrowUpDown className="mr-2 h-4 w-4" />
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="date">{t("dashboard.resources.sort.date") || "Date"}</SelectItem>
+            <SelectItem value="name">{t("dashboard.resources.sort.name") || "Name"}</SelectItem>
+            <SelectItem value="size">{t("dashboard.resources.sort.size") || "Size"}</SelectItem>
+            <SelectItem value="category">{t("dashboard.resources.sort.category") || "Category"}</SelectItem>
+          </SelectContent>
+        </Select>
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={() => setSortOrder(sortOrder === "asc" ? "desc" : "asc")}
+          className="rounded-full"
+          aria-label="Toggle sort order"
+        >
+          {sortOrder === "asc" ? (
+            <ArrowUp className="h-4 w-4" />
+          ) : (
+            <ArrowDown className="h-4 w-4" />
+          )}
+        </Button>
+        {/* View Toggle Buttons */}
+        <div className="flex items-center gap-1 border rounded-full p-1 bg-muted/50">
+          <Button
+            variant={viewMode === "grid" ? "default" : "ghost"}
+            size="sm"
+            onClick={() => setViewMode("grid")}
+            className="rounded-full h-8 w-8 p-0"
+            aria-label="Grid view"
+          >
+            <LayoutGrid className="h-4 w-4" />
+          </Button>
+          <Button
+            variant={viewMode === "list" ? "default" : "ghost"}
+            size="sm"
+            onClick={() => setViewMode("list")}
+            className="rounded-full h-8 w-8 p-0"
+            aria-label="List view"
+          >
+            <List className="h-4 w-4" />
+          </Button>
+          <Button
+            variant={viewMode === "icons" ? "default" : "ghost"}
+            size="sm"
+            onClick={() => setViewMode("icons")}
+            className="rounded-full h-8 w-8 p-0"
+            aria-label="Icons view"
+          >
+            <Grid className="h-4 w-4" />
+          </Button>
+        </div>
+      </div>
 
-      {filteredResources.length === 0 ? (
+      {isLoading ? (
+        <Card>
+          <CardContent className="py-8">
+            <div className="text-center text-muted-foreground">
+              {t("dashboard.resources.loading") || "Loading resources..."}
+            </div>
+          </CardContent>
+        </Card>
+      ) : filteredAndSortedResources.length === 0 ? (
         <Card
           onDragEnter={handleDragEnter}
           onDragLeave={handleDragLeave}
@@ -593,7 +669,7 @@ const ResourcesContent = () => {
               : "grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3"
           }
         >
-          {filteredResources.map((resource) => {
+          {filteredAndSortedResources.map((resource) => {
             // Icons view - compact icon-based layout
             if (viewMode === "icons") {
               return (

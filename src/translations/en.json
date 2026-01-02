@@ -436,6 +436,11 @@
   "dashboard.resources.error.title": "Error",
   "dashboard.resources.error.loadFailed": "Failed to load resources. Please try again.",
   "dashboard.resources.error.notLoggedIn": "You must be logged in to upload resources.",
+  "dashboard.resources.loading": "Loading resources...",
+  "dashboard.resources.sort.date": "Date",
+  "dashboard.resources.sort.name": "Name",
+  "dashboard.resources.sort.size": "Size",
+  "dashboard.resources.sort.category": "Category",
   
   "dashboard.budget.title": "Budget & Financials",
   "dashboard.budget.overview": "Budget Overview",

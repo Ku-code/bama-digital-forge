@@ -420,6 +420,11 @@
   "dashboard.resources.error.title": "Грешка",
   "dashboard.resources.error.loadFailed": "Неуспешно зареждане на ресурси. Моля, опитайте отново.",
   "dashboard.resources.error.notLoggedIn": "Трябва да сте влезли в системата, за да качите ресурси.",
+  "dashboard.resources.loading": "Зареждане на ресурси...",
+  "dashboard.resources.sort.date": "Дата",
+  "dashboard.resources.sort.name": "Име",
+  "dashboard.resources.sort.size": "Размер",
+  "dashboard.resources.sort.category": "Категория",
   
   "dashboard.budget.title": "Бюджет и финанси",
   "dashboard.budget.overview": "Преглед на бюджета",

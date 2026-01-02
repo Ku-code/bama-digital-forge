@@ -21,6 +21,10 @@ export type HistoryType =
   | "member_role_changed"
   | "member_removed"
   | "profile_updated"
+  | "resource_uploaded"
+  | "resource_updated"
+  | "resource_deleted"
+  | "resource_downloaded"
   | "other";
 
 export interface HistoryItem {
@@ -74,6 +78,10 @@ export const logHistory = async (
       member_role_changed: { action: 'Changed member role', description: `Changed role of "${targetTitle || targetId}"` },
       member_removed: { action: 'Removed member', description: `Removed member "${targetTitle || targetId}"` },
       profile_updated: { action: 'Updated profile', description: 'Updated their profile' },
+      resource_uploaded: { action: 'Uploaded resource', description: `Uploaded resource "${targetTitle || targetId}"` },
+      resource_updated: { action: 'Updated resource', description: `Updated resource "${targetTitle || targetId}"` },
+      resource_deleted: { action: 'Deleted resource', description: `Deleted resource "${targetTitle || targetId}"` },
+      resource_downloaded: { action: 'Downloaded resource', description: `Downloaded resource "${targetTitle || targetId}"` },
       other: { action: 'Other action', description: targetTitle || 'Performed an action' },
     };
 

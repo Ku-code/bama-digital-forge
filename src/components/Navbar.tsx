@@ -90,7 +90,7 @@ const Navbar = () => {
   return (
     <header
       className={`fixed top-0 w-full z-50 transition-all duration-300 ${isScrolled ? "bg-background/90 shadow-md backdrop-blur-sm py-2 border-b border-border/40" : "bg-transparent py-4"
-        }`}
+        } ${isMenuOpen ? "bg-background/95" : ""}`}
     >
       <div className="container mx-auto px-4 flex items-center justify-between">
         <a href="#home" className="flex items-center">
@@ -232,25 +232,45 @@ const Navbar = () => {
           </div>
           )}
           <button
-            className="text-foreground p-2 ml-2"
+            className={`text-foreground p-2 ml-2 z-[60] relative transition-colors ${isMenuOpen ? 'text-destructive hover:text-destructive/80' : 'hover:text-primary'}`}
             onClick={toggleMenu}
-            aria-label="Toggle menu"
+            aria-label={isMenuOpen ? "Close menu" : "Open menu"}
+            aria-expanded={isMenuOpen}
           >
-            {isMenuOpen ? <X size={24} /> : <Menu size={24} />}
+            {isMenuOpen ? <X size={24} className="animate-in fade-in" /> : <Menu size={24} className="animate-in fade-in" />}
           </button>
         </div>
       </div>
 
       {/* Mobile Navigation */}
       {isMenuOpen && (
-        <div className="md:hidden bg-background shadow-lg border-t border-border">
-          <nav className="container mx-auto px-4 py-4">
+        <>
+          {/* Backdrop overlay - click to close */}
+          <div 
+            className="md:hidden fixed inset-0 bg-black/50 z-40 animate-in fade-in"
+            onClick={closeMenu}
+            aria-hidden="true"
+          />
+          {/* Mobile menu */}
+          <div className="md:hidden bg-background shadow-lg border-t border-border relative z-50 animate-in slide-in-from-top">
+            {/* Close button inside menu - always visible at top */}
+            <div className="flex items-center justify-between px-4 py-3 border-b border-border bg-background sticky top-0 z-10">
+              <span className="text-lg font-semibold text-foreground">{t("nav.menu") || "Menu"}</span>
+              <button
+                className="text-foreground hover:text-destructive active:text-destructive p-2 -mr-2 transition-all active:scale-95 touch-manipulation"
+                onClick={closeMenu}
+                aria-label="Close menu"
+              >
+                <X size={24} />
+              </button>
+            </div>
+            <nav className="container mx-auto px-4 py-4">
             <ul className="space-y-4">
               {navLinks.map((link) => (
                 <li key={link.name}>
                   <a
                     href={link.href}
-                    className={`block text-lg font-medium transition-colors ${activeSection === link.href.substring(1)
+                    className={`block text-lg font-medium transition-colors py-2 ${activeSection === link.href.substring(1)
                       ? "text-destructive"
                       : "text-foreground hover:text-primary"
                       }`}
@@ -314,6 +334,7 @@ const Navbar = () => {
             </ul>
           </nav>
         </div>
+        </>
       )}
     </header>
   );

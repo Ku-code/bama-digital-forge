@@ -687,8 +687,8 @@ const Index = () => {
           <h2 className="text-2xl md:text-3xl lg:text-4xl font-bold mb-8 md:mb-12 text-center text-foreground animate-on-scroll opacity-0 translate-y-4 transition-all duration-700 ease-out px-4">
             {t("contact.title")}
           </h2>
-          <div className="max-w-4xl mx-auto">
-            <div className="grid md:grid-cols-2 gap-8">
+          <div className="max-w-6xl mx-auto">
+            <div className="grid md:grid-cols-2 gap-8 mb-8">
               <div className="bg-card p-8 rounded-lg shadow-md animate-on-scroll opacity-0 translate-y-4 transition-all duration-700 ease-out delay-100">
                 <h3 className="text-xl font-semibold text-foreground mb-4">{t("contact.form.title")}</h3>
                 <p className="text-base md:text-lg text-foreground/80 leading-relaxed mb-4 md:mb-6 px-4">
@@ -717,6 +717,29 @@ const Index = () => {
                     {t("contact.discord.cta")}
                   </a>
                 </Button>
+              </div>
+            </div>
+            
+            {/* Google Maps Section */}
+            <div className="bg-card p-8 rounded-lg shadow-md animate-on-scroll opacity-0 translate-y-4 transition-all duration-700 ease-out delay-300">
+              <h3 className="text-xl font-semibold text-foreground mb-4 text-center">
+                {t("contact.location.title")}
+              </h3>
+              <p className="text-base md:text-lg text-foreground/80 leading-relaxed mb-6 text-center px-4">
+                {t("contact.location.description")}
+              </p>
+              <div className="w-full rounded-lg overflow-hidden border border-border/50 shadow-sm">
+                <iframe
+                  src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d6019356.767090495!2d14.43004323370686!3d42.5523403136874!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x6dbf683d01fab4c3%3A0x74dbbf4def49e93a!2sBulgarian%20Additive%20Manufacturing%20Association%20(BAMAS)!5e0!3m2!1sen!2sbg!4v1767378707394!5m2!1sen!2sbg"
+                  width="100%"
+                  height="450"
+                  style={{ border: 0 }}
+                  allowFullScreen
+                  loading="lazy"
+                  referrerPolicy="no-referrer-when-downgrade"
+                  className="w-full"
+                  title="BAMAS Location"
+                />
               </div>
             </div>
           </div>

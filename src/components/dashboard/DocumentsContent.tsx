@@ -42,7 +42,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/hooks/use-toast";
 import { logHistory } from "@/lib/history";
 import { loadDocuments, createDocument, updateDocument, deleteDocument, uploadDocumentFile, getDocumentFileUrl, convertBase64ToFileAndUpload, Document as SupabaseDocument } from "@/lib/documents";
-import { FileText, Plus, ExternalLink, Search, Filter, X, File, Calendar, Edit, Save, Trash2, Grid3x3, Type, Upload, Download, HardDrive, Minus } from "lucide-react";
+import { FileText, Plus, ExternalLink, Search, Filter, X, File, Calendar, Edit, Save, Trash2, Grid3x3, Type, Upload, Download, HardDrive, Minus, LayoutGrid, List, Grid } from "lucide-react";
 import { format } from "date-fns";
 
 interface TableData {
@@ -85,6 +85,7 @@ const DocumentsContent = () => {
   const [createType, setCreateType] = useState<"googleDrive" | "text" | "table" | "uploaded">("googleDrive");
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState<string>("all");
+  const [viewMode, setViewMode] = useState<"grid" | "list" | "icons">("grid");
   const [newDocument, setNewDocument] = useState({
     title: "",
     description: "",
@@ -1278,8 +1279,8 @@ const DocumentsContent = () => {
 
       {/* Search and Filter */}
       {documents.length > 0 && (
-        <div className="flex gap-4 items-center">
-          <div className="relative flex-1">
+        <div className="flex gap-4 items-center flex-wrap">
+          <div className="relative flex-1 min-w-[200px]">
             <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
             <Input
               placeholder={t("dashboard.documents.search.placeholder") || "Search documents..."}
@@ -1302,6 +1303,36 @@ const DocumentsContent = () => {
               ))}
             </SelectContent>
           </Select>
+          {/* View Toggle Buttons */}
+          <div className="flex items-center gap-1 border rounded-full p-1 bg-muted/50">
+            <Button
+              variant={viewMode === "grid" ? "default" : "ghost"}
+              size="sm"
+              onClick={() => setViewMode("grid")}
+              className="rounded-full h-8 w-8 p-0"
+              aria-label="Grid view"
+            >
+              <LayoutGrid className="h-4 w-4" />
+            </Button>
+            <Button
+              variant={viewMode === "list" ? "default" : "ghost"}
+              size="sm"
+              onClick={() => setViewMode("list")}
+              className="rounded-full h-8 w-8 p-0"
+              aria-label="List view"
+            >
+              <List className="h-4 w-4" />
+            </Button>
+            <Button
+              variant={viewMode === "icons" ? "default" : "ghost"}
+              size="sm"
+              onClick={() => setViewMode("icons")}
+              className="rounded-full h-8 w-8 p-0"
+              aria-label="Icons view"
+            >
+              <Grid className="h-4 w-4" />
+            </Button>
+          </div>
         </div>
       )}
 
@@ -1345,16 +1376,155 @@ const DocumentsContent = () => {
         </Card>
       ) : (
         <div
-          className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"
           onDragEnter={handleDragEnter}
           onDragLeave={handleDragLeave}
           onDragOver={handleDragOver}
           onDrop={handleDrop}
+          className={
+            viewMode === "grid"
+              ? "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"
+              : viewMode === "list"
+              ? "space-y-2"
+              : "grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3"
+          }
         >
           {filteredDocuments.map((doc) => {
             const embedUrl = doc.googleDriveLink ? getEmbedUrl(doc.googleDriveLink) : null;
             const canEmbed = embedUrl !== null;
 
+            // Icons view - compact icon-based layout
+            if (viewMode === "icons") {
+              return (
+                <Card key={doc.id} className="flex flex-col items-center justify-center p-4 hover:shadow-md transition-shadow cursor-pointer group">
+                  <div className="flex flex-col items-center gap-3 w-full">
+                    <div className="p-4 rounded-lg bg-muted group-hover:bg-primary/10 transition-colors">
+                      {doc.type === "text" ? (
+                        <Type className="h-8 w-8 text-muted-foreground group-hover:text-primary" />
+                      ) : doc.type === "table" ? (
+                        <Grid3x3 className="h-8 w-8 text-muted-foreground group-hover:text-primary" />
+                      ) : doc.type === "uploaded" ? (
+                        <Upload className="h-8 w-8 text-muted-foreground group-hover:text-primary" />
+                      ) : (
+                        <File className="h-8 w-8 text-muted-foreground group-hover:text-primary" />
+                      )}
+                    </div>
+                    <div className="text-center w-full">
+                      <p className="text-sm font-medium line-clamp-2">{doc.title}</p>
+                      <p className="text-xs text-muted-foreground mt-1">{doc.category}</p>
+                    </div>
+                    <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                      {doc.createdBy === user?.id && (
+                        <>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleEditDocument(doc);
+                            }}
+                            className="h-6 w-6 rounded-full"
+                          >
+                            <Edit className="h-3 w-3" />
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleDeleteDocument(doc.id);
+                            }}
+                            className="h-6 w-6 rounded-full"
+                          >
+                            <X className="h-3 w-3" />
+                          </Button>
+                        </>
+                      )}
+                    </div>
+                  </div>
+                </Card>
+              );
+            }
+
+            // List view - table-like horizontal layout
+            if (viewMode === "list") {
+              return (
+                <Card key={doc.id} className="hover:shadow-md transition-shadow">
+                  <div className="flex items-center gap-4 p-4">
+                    <div className="flex-shrink-0">
+                      {doc.type === "text" ? (
+                        <Type className="h-6 w-6 text-muted-foreground" />
+                      ) : doc.type === "table" ? (
+                        <Grid3x3 className="h-6 w-6 text-muted-foreground" />
+                      ) : doc.type === "uploaded" ? (
+                        <Upload className="h-6 w-6 text-muted-foreground" />
+                      ) : (
+                        <File className="h-6 w-6 text-muted-foreground" />
+                      )}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2 mb-1">
+                        <h3 className="font-semibold truncate">{doc.title}</h3>
+                        <Badge variant="secondary" className="rounded-full text-xs">
+                          {doc.category}
+                        </Badge>
+                        <Badge variant="outline" className="rounded-full text-xs">
+                          {doc.fileType || (doc.type === "text" ? "Note" : doc.type === "table" ? "Table" : "Document")}
+                        </Badge>
+                      </div>
+                      {doc.description && (
+                        <p className="text-sm text-muted-foreground line-clamp-1">{doc.description}</p>
+                      )}
+                      <div className="flex items-center gap-4 mt-2 text-xs text-muted-foreground">
+                        <div className="flex items-center gap-1">
+                          <Avatar className="h-4 w-4">
+                            <AvatarImage src={doc.createdByImage} alt={doc.createdByName} />
+                            <AvatarFallback className="text-[8px]">
+                              {doc.createdByName.split(" ").map((n) => n[0]).join("").toUpperCase().slice(0, 2)}
+                            </AvatarFallback>
+                          </Avatar>
+                          <span>{doc.createdByName}</span>
+                        </div>
+                        <div className="flex items-center gap-1">
+                          <Calendar className="h-3 w-3" />
+                          <span>{format(new Date(doc.updatedAt || doc.createdAt), "PP")}</span>
+                        </div>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-2 flex-shrink-0">
+                      {doc.type === "googleDrive" && doc.googleDriveLink && (
+                        <Button asChild variant="outline" size="sm" className="rounded-full">
+                          <a href={doc.googleDriveLink} target="_blank" rel="noopener noreferrer">
+                            <ExternalLink className="h-4 w-4" />
+                          </a>
+                        </Button>
+                      )}
+                      {doc.createdBy === user?.id && (
+                        <>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            onClick={() => handleEditDocument(doc)}
+                            className="rounded-full"
+                          >
+                            <Edit className="h-4 w-4" />
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            onClick={() => handleDeleteDocument(doc.id)}
+                            className="rounded-full"
+                          >
+                            <X className="h-4 w-4" />
+                          </Button>
+                        </>
+                      )}
+                    </div>
+                  </div>
+                </Card>
+              );
+            }
+
+            // Grid view - default card layout
             return (
               <Card key={doc.id} className="flex flex-col">
                 <CardHeader>

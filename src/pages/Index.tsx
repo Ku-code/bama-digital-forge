@@ -69,10 +69,10 @@ const Index = () => {
   }, [language]);
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background overflow-x-hidden">
       <Navbar />
       
-      <section id="home" className="relative">
+      <section id="home" className="relative pt-16 md:pt-20">
         <DotGlobeHero
           rotationSpeed={0.004}
           className="bg-gradient-to-br from-background via-background/95 to-muted/10 relative overflow-hidden"
@@ -81,7 +81,7 @@ const Index = () => {
           <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-primary/5 rounded-full blur-3xl animate-pulse" />
           <div className="absolute bottom-1/4 right-1/4 w-64 h-64 bg-primary/3 rounded-full blur-3xl animate-pulse" />
           
-          <div className="relative z-10 text-center space-y-8 md:space-y-12 max-w-5xl mx-auto px-4 md:px-6 py-8 md:py-12">
+          <div className="relative z-10 text-center space-y-8 md:space-y-12 max-w-5xl mx-auto px-4 md:px-6 pt-24 md:pt-32 pb-8 md:pb-12">
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
@@ -92,12 +92,12 @@ const Index = () => {
                 initial={{ opacity: 0, scale: 0.9 }}
                 animate={{ opacity: 1, scale: 1 }}
                 transition={{ duration: 0.6, delay: 0.2 }}
-                className="relative inline-flex items-center gap-3 px-6 py-3 rounded-full bg-gradient-to-r from-primary/20 via-primary/10 to-primary/20 border border-primary/30 backdrop-blur-xl shadow-2xl"
+                className="relative inline-flex items-center gap-2 md:gap-3 px-4 md:px-6 py-2 md:py-3 rounded-full bg-gradient-to-r from-primary/20 via-primary/10 to-primary/20 border border-primary/30 backdrop-blur-xl shadow-2xl scale-90 md:scale-100"
               >
                 <div className="absolute inset-0 rounded-full bg-gradient-to-r from-primary/10 via-transparent to-primary/10 animate-pulse" />
-                <div className="w-2 h-2 bg-primary rounded-full animate-ping" />
-                <span className="relative z-10 text-sm font-bold text-primary tracking-wider uppercase">{t("hero.badge")}</span>
-                <div className="w-2 h-2 bg-primary rounded-full animate-ping animation-delay-500" />
+                <div className="w-1.5 h-1.5 md:w-2 md:h-2 bg-primary rounded-full animate-ping" />
+                <span className="relative z-10 text-xs md:text-sm font-bold text-primary tracking-wider uppercase">{t("hero.badge")}</span>
+                <div className="w-1.5 h-1.5 md:w-2 md:h-2 bg-primary rounded-full animate-ping animation-delay-500" />
               </motion.div>
               
               <div className="space-y-6">

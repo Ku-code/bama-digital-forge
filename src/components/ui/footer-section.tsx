@@ -124,21 +124,32 @@ function FooterSection({
     }
   }
 
-  // Determine which logo to show based on language
-  // Try primary paths first, with fallbacks
+  // Determine which logo to show based on language and theme
+  // Light mode uses specific logos from /logos folder
+  // Dark mode uses the existing logos
   const getLogoPath = () => {
-    if (currentLanguage === "bg") {
-      // Try BamasBg.png first, then fallback to existing logo
-      return "/logos/BamasBg.png";
+    if (isDarkMode) {
+      // Dark mode: use existing logos
+      if (currentLanguage === "bg") {
+        return "/lovable-uploads/BAMAS_Logo_bg.png";
+      } else {
+        return "/lovable-uploads/6e77d85a-74ad-47e5-b141-a339ec981d57.png";
+      }
     } else {
-      // Try BamasEN.png first, then fallback to existing logo
-      return "/logos/BamasEN.png";
+      // Light mode: use logos from /logos folder
+      if (currentLanguage === "bg") {
+        // Bulgarian version for light mode (file ending with 6)
+        return "/logos/BAMAS_LOGO_inkscape_file_6.PNG";
+      } else {
+        // English version for light mode (file ending with 42)
+        return "/logos/BAMAS_LOGO_inkscape_file_4 2.PNG";
+      }
     }
   };
   
   const logoPath = getLogoPath();
   
-  // Fallback paths if primary doesn't exist
+  // Fallback paths if primary doesn't exist (for dark mode)
   const fallbackLogoPath = currentLanguage === "bg" 
     ? "/lovable-uploads/BAMAS_Logo_bg.png"
     : "/lovable-uploads/6e77d85a-74ad-47e5-b141-a339ec981d57.png";
@@ -156,24 +167,25 @@ function FooterSection({
                 aria-label={currentLanguage === "bg" ? "Отиди към началото" : "Go to home"}
               >
                 <img
+                  key={`${logoPath}-${isDarkMode}`}
                   src={logoPath}
                   alt={currentLanguage === "bg" ? "БАЗАП Лого" : "BAMAS Logo"}
-                  className="h-12 md:h-16 w-auto object-contain max-w-full rounded-lg shadow-sm"
+                  className="h-12 md:h-16 w-auto object-contain max-w-full shadow-sm"
                   loading="eager"
                   decoding="async"
-                  style={{ display: 'block', maxHeight: '64px', borderRadius: '8px' }}
+                  style={{ display: 'block', maxHeight: '64px', borderRadius: '1rem' }}
                   onError={(e) => {
                     console.warn('BAMAS logo failed to load from primary path:', e.currentTarget.src);
-                    // Try fallback path
-                    if (e.currentTarget.src !== fallbackLogoPath) {
+                    // Try fallback path only in dark mode
+                    if (isDarkMode && e.currentTarget.src !== fallbackLogoPath) {
                       console.log('Trying fallback path:', fallbackLogoPath);
                       e.currentTarget.src = fallbackLogoPath;
                     } else {
-                      console.error('Both primary and fallback logo paths failed to load');
+                      console.error('Logo failed to load:', e.currentTarget.src);
                     }
                   }}
                   onLoad={() => {
-                    console.log('BAMAS logo loaded successfully');
+                    console.log('BAMAS logo loaded successfully from:', logoPath);
                   }}
                 />
               </a>
@@ -252,7 +264,7 @@ function FooterSection({
                     <img
                       src="/addliancelogo.png"
                       alt="Addliance Logo" 
-                      className="h-16 w-auto object-contain rounded-lg"
+                      className="h-16 w-auto object-contain"
                       style={{ 
                         maxWidth: '250px',
                         height: 'auto',
@@ -261,7 +273,7 @@ function FooterSection({
                         opacity: 1,
                         filter: 'none',
                         imageRendering: 'auto',
-                        borderRadius: '12px'
+                        borderRadius: '1rem'
                       }}
                       loading="lazy"
                       decoding="async"

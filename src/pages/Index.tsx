@@ -687,15 +687,15 @@ const Index = () => {
           <h2 className="text-2xl md:text-3xl lg:text-4xl font-bold mb-8 md:mb-12 text-center text-foreground animate-on-scroll opacity-0 translate-y-4 transition-all duration-700 ease-out px-4">
             {t("contact.title")}
           </h2>
-          <div className="max-w-6xl mx-auto">
-            <div className="grid md:grid-cols-2 gap-8 mb-8">
-              <div className="bg-card p-8 rounded-lg shadow-md animate-on-scroll opacity-0 translate-y-4 transition-all duration-700 ease-out delay-100">
-                <h3 className="text-xl font-semibold text-foreground mb-4">{t("contact.form.title")}</h3>
-                <p className="text-base md:text-lg text-foreground/80 leading-relaxed mb-4 md:mb-6 px-4">
+          <div className="max-w-7xl mx-auto">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 lg:gap-8 mb-8">
+              <div className="bg-card p-6 sm:p-8 rounded-lg shadow-md animate-on-scroll opacity-0 translate-y-4 transition-all duration-700 ease-out delay-100">
+                <h3 className="text-lg sm:text-xl font-semibold text-foreground mb-3 sm:mb-4">{t("contact.form.title")}</h3>
+                <p className="text-sm sm:text-base md:text-lg text-foreground/80 leading-relaxed mb-4 sm:mb-6">
                   {t("contact.form.description")}
                 </p>
                 <Button 
-                  className="bg-primary hover:bg-primary/90 text-primary-foreground w-full"
+                  className="bg-primary hover:bg-primary/90 text-primary-foreground w-full text-sm sm:text-base"
                   asChild
                 >
                   <a href="https://docs.google.com/forms/d/1QH_opmysVjtPv_IE7ECKRqbW0t49Jv7QON6xG69l0Qk/edit" target="_blank" rel="noopener noreferrer">
@@ -704,24 +704,39 @@ const Index = () => {
                 </Button>
               </div>
               
-              <div className="bg-card p-8 rounded-lg shadow-md animate-on-scroll opacity-0 translate-y-4 transition-all duration-700 ease-out delay-200">
-                <h3 className="text-xl font-semibold text-foreground mb-4">{t("contact.discord.title")}</h3>
-                <p className="text-base md:text-lg text-foreground/80 leading-relaxed mb-4 md:mb-6 px-4">
+              <div className="bg-card p-6 sm:p-8 rounded-lg shadow-md animate-on-scroll opacity-0 translate-y-4 transition-all duration-700 ease-out delay-200">
+                <h3 className="text-lg sm:text-xl font-semibold text-foreground mb-3 sm:mb-4">{t("contact.discord.title")}</h3>
+                <p className="text-sm sm:text-base md:text-lg text-foreground/80 leading-relaxed mb-4 sm:mb-6">
                   {t("contact.discord.description")}
                 </p>
                 <Button 
-                  className="bg-[#5865F2] hover:bg-[#5865F2]/90 text-white w-full"
+                  className="bg-[#5865F2] hover:bg-[#5865F2]/90 text-white w-full text-sm sm:text-base"
                   asChild
                 >
-                  <a href="https://discord.com/invite/WBkGh3nz" target="_blank" rel="noopener noreferrer">
+                  <a href="https://discord.gg/hM6Snchf9N" target="_blank" rel="noopener noreferrer">
                     {t("contact.discord.cta")}
+                  </a>
+                </Button>
+              </div>
+              
+              <div className="bg-card p-6 sm:p-8 rounded-lg shadow-md animate-on-scroll opacity-0 translate-y-4 transition-all duration-700 ease-out delay-300 sm:col-span-2 lg:col-span-1">
+                <h3 className="text-lg sm:text-xl font-semibold text-foreground mb-3 sm:mb-4">{t("contact.viber.title")}</h3>
+                <p className="text-sm sm:text-base md:text-lg text-foreground/80 leading-relaxed mb-4 sm:mb-6">
+                  {t("contact.viber.description")}
+                </p>
+                <Button 
+                  className="bg-[#665CAC] hover:bg-[#665CAC]/90 text-white w-full text-sm sm:text-base"
+                  asChild
+                >
+                  <a href="https://invite.viber.com/?g2=AQA7VGQ9uWfQ3FWlDylP2%2BUG%2FEvuxPVitIKgm0VBBfQ6locvqZmob4hpS4rjkhXO" target="_blank" rel="noopener noreferrer">
+                    {t("contact.viber.cta")}
                   </a>
                 </Button>
               </div>
             </div>
             
             {/* Google Maps Section */}
-            <div className="bg-card p-8 rounded-lg shadow-md animate-on-scroll opacity-0 translate-y-4 transition-all duration-700 ease-out delay-300">
+            <div className="bg-card p-8 rounded-lg shadow-md animate-on-scroll opacity-0 translate-y-4 transition-all duration-700 ease-out delay-400">
               <h3 className="text-xl font-semibold text-foreground mb-4 text-center">
                 {t("contact.location.title")}
               </h3>

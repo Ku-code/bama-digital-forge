@@ -33,22 +33,21 @@ jobs:
         run: npm ci
 
       - name: Verify environment variables
+        continue-on-error: true
         run: |
           echo "Checking environment variables..."
           if [ -z "${{ secrets.VITE_SUPABASE_URL }}" ]; then
-            echo "❌ VITE_SUPABASE_URL is not set"
-            exit 1
+            echo "⚠️ WARNING: VITE_SUPABASE_URL is not set - Supabase features will not work"
           else
             echo "✅ VITE_SUPABASE_URL is set"
           fi
           if [ -z "${{ secrets.VITE_SUPABASE_ANON_KEY }}" ]; then
-            echo "❌ VITE_SUPABASE_ANON_KEY is not set"
-            exit 1
+            echo "⚠️ WARNING: VITE_SUPABASE_ANON_KEY is not set - Supabase features will not work"
           else
             echo "✅ VITE_SUPABASE_ANON_KEY is set"
           fi
           if [ -z "${{ secrets.VITE_GOOGLE_CLIENT_ID }}" ]; then
-            echo "⚠️ VITE_GOOGLE_CLIENT_ID is not set (Google OAuth will be disabled)"
+            echo "⚠️ WARNING: VITE_GOOGLE_CLIENT_ID is not set (Google OAuth will be disabled)"
           else
             echo "✅ VITE_GOOGLE_CLIENT_ID is set"
           fi

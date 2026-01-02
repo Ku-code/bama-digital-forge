@@ -28,6 +28,7 @@ import {
   Settings,
   Home,
   ArrowLeft,
+  Package,
 } from "lucide-react";
 import HistoryContent from "@/components/dashboard/HistoryContent";
 import VotesContent from "@/components/dashboard/VotesContent";
@@ -35,8 +36,9 @@ import AgendaContent from "@/components/dashboard/AgendaContent";
 import DocumentsContent from "@/components/dashboard/DocumentsContent";
 import BudgetContent from "@/components/dashboard/BudgetContent";
 import NetworkContent from "@/components/dashboard/NetworkContent";
+import ResourcesContent from "@/components/dashboard/ResourcesContent";
 
-type MenuItem = "history" | "votes" | "agenda" | "documents" | "budget" | "network";
+type MenuItem = "history" | "votes" | "agenda" | "documents" | "budget" | "network" | "resources";
 
 const Dashboard = () => {
   const { user } = useAuth();
@@ -51,6 +53,7 @@ const Dashboard = () => {
     { id: "documents" as MenuItem, icon: FileText, label: t("dashboard.menu.documents") || "Documents" },
     { id: "budget" as MenuItem, icon: DollarSign, label: t("dashboard.menu.budget") || "Budget" },
     { id: "network" as MenuItem, icon: Users, label: t("dashboard.menu.network") || "Network" },
+    { id: "resources" as MenuItem, icon: Package, label: t("dashboard.menu.resources") || "Resources" },
   ];
 
   const renderContent = () => {
@@ -67,6 +70,8 @@ const Dashboard = () => {
         return <BudgetContent />;
       case "network":
         return <NetworkContent />;
+      case "resources":
+        return <ResourcesContent />;
       default:
         return <HistoryContent />;
     }

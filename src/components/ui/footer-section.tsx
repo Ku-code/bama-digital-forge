@@ -124,11 +124,60 @@ function FooterSection({
     }
   }
 
+  // Determine which logo to show based on language
+  // Try primary paths first, with fallbacks
+  const getLogoPath = () => {
+    if (currentLanguage === "bg") {
+      // Try BamasBg.png first, then fallback to existing logo
+      return "/logos/BamasBg.png";
+    } else {
+      // Try BamasEN.png first, then fallback to existing logo
+      return "/logos/BamasEN.png";
+    }
+  };
+  
+  const logoPath = getLogoPath();
+  
+  // Fallback paths if primary doesn't exist
+  const fallbackLogoPath = currentLanguage === "bg" 
+    ? "/lovable-uploads/BAMAS_Logo_bg.png"
+    : "/lovable-uploads/6e77d85a-74ad-47e5-b141-a339ec981d57.png";
+
   return (
     <footer className="relative border-t bg-background text-foreground transition-colors duration-300">
       <div className="container mx-auto px-4 py-12 md:px-6 lg:px-8">
         <div className="grid gap-12 md:grid-cols-2 lg:grid-cols-4">
           <div className="relative">
+            {/* BAMAS Logo - positioned above newsletter title */}
+            <div className="mb-6 flex justify-start">
+              <a 
+                href="#home" 
+                className="inline-block transition-all hover:opacity-80 hover:scale-105 cursor-pointer"
+                aria-label={currentLanguage === "bg" ? "Отиди към началото" : "Go to home"}
+              >
+                <img
+                  src={logoPath}
+                  alt={currentLanguage === "bg" ? "БАЗАП Лого" : "BAMAS Logo"}
+                  className="h-12 md:h-16 w-auto object-contain max-w-full rounded-lg shadow-sm"
+                  loading="eager"
+                  decoding="async"
+                  style={{ display: 'block', maxHeight: '64px', borderRadius: '8px' }}
+                  onError={(e) => {
+                    console.warn('BAMAS logo failed to load from primary path:', e.currentTarget.src);
+                    // Try fallback path
+                    if (e.currentTarget.src !== fallbackLogoPath) {
+                      console.log('Trying fallback path:', fallbackLogoPath);
+                      e.currentTarget.src = fallbackLogoPath;
+                    } else {
+                      console.error('Both primary and fallback logo paths failed to load');
+                    }
+                  }}
+                  onLoad={() => {
+                    console.log('BAMAS logo loaded successfully');
+                  }}
+                />
+              </a>
+            </div>
             <h2 className="mb-4 text-3xl font-bold tracking-tight">
               {translations?.newsletter?.title || "Join BAMAS"}
             </h2>
@@ -203,7 +252,7 @@ function FooterSection({
                     <img
                       src="/addliancelogo.png"
                       alt="Addliance Logo" 
-                      className="h-16 w-auto object-contain rounded-sm"
+                      className="h-16 w-auto object-contain rounded-lg"
                       style={{ 
                         maxWidth: '250px',
                         height: 'auto',
@@ -212,7 +261,7 @@ function FooterSection({
                         opacity: 1,
                         filter: 'none',
                         imageRendering: 'auto',
-                        borderRadius: '4px'
+                        borderRadius: '12px'
                       }}
                       loading="lazy"
                       decoding="async"

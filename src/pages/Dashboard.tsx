@@ -88,8 +88,8 @@ const Dashboard = () => {
       <div className="flex min-h-screen w-full">
         <Sidebar collapsible="icon">
           <SidebarHeader className="border-b border-sidebar-border">
-            <div className="flex items-center gap-2 px-2 py-2">
-              <div className="h-8 w-8 flex-shrink-0">
+            <div className="flex items-center justify-center px-2 py-2 group-data-[collapsible=icon]:px-1.5">
+              <div className="h-8 w-8 flex-shrink-0 group-data-[collapsible=icon]:h-7 group-data-[collapsible=icon]:w-7 transition-all duration-200">
                 <img
                   src={logoPath}
                   alt="BAMAS Logo"
@@ -133,10 +133,10 @@ const Dashboard = () => {
                 </SidebarMenuButton>
               </SidebarMenuItem>
             </SidebarMenu>
-            <div className="flex items-center gap-2 px-2 py-2">
-              <Avatar className="h-8 w-8">
+            <div className="flex items-center justify-center gap-2 px-2 py-2 group-data-[collapsible=icon]:px-1.5">
+              <Avatar className="h-8 w-8 flex-shrink-0 group-data-[collapsible=icon]:h-7 group-data-[collapsible=icon]:w-7 transition-all duration-200">
                 <AvatarImage src={user?.image} alt={user?.name} />
-                <AvatarFallback>{userInitials}</AvatarFallback>
+                <AvatarFallback className="text-xs group-data-[collapsible=icon]:text-[10px] transition-all duration-200">{userInitials}</AvatarFallback>
               </Avatar>
               <div className="flex flex-col min-w-0 group-data-[collapsible=icon]:hidden">
                 <span className="text-sm font-medium truncate">{user?.name}</span>

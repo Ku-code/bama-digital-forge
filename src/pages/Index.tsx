@@ -698,7 +698,7 @@ const Index = () => {
                   className="bg-primary hover:bg-primary/90 text-primary-foreground w-full text-sm sm:text-base"
                   asChild
                 >
-                  <a href="https://docs.google.com/forms/d/1QH_opmysVjtPv_IE7ECKRqbW0t49Jv7QON6xG69l0Qk/edit" target="_blank" rel="noopener noreferrer">
+                  <a href="mailto:info@bamas.xyz?subject=Contact%20from%20BAMAS%20Website">
                     {t("contact.form.cta")}
                   </a>
                 </Button>

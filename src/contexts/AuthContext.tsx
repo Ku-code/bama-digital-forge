@@ -79,28 +79,16 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
   // Load user from Supabase on mount and listen for auth changes
   useEffect(() => {
-    // #region agent log
-    fetch('http://127.0.0.1:7242/ingest/50346ba1-6398-4d3a-b7ae-e83d28e057d9',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'AuthContext.tsx:93',message:'AuthContext useEffect started',data:{isSupabaseConfigured:isSupabaseConfigured()},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'B'})}).catch(()=>{});
-    // #endregion
     // Only initialize Supabase if it's configured
     if (!isSupabaseConfigured()) {
-      // #region agent log
-      fetch('http://127.0.0.1:7242/ingest/50346ba1-6398-4d3a-b7ae-e83d28e057d9',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'AuthContext.tsx:96',message:'Supabase not configured, setting isLoading false',data:{},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'D'})}).catch(()=>{});
-      // #endregion
       console.warn('⚠️ Supabase is not configured. Authentication features will not work.');
       setIsLoading(false);
       return;
     }
 
-    // #region agent log
-    fetch('http://127.0.0.1:7242/ingest/50346ba1-6398-4d3a-b7ae-e83d28e057d9',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'AuthContext.tsx:102',message:'Starting getSession call',data:{},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'B'})}).catch(()=>{});
-    // #endregion
     // Get initial session
     supabase.auth.getSession()
       .then(({ data: { session }, error }) => {
-        // #region agent log
-        fetch('http://127.0.0.1:7242/ingest/50346ba1-6398-4d3a-b7ae-e83d28e057d9',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'AuthContext.tsx:105',message:'getSession promise resolved',data:{hasSession:!!session,hasError:!!error,error:error?.message},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'B'})}).catch(()=>{});
-        // #endregion
         if (error) {
           console.error('Error getting session:', error);
           setIsLoading(false);
@@ -109,16 +97,10 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         if (session) {
           loadUserFromDatabase(session.user.id);
         } else {
-          // #region agent log
-          fetch('http://127.0.0.1:7242/ingest/50346ba1-6398-4d3a-b7ae-e83d28e057d9',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'AuthContext.tsx:113',message:'No session, setting isLoading false',data:{},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'B'})}).catch(()=>{});
-          // #endregion
           setIsLoading(false);
         }
       })
       .catch((error) => {
-        // #region agent log
-        fetch('http://127.0.0.1:7242/ingest/50346ba1-6398-4d3a-b7ae-e83d28e057d9',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'AuthContext.tsx:118',message:'getSession promise rejected',data:{error:error instanceof Error?error.message:String(error)},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'B'})}).catch(()=>{});
-        // #endregion
         console.error('Failed to get session:', error);
         setIsLoading(false);
       });
@@ -127,9 +109,6 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange(async (event, session) => {
-      // #region agent log
-      fetch('http://127.0.0.1:7242/ingest/50346ba1-6398-4d3a-b7ae-e83d28e057d9',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'AuthContext.tsx:125',message:'onAuthStateChange triggered',data:{event,hasSession:!!session},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'B'})}).catch(()=>{});
-      // #endregion
       if (session) {
         await loadUserFromDatabase(session.user.id);
       } else {
@@ -144,14 +123,8 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   }, []);
 
   const loadUserFromDatabase = async (userId: string) => {
-    // #region agent log
-    fetch('http://127.0.0.1:7242/ingest/50346ba1-6398-4d3a-b7ae-e83d28e057d9',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'AuthContext.tsx:125',message:'loadUserFromDatabase started',data:{userId},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'B'})}).catch(()=>{});
-    // #endregion
     try {
       let dbUser = await db.fetchById('users', userId);
-      // #region agent log
-      fetch('http://127.0.0.1:7242/ingest/50346ba1-6398-4d3a-b7ae-e83d28e057d9',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'AuthContext.tsx:128',message:'db.fetchById completed',data:{hasUser:!!dbUser},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'B'})}).catch(()=>{});
-      // #endregion
       
       if (!dbUser) {
         // User doesn't exist in database yet - create it using the function
@@ -159,7 +132,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         const { data: authUser } = await supabase.auth.getUser();
         if (authUser?.user) {
           const userMetadata = authUser.user.user_metadata || {};
-          const { error: functionError } = await supabase.rpc('create_user_profile', {
+          const { error: functionError } = await (supabase.rpc as any)('create_user_profile', {
             user_id: userId,
             user_name: userMetadata.name || authUser.user.email?.split('@')[0] || 'User',
             user_email: authUser.user.email || '',
@@ -181,15 +154,9 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         setUser(null);
       }
     } catch (error) {
-      // #region agent log
-      fetch('http://127.0.0.1:7242/ingest/50346ba1-6398-4d3a-b7ae-e83d28e057d9',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'AuthContext.tsx:169',message:'loadUserFromDatabase error',data:{error:error instanceof Error?error.message:String(error)},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'B'})}).catch(()=>{});
-      // #endregion
       console.error('Error loading user from database:', error);
       setUser(null);
     } finally {
-      // #region agent log
-      fetch('http://127.0.0.1:7242/ingest/50346ba1-6398-4d3a-b7ae-e83d28e057d9',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'AuthContext.tsx:173',message:'loadUserFromDatabase finally, setting isLoading false',data:{},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'B'})}).catch(()=>{});
-      // #endregion
       setIsLoading(false);
     }
   };
@@ -226,7 +193,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         setUser(convertSupabaseUserToUser(updated));
       } else {
         // New user - use database function to create profile (bypasses RLS)
-        const { error: functionError } = await supabase.rpc('create_user_profile', {
+        const { error: functionError } = await (supabase.rpc as any)('create_user_profile', {
           user_id: userData.id,
           user_name: userData.name,
           user_email: userData.email,
@@ -356,7 +323,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
       if (data.user) {
         // Use database function to create user profile (bypasses RLS)
-        const { data: userId, error: functionError } = await supabase.rpc('create_user_profile', {
+        const { data: userId, error: functionError } = await (supabase.rpc as any)('create_user_profile', {
           user_id: data.user.id,
           user_name: name,
           user_email: email,
@@ -425,7 +392,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         if (!dbUser) {
           // Use database function to create user profile (bypasses RLS)
           const userMetadata = data.user.user_metadata || {};
-          const { error: functionError } = await supabase.rpc('create_user_profile', {
+          const { error: functionError } = await (supabase.rpc as any)('create_user_profile', {
             user_id: data.user.id,
             user_name: userMetadata.name || userMetadata.full_name || data.user.email?.split('@')[0] || 'User',
             user_email: data.user.email || '',

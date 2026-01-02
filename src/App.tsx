@@ -81,8 +81,14 @@ const AppContent: React.FC = () => {
   // Check if Supabase is configured
   const isSupabaseConfigured = !!(import.meta.env.VITE_SUPABASE_URL && import.meta.env.VITE_SUPABASE_ANON_KEY);
   
-  if (!isSupabaseConfigured && import.meta.env.MODE === 'production') {
-    console.warn('⚠️ Supabase is not configured. Some features may not work.');
+  // Debug logging in production to help diagnose env var issues
+  if (import.meta.env.MODE === 'production') {
+    if (!isSupabaseConfigured) {
+      console.warn('⚠️ Supabase is not configured. Some features may not work.');
+    }
+    if (!googleClientId || googleClientId.trim() === '') {
+      console.warn('⚠️ Google OAuth Client ID is not configured. Google login will not be available.');
+    }
   }
   
   return (

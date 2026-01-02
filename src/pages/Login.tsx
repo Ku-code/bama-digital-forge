@@ -115,7 +115,7 @@ const Login = () => {
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
-              {import.meta.env.VITE_GOOGLE_CLIENT_ID ? (
+              {import.meta.env.VITE_GOOGLE_CLIENT_ID && import.meta.env.VITE_GOOGLE_CLIENT_ID.trim() !== '' ? (
                 <>
                   <GoogleLogin
                     onSuccess={handleGoogleSuccess}
@@ -142,6 +142,11 @@ const Login = () => {
               ) : (
                 <div className="p-4 bg-muted rounded-lg text-center text-sm text-muted-foreground">
                   {t("auth.google.notConfigured") || "Google authentication is not configured. Please use email/password login."}
+                  {import.meta.env.MODE === 'production' && (
+                    <div className="mt-2 text-xs">
+                      Debug: VITE_GOOGLE_CLIENT_ID = {import.meta.env.VITE_GOOGLE_CLIENT_ID ? 'Set' : 'Not set'}
+                    </div>
+                  )}
                 </div>
               )}
 

@@ -88,7 +88,7 @@ const Dashboard = () => {
       <div className="flex min-h-screen w-full">
         <Sidebar collapsible="icon">
           <SidebarHeader className="border-b border-sidebar-border">
-            <div className="flex items-center justify-between gap-2 px-2 py-2">
+            <div className="flex items-center gap-2 px-2 py-2">
               <div className="h-8 w-8 flex-shrink-0">
                 <img
                   src={logoPath}
@@ -96,7 +96,6 @@ const Dashboard = () => {
                   className="w-full h-full object-contain rounded"
                 />
               </div>
-              <SidebarTrigger className="ml-auto" />
             </div>
           </SidebarHeader>
           <SidebarContent>
@@ -148,9 +147,9 @@ const Dashboard = () => {
         </Sidebar>
         <SidebarInset>
           <header className="sticky top-0 z-10 flex h-16 shrink-0 items-center gap-2 border-b bg-background px-4">
-            <div className="flex items-center gap-2 flex-1">
-              <SidebarTrigger className="-ml-1" />
-              <div className="flex items-center gap-2 ml-auto">
+            <div className="flex items-center gap-3 flex-1 min-w-0">
+              <SidebarTrigger className="shrink-0" />
+              <div className="flex items-center gap-2 ml-auto shrink-0">
                 <Button
                   variant="outline"
                   size="sm"
@@ -158,8 +157,8 @@ const Dashboard = () => {
                   className="gap-2"
                 >
                   <Link to="/">
-                    <Home className="h-4 w-4" />
-                    <span className="hidden sm:inline">
+                    <Home className="h-4 w-4 shrink-0" />
+                    <span className="hidden sm:inline whitespace-nowrap">
                       {t("dashboard.backToHome") || "Back to Home"}
                     </span>
                     <span className="sm:hidden">
@@ -170,8 +169,8 @@ const Dashboard = () => {
               </div>
             </div>
           </header>
-          <div className="flex-1 p-6">
-            <div className="max-w-7xl mx-auto">
+          <div className="flex-1 p-4 md:p-6 overflow-auto">
+            <div className="max-w-7xl mx-auto w-full">
               {renderContent()}
             </div>
           </div>

@@ -66,7 +66,7 @@ export const createResource = async (
         created_by: resourceData.created_by,
         created_by_name: resourceData.created_by_name,
         created_by_image: resourceData.created_by_image || null,
-      })
+      } as any)
       .select()
       .single();
 
@@ -94,8 +94,8 @@ export const updateResource = async (
   }
 ): Promise<Resource> => {
   try {
-    const { data, error } = await supabase
-      .from('resources')
+    const { data, error } = await (supabase
+      .from('resources') as any)
       .update(updates)
       .eq('id', resourceId)
       .select()

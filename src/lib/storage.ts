@@ -73,5 +73,31 @@ export const storage = {
     if (error) throw error;
     return data.map((file) => file.name);
   },
+
+  /**
+   * Check if a bucket exists
+   */
+  async bucketExists(bucket: string): Promise<boolean> {
+    try {
+      const { data, error } = await supabase.storage.from(bucket).list('', { limit: 1 });
+      // If we can list (even if empty), bucket exists
+      // If error is "not found" or similar, bucket doesn't exist
+      if (error) {
+        if (error.message?.includes('not found') || error.message?.includes('does not exist')) {
+          return false;
+        }
+        throw error;
+      }
+      return true;
+    } catch (error: any) {
+      // If error indicates bucket doesn't exist, return false
+      if (error?.message?.includes('not found') || error?.message?.includes('does not exist')) {
+        return false;
+      }
+      // For other errors, assume bucket might exist but we can't verify
+      // Return true to avoid blocking operations
+      return true;
+    }
+  },
 };
 

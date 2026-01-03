@@ -99,15 +99,23 @@ const ResourcesContent = () => {
       setResources(convertedResources);
     } catch (error: any) {
       console.error("Error loading resources:", error);
-      const errorMessage = error?.message || error?.error?.message || "Unknown error";
+      const errorMessage = error?.message || error?.error?.message || error?.code || "Unknown error";
+      
+      let userFriendlyMessage = t("dashboard.resources.error.loadFailed") || "Failed to load resources. Please try again.";
+      
+      if (errorMessage.includes("relation") || errorMessage.includes("does not exist") || error?.code === "42P01") {
+        userFriendlyMessage = "Resources table not found. Please run the database migration (002_resources_table.sql) in Supabase SQL Editor.";
+      } else if (errorMessage.includes("permission") || errorMessage.includes("policy") || error?.code === "42501") {
+        userFriendlyMessage = "You don't have permission to access resources. Please ensure your account is approved and RLS policies are set up correctly.";
+      } else if (errorMessage.includes("JWT") || errorMessage.includes("authentication")) {
+        userFriendlyMessage = "Authentication error. Please log out and log back in.";
+      }
+      
       toast({
         title: t("dashboard.resources.error.title") || "Error",
-        description: errorMessage.includes("relation") || errorMessage.includes("does not exist")
-          ? "Resources table not found. Please run the database migration first."
-          : errorMessage.includes("permission") || errorMessage.includes("policy")
-          ? "You don't have permission to access resources. Please contact an administrator."
-          : t("dashboard.resources.error.loadFailed") || "Failed to load resources. Please try again.",
+        description: userFriendlyMessage,
         variant: "destructive",
+        duration: 8000,
       });
     } finally {
       setIsLoading(false);
@@ -119,6 +127,17 @@ const ResourcesContent = () => {
       toast({
         title: t("dashboard.resources.error.title") || "Error",
         description: t("dashboard.resources.error.notLoggedIn") || "You must be logged in to upload resources.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    // Validate file size (50MB limit)
+    const maxSize = 50 * 1024 * 1024; // 50MB
+    if (file.size > maxSize) {
+      toast({
+        title: t("dashboard.resources.upload.error.title") || "Upload Failed",
+        description: `File is too large. Maximum size is 50MB. Your file is ${(file.size / 1024 / 1024).toFixed(2)}MB.`,
         variant: "destructive",
       });
       return;
@@ -176,17 +195,27 @@ const ResourcesContent = () => {
       await loadResourcesFromDatabase();
     } catch (error: any) {
       console.error("Error uploading file:", error);
-      const errorMessage = error?.message || error?.error?.message || "Unknown error";
+      const errorMessage = error?.message || error?.error?.message || error?.code || "Unknown error";
+      
+      let userFriendlyMessage = t("dashboard.resources.upload.error.description") || "Failed to upload resource. Please try again.";
+      
+      if (errorMessage.includes("bucket") || errorMessage.includes("not found") || error?.code === "404") {
+        userFriendlyMessage = "Storage bucket 'resources' not found. Please create it in Supabase Storage settings. See RESOURCES_SETUP.md for instructions.";
+      } else if (errorMessage.includes("permission") || errorMessage.includes("policy") || error?.code === "42501") {
+        userFriendlyMessage = "You don't have permission to upload resources. Please ensure your account is approved and storage policies are configured.";
+      } else if (errorMessage.includes("size") || errorMessage.includes("too large") || error?.code === "413") {
+        userFriendlyMessage = "File is too large. Maximum size is 50MB. Please upload a smaller file.";
+      } else if (errorMessage.includes("JWT") || errorMessage.includes("authentication")) {
+        userFriendlyMessage = "Authentication error. Please log out and log back in.";
+      } else if (errorMessage.includes("duplicate") || errorMessage.includes("already exists")) {
+        userFriendlyMessage = "A file with this name already exists. Please rename your file and try again.";
+      }
+      
       toast({
         title: t("dashboard.resources.upload.error.title") || "Upload Failed",
-        description: errorMessage.includes("bucket") || errorMessage.includes("not found")
-          ? "Storage bucket 'resources' not found. Please create it in Supabase Storage settings."
-          : errorMessage.includes("permission") || errorMessage.includes("policy")
-          ? "You don't have permission to upload resources. Please contact an administrator."
-          : errorMessage.includes("size") || errorMessage.includes("too large")
-          ? "File is too large. Please upload a smaller file."
-          : errorMessage || t("dashboard.resources.upload.error.description") || "Failed to upload resource. Please try again.",
+        description: userFriendlyMessage,
         variant: "destructive",
+        duration: 8000,
       });
     }
   };
@@ -386,7 +415,10 @@ const ResourcesContent = () => {
   const handleDragLeave = (e: React.DragEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    setIsDragging(false);
+    // Only hide drag state if we're actually leaving the drop zone
+    if (!e.currentTarget.contains(e.relatedTarget as Node)) {
+      setIsDragging(false);
+    }
   };
 
   const handleDragOver = (e: React.DragEvent) => {
@@ -401,11 +433,23 @@ const ResourcesContent = () => {
 
     const files = Array.from(e.dataTransfer.files);
     
-    if (files.length === 0) return;
+    if (files.length === 0) {
+      toast({
+        title: t("dashboard.resources.upload.error.title") || "Upload Failed",
+        description: "No files detected. Please try again.",
+        variant: "destructive",
+      });
+      return;
+    }
 
-    // Process each dropped file
+    // Process each dropped file sequentially
     for (const file of files) {
-      await processFile(file);
+      try {
+        await processFile(file);
+      } catch (error) {
+        console.error(`Error processing file ${file.name}:`, error);
+        // Continue processing other files even if one fails
+      }
     }
   };
 

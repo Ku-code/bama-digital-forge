@@ -141,6 +141,14 @@ export const uploadResourceFile = async (
   userId: string
 ): Promise<{ path: string; fileName: string; fileSize: number; mimeType: string }> => {
   try {
+    // Check if bucket exists
+    const bucketExists = await storage.bucketExists('resources');
+    if (!bucketExists) {
+      const error = new Error('Storage bucket "resources" not found. Please create it in Supabase Storage settings. See RESOURCES_SETUP_COMPLETE.md for instructions.');
+      (error as any).code = 'BUCKET_NOT_FOUND';
+      throw error;
+    }
+
     const timestamp = Date.now();
     const sanitizedFileName = file.name.replace(/[^a-zA-Z0-9.-]/g, '_');
     const filePath = `${userId}/${timestamp}-${sanitizedFileName}`;

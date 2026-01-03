@@ -1,6 +1,8 @@
 # Resources Database Setup Guide
 
-This guide will help you set up the Resources feature in your Supabase project.
+> **⚠️ IMPORTANT: For the complete, step-by-step setup guide, see `RESOURCES_SETUP_COMPLETE.md` in the project root.**
+
+This is a quick reference guide. For detailed instructions with troubleshooting, see the complete guide.
 
 ## Step 1: Run the Database Migration
 

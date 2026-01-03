@@ -114,7 +114,7 @@ const ResourcesContent = () => {
     }
   };
 
-  const processFile = async (file: File) => {
+  const processFile = async (file: File, customTitle?: string, customDescription?: string, customCategory?: string) => {
     if (!user?.id) {
       toast({
         title: t("dashboard.resources.error.title") || "Error",
@@ -144,9 +144,10 @@ const ResourcesContent = () => {
       else if (["zip", "rar"].includes(fileExtension)) fileType = "Archive";
       else if (["ai", "eps", "psd"].includes(fileExtension)) fileType = "Design";
 
-      // Use form title if provided, otherwise use file name (without extension)
-      const titleWithoutExt = newResource.title.trim() || fileName.replace(/\.[^/.]+$/, "");
-      const description = newResource.description.trim() || `${t("dashboard.resources.uploaded") || "Uploaded"}: ${fileName}`;
+      // Use custom title if provided, otherwise use form title, otherwise use file name (without extension)
+      const titleWithoutExt = customTitle || newResource.title.trim() || fileName.replace(/\.[^/.]+$/, "");
+      const description = customDescription || newResource.description.trim() || `${t("dashboard.resources.uploaded") || "Uploaded"}: ${fileName}`;
+      const category = customCategory || newResource.category || "Logos";
 
       const createdResource = await createResource({
         title: titleWithoutExt,
@@ -155,7 +156,7 @@ const ResourcesContent = () => {
         file_name: uploadResult.fileName,
         file_size: uploadResult.fileSize,
         mime_type: uploadResult.mimeType,
-        category: newResource.category || "Logos",
+        category: category,
         created_by: user.id,
         created_by_name: user.name,
         created_by_image: user.image,
@@ -402,34 +403,43 @@ const ResourcesContent = () => {
     
     if (files.length === 0) return;
 
+    // Process each dropped file
     for (const file of files) {
       await processFile(file);
     }
   };
 
   useEffect(() => {
-    const dropZone = dropZoneRef.current;
-    if (!dropZone) return;
-
     const handleDragEnterGlobal = (e: DragEvent) => {
-      e.preventDefault();
-      setIsDragging(true);
+      // Only show drag overlay if dragging files
+      if (e.dataTransfer?.types.includes('Files')) {
+        e.preventDefault();
+        setIsDragging(true);
+      }
     };
 
     const handleDragLeaveGlobal = (e: DragEvent) => {
-      e.preventDefault();
-      if (!dropZone.contains(e.relatedTarget as Node)) {
+      // Only hide if we're leaving the window entirely
+      if (!e.relatedTarget || (e.relatedTarget as Node).nodeName === 'HTML') {
+        e.preventDefault();
         setIsDragging(false);
       }
     };
 
     const handleDragOverGlobal = (e: DragEvent) => {
-      e.preventDefault();
+      if (e.dataTransfer?.types.includes('Files')) {
+        e.preventDefault();
+        e.stopPropagation();
+      }
     };
 
     const handleDropGlobal = (e: DragEvent) => {
-      e.preventDefault();
-      setIsDragging(false);
+      // Prevent default browser behavior (opening file)
+      if (e.dataTransfer?.types.includes('Files')) {
+        e.preventDefault();
+        e.stopPropagation();
+        setIsDragging(false);
+      }
     };
 
     document.addEventListener('dragenter', handleDragEnterGlobal);
@@ -491,7 +501,7 @@ const ResourcesContent = () => {
 
   return (
     <div className="space-y-4">
-      {/* Drag and Drop Zone */}
+      {/* Drag and Drop Zone Overlay */}
       {isDragging && (
         <div
           ref={dropZoneRef}
@@ -500,8 +510,9 @@ const ResourcesContent = () => {
           onDragOver={handleDragOver}
           onDrop={handleDrop}
           className="fixed inset-0 z-50 bg-primary/20 backdrop-blur-sm flex items-center justify-center border-4 border-dashed border-primary rounded-lg"
+          style={{ pointerEvents: 'auto' }}
         >
-          <div className="bg-background border-2 border-primary rounded-lg p-8 text-center max-w-md">
+          <div className="bg-background border-2 border-primary rounded-lg p-8 text-center max-w-md pointer-events-none">
             <Upload className="h-16 w-16 mx-auto mb-4 text-primary" />
             <h3 className="text-2xl font-bold mb-2">
               {t("dashboard.resources.dragDrop.title") || "Drop files here"}
@@ -623,7 +634,7 @@ const ResourcesContent = () => {
           onDragLeave={handleDragLeave}
           onDragOver={handleDragOver}
           onDrop={handleDrop}
-          className={`transition-all ${isDragging ? "border-primary border-2 border-dashed bg-primary/5" : ""}`}
+          className={`transition-all cursor-pointer min-h-[300px] flex flex-col justify-center ${isDragging ? "border-primary border-2 border-dashed bg-primary/10" : "border-2 border-dashed border-border hover:border-primary/50 hover:bg-muted/50"}`}
         >
           <CardHeader>
             <CardTitle>{t("dashboard.resources.library") || "Resource Library"}</CardTitle>
@@ -631,16 +642,18 @@ const ResourcesContent = () => {
               {t("dashboard.resources.description") || "Access organization resources and files"}
             </CardDescription>
           </CardHeader>
-          <CardContent>
+          <CardContent className="flex-1 flex items-center justify-center">
             {resources.length === 0 ? (
-              <div className="text-center py-8">
+              <div className="text-center py-8 w-full">
                 <div className="flex flex-col items-center gap-4">
-                  <div className="p-6 rounded-full bg-muted">
-                    <Upload className="h-12 w-12 text-muted-foreground" />
+                  <div className={`p-6 rounded-full transition-colors ${isDragging ? "bg-primary/20" : "bg-muted"}`}>
+                    <Upload className={`h-12 w-12 transition-colors ${isDragging ? "text-primary" : "text-muted-foreground"}`} />
                   </div>
                   <div>
-                    <p className="text-muted-foreground mb-2">
-                      {t("dashboard.resources.empty") || "No resources available."}
+                    <p className="text-muted-foreground mb-2 text-lg font-medium">
+                      {isDragging 
+                        ? (t("dashboard.resources.dragDrop.title") || "Drop files here")
+                        : (t("dashboard.resources.empty") || "No resources available.")}
                     </p>
                     <p className="text-sm text-muted-foreground">
                       {t("dashboard.resources.dragDrop.hint") || "Drag and drop files here to upload, or use the Upload button above"}
@@ -649,9 +662,19 @@ const ResourcesContent = () => {
                 </div>
               </div>
             ) : (
-              <p className="text-muted-foreground">
-                {t("dashboard.resources.noResults") || "No resources match your search."}
-              </p>
+              <div className="text-center py-8">
+                <p className="text-muted-foreground mb-4">
+                  {t("dashboard.resources.noResults") || "No resources match your search."}
+                </p>
+                <div className="flex flex-col items-center gap-4">
+                  <div className="p-4 rounded-lg bg-muted border-2 border-dashed border-border">
+                    <Upload className="h-8 w-8 text-muted-foreground" />
+                  </div>
+                  <p className="text-sm text-muted-foreground">
+                    {t("dashboard.resources.dragDrop.hint") || "Drag and drop files here to upload, or use the Upload button above"}
+                  </p>
+                </div>
+              </div>
             )}
           </CardContent>
         </Card>
@@ -661,14 +684,25 @@ const ResourcesContent = () => {
           onDragLeave={handleDragLeave}
           onDragOver={handleDragOver}
           onDrop={handleDrop}
-          className={
+          className={`relative ${
             viewMode === "grid"
               ? "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"
               : viewMode === "list"
               ? "space-y-2"
               : "grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3"
-          }
+          } ${isDragging ? "opacity-50" : ""}`}
         >
+          {/* Drop indicator overlay when dragging */}
+          {isDragging && (
+            <div className="absolute inset-0 z-10 border-4 border-dashed border-primary bg-primary/5 rounded-lg flex items-center justify-center pointer-events-none">
+              <div className="bg-background border-2 border-primary rounded-lg p-6 text-center">
+                <Upload className="h-12 w-12 mx-auto mb-3 text-primary" />
+                <p className="text-lg font-semibold text-primary">
+                  {t("dashboard.resources.dragDrop.title") || "Drop files here"}
+                </p>
+              </div>
+            </div>
+          )}
           {filteredAndSortedResources.map((resource) => {
             // Icons view - compact icon-based layout
             if (viewMode === "icons") {

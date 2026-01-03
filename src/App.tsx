@@ -20,6 +20,7 @@ import Dashboard from "./pages/Dashboard";
 import Settings from "./pages/Settings";
 import CookieConsent from "./components/CookieConsent";
 import ProtectedRoute from "./components/ProtectedRoute";
+import ScrollProgress from "./components/ScrollProgress";
 
 const queryClient = new QueryClient();
 
@@ -107,6 +108,7 @@ const AppContent: React.FC = () => {
           <Toaster />
           <Sonner />
           <BrowserRouter>
+            <ScrollProgress />
             <CookieConsent />
             <Routes>
               <Route path="/" element={<Index />} />

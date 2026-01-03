@@ -156,7 +156,7 @@ function FooterSection({
 
   return (
     <footer className="relative border-t bg-background text-foreground transition-colors duration-300">
-      <div className="container mx-auto px-4 py-12 md:px-6 lg:px-8">
+      <div className="container mx-auto px-4 py-12 md:px-6 lg:px-8 max-w-7xl">
         <div className="grid gap-12 md:grid-cols-2 lg:grid-cols-4">
           <div className="relative">
             {/* BAMAS Logo - positioned above newsletter title */}
@@ -431,6 +431,35 @@ function FooterSection({
               {translations?.cookieSettings || "Cookie Policy"}
             </a>
           </nav>
+        </div>
+      </div>
+      {/* Large stylized text at bottom - full width */}
+      <div className="w-screen relative left-1/2 right-1/2 -ml-[50vw] -mr-[50vw] mt-12 pt-12 border-t border-border/10 overflow-hidden">
+        <div className="w-full text-center px-2 sm:px-4 md:px-6 lg:px-8">
+          <h1 
+            className="w-full font-black tracking-tighter leading-none select-none pointer-events-none block"
+            style={{
+              fontSize: 'clamp(3.5rem, 30vw, 22rem)',
+              color: 'transparent',
+              WebkitTextStroke: isDarkMode ? '1.5px' : '2px',
+              WebkitTextStrokeColor: isDarkMode 
+                ? 'hsl(159, 88%, 33%)' 
+                : '#E62F29',
+              opacity: isDarkMode ? 0.4 : 0.5,
+              letterSpacing: currentLanguage === "bg" ? '-0.15em' : '-0.12em',
+              lineHeight: '0.7',
+              width: '100%',
+              maxWidth: '100%',
+              margin: '0 auto',
+              wordBreak: 'keep-all',
+              overflowWrap: 'normal',
+              whiteSpace: 'nowrap',
+              overflow: 'hidden',
+              textOverflow: 'clip',
+            }}
+          >
+            {currentLanguage === "bg" ? "БАЗАП" : "BAMAS"}
+          </h1>
         </div>
       </div>
     </footer>

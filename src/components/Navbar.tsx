@@ -121,6 +121,7 @@ const Navbar = () => {
     <header
       className={`fixed top-0 w-full z-50 transition-all duration-300 ${isScrolled ? "bg-background/90 shadow-md backdrop-blur-sm py-2 border-b border-border/40" : "bg-transparent py-4"
         } ${isMenuOpen ? "bg-background/95" : ""}`}
+      style={{ minHeight: isScrolled ? '64px' : '80px' }}
     >
       <div className="container mx-auto px-4 flex items-center justify-between">
         <a href="#home" className="flex items-center">
@@ -293,7 +294,7 @@ const Navbar = () => {
             aria-hidden="true"
           />
           {/* Mobile menu */}
-          <div className="md:hidden bg-background shadow-lg border-t border-border relative z-50 animate-in slide-in-from-top">
+          <div className="md:hidden bg-background shadow-lg border-t border-border fixed left-0 right-0 bottom-0 z-50 animate-in slide-in-from-top overflow-y-auto" style={{ top: isScrolled ? '64px' : '80px' }}>
             {/* Close button inside menu - always visible at top */}
             <div className="flex items-center justify-between px-4 py-3 border-b border-border bg-background sticky top-0 z-10">
               <span className="text-lg font-semibold text-foreground">{t("nav.menu") || "Menu"}</span>

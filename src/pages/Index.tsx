@@ -72,16 +72,16 @@ const Index = () => {
     <div className="min-h-screen bg-background overflow-x-hidden">
       <Navbar />
       
-      <section id="home" className="relative pt-16 md:pt-20">
+      <section id="home" className="relative pt-20 md:pt-24 scroll-mt-20 md:scroll-mt-24">
         <DotGlobeHero
           rotationSpeed={0.004}
           className="bg-gradient-to-br from-background via-background/95 to-muted/10 relative overflow-hidden"
         >
           <div className="absolute inset-0 bg-gradient-to-t from-background/50 via-transparent to-background/30" />
-          <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-primary/5 rounded-full blur-3xl animate-pulse" />
-          <div className="absolute bottom-1/4 right-1/4 w-64 h-64 bg-primary/3 rounded-full blur-3xl animate-pulse" />
+          <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-primary/5 rounded-full blur-3xl animate-pulse pointer-events-none" />
+          <div className="absolute bottom-1/4 right-1/4 w-64 h-64 bg-primary/3 rounded-full blur-3xl animate-pulse pointer-events-none" />
           
-          <div className="relative z-10 text-center space-y-8 md:space-y-12 max-w-5xl mx-auto px-4 md:px-6 pt-24 md:pt-32 pb-8 md:pb-12">
+          <div className="relative z-10 text-center space-y-8 md:space-y-12 max-w-5xl mx-auto px-4 md:px-6 pt-8 md:pt-12 pb-12 md:pb-16">
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
@@ -193,7 +193,7 @@ const Index = () => {
         </DotGlobeHero>
       </section>
 
-      <section id="about" className="py-12 md:py-20 bg-muted/30 relative overflow-hidden">
+      <section id="about" className="py-12 md:py-20 bg-muted/30 relative overflow-hidden scroll-mt-20 md:scroll-mt-24">
         {/* Background image with reduced opacity - centered behind text */}
         <div 
           className="absolute inset-0 pointer-events-none z-0"
@@ -221,10 +221,10 @@ const Index = () => {
         </div>
       </section>
 
-      <section id="mission" className="py-24 bg-gradient-to-b from-background via-muted/20 to-background relative overflow-hidden">
+      <section id="mission" className="py-16 md:py-24 bg-gradient-to-b from-background via-muted/20 to-background relative overflow-hidden scroll-mt-20 md:scroll-mt-24">
         {/* Background decorative elements */}
-        <div className="absolute top-0 left-0 w-96 h-96 bg-primary/5 rounded-full blur-3xl -translate-x-1/2 -translate-y-1/2"></div>
-        <div className="absolute bottom-0 right-0 w-96 h-96 bg-primary/5 rounded-full blur-3xl translate-x-1/2 translate-y-1/2"></div>
+        <div className="absolute top-0 left-0 w-96 h-96 bg-primary/5 rounded-full blur-3xl -translate-x-1/2 -translate-y-1/2 pointer-events-none"></div>
+        <div className="absolute bottom-0 right-0 w-96 h-96 bg-primary/5 rounded-full blur-3xl translate-x-1/2 translate-y-1/2 pointer-events-none"></div>
         
         <div className="container mx-auto px-4 relative z-10">
           {/* Section Header */}
@@ -369,7 +369,7 @@ const Index = () => {
         </div>
       </section>
 
-      <section id="objectives" className="py-12 md:py-20 bg-muted/30">
+      <section id="objectives" className="py-12 md:py-20 bg-muted/30 scroll-mt-20 md:scroll-mt-24">
         <div className="container mx-auto px-4">
           <h2 className="text-2xl md:text-3xl lg:text-4xl font-bold mb-8 md:mb-12 text-center text-foreground animate-on-scroll opacity-0 translate-y-4 transition-all duration-700 ease-out px-4">
             {t("objectives.title")}
@@ -411,7 +411,7 @@ const Index = () => {
         </div>
       </section>
 
-      <section id="membership-pricing" className="py-12 md:py-20 bg-muted/30">
+      <section id="membership-pricing" className="py-12 md:py-20 bg-muted/30 scroll-mt-20 md:scroll-mt-24">
         <div className="container mx-auto px-4">
           <h2 className="text-3xl md:text-4xl font-bold mb-4 text-center text-foreground animate-on-scroll opacity-0 translate-y-4 transition-all duration-700 ease-out">
             {t("membership.pricing.title")}
@@ -518,7 +518,7 @@ const Index = () => {
         </div>
       </section>
 
-      <section id="membership" className="py-12 md:py-20 bg-background">
+      <section id="membership" className="py-12 md:py-20 bg-background scroll-mt-20 md:scroll-mt-24">
         <div className="container mx-auto px-4">
           <h2 className="text-2xl md:text-3xl lg:text-4xl font-bold mb-8 md:mb-12 text-center text-foreground animate-on-scroll opacity-0 translate-y-4 transition-all duration-700 ease-out px-4">
             {t("membership.title")}
@@ -572,7 +572,7 @@ const Index = () => {
         </div>
       </section>
 
-      <section id="events" className="py-12 md:py-20 bg-muted/30">
+      <section id="events" className="py-12 md:py-20 bg-muted/30 scroll-mt-20 md:scroll-mt-24">
         <div className="container mx-auto px-4">
           <h2 className="text-2xl md:text-3xl lg:text-4xl font-bold mb-8 md:mb-12 text-center text-foreground animate-on-scroll opacity-0 translate-y-4 transition-all duration-700 ease-out px-4">
             {t("events.title")}
@@ -650,7 +650,7 @@ const Index = () => {
         </div>
       </section>
 
-      <section id="partner" className="py-12 md:py-20 bg-background">
+      <section id="partner" className="py-12 md:py-20 bg-background scroll-mt-20 md:scroll-mt-24">
         <div className="container mx-auto px-4">
           <h2 className="text-2xl md:text-3xl lg:text-4xl font-bold mb-8 md:mb-12 text-center text-foreground animate-on-scroll opacity-0 translate-y-4 transition-all duration-700 ease-out px-4">
             {t("partner.title")}
@@ -682,7 +682,7 @@ const Index = () => {
         </div>
       </section>
 
-      <section id="contact" className="py-12 md:py-20 bg-muted/30">
+      <section id="contact" className="py-12 md:py-20 bg-muted/30 scroll-mt-20 md:scroll-mt-24">
         <div className="container mx-auto px-4">
           <h2 className="text-2xl md:text-3xl lg:text-4xl font-bold mb-8 md:mb-12 text-center text-foreground animate-on-scroll opacity-0 translate-y-4 transition-all duration-700 ease-out px-4">
             {t("contact.title")}

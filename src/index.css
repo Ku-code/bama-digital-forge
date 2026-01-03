@@ -247,3 +247,43 @@ html {
 .button-hover-effect:hover:after {
   @apply scale-x-100 origin-left;
 }
+
+/* Prevent section overlap */
+section {
+  position: relative;
+  isolation: isolate;
+  min-height: 0;
+}
+
+/* Ensure sections have proper spacing and don't overlap */
+section[id] {
+  scroll-margin-top: 5rem;
+}
+
+@media (min-width: 768px) {
+  section[id] {
+    scroll-margin-top: 6rem;
+  }
+}
+
+/* Prevent absolute positioned elements from causing overflow */
+section > *[class*="absolute"] {
+  overflow: hidden;
+  contain: layout;
+}
+
+/* Ensure mobile menu doesn't overlap content */
+@media (max-width: 768px) {
+  header[class*="fixed"] {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 50;
+  }
+  
+  /* Add extra padding on mobile to account for navbar */
+  section[id="home"] {
+    padding-top: 5rem !important;
+  }
+}

@@ -106,6 +106,11 @@ const PARTNERS: Partner[] = [
     url: "https://www.epma.com/",
     hasWhiteBackground: true,
   },
+  {
+    logo: "/partnerlogos/Betma Logo.png",
+    name: "BETMA",
+    url: "https://www.betma.eu/",
+  },
 ];
 
 // Duplicate partners for seamless infinite loop

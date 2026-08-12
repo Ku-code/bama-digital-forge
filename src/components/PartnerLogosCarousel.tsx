@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { useTheme } from "@/components/ThemeProvider";
 
 interface Partner {
   logo: string;
@@ -8,6 +9,7 @@ interface Partner {
   url: string;
   hasWhiteBackground?: boolean;
   subtext?: string;
+  logoDark?: string;
 }
 
 // Partner logos with their website URLs
@@ -110,6 +112,13 @@ const PARTNERS: Partner[] = [
     logo: "/partnerlogos/Betma Logo.png",
     name: "BETMA",
     url: "https://www.betma.eu/",
+    logoDark: "/partnerlogos/Betma Logo white.png",
+  },
+  {
+    logo: "/partnerlogos/peri-logo.webp",
+    name: "PERI Bulgaria",
+    url: "https://www.peri.bg/",
+    hasWhiteBackground: true,
   },
 ];
 
@@ -121,6 +130,7 @@ const PartnerLogosCarousel = () => {
   const [canScrollLeft, setCanScrollLeft] = useState(false);
   const [canScrollRight, setCanScrollRight] = useState(true);
   const [isAutoScrolling, setIsAutoScrolling] = useState(true);
+  const { resolvedTheme } = useTheme();
 
   // Check scroll position
   const checkScrollPosition = () => {
@@ -191,7 +201,9 @@ const PartnerLogosCarousel = () => {
     setTimeout(() => setIsAutoScrolling(true), 5000);
   };
 
-  const renderLogo = (partner: Partner, key: string) => (
+  const renderLogo = (partner: Partner, key: string) => {
+    const logoSrc = partner.logoDark && resolvedTheme === "dark" ? partner.logoDark : partner.logo;
+    return (
     <a
       key={key}
       href={partner.url}
@@ -202,7 +214,7 @@ const PartnerLogosCarousel = () => {
       {partner.hasWhiteBackground ? (
         <div className="h-40 w-96 flex flex-col items-center justify-center bg-white rounded-lg p-4 shadow-sm">
           <img
-            src={partner.logo}
+            src={logoSrc}
             alt={`${partner.name} Logo`}
             className="h-auto w-auto object-contain max-h-28 max-w-full"
             loading="lazy"
@@ -220,7 +232,7 @@ const PartnerLogosCarousel = () => {
       ) : (
         <div className="h-52 w-96 flex flex-col items-center justify-center bg-card/50 rounded-lg p-6 shadow-sm border border-white/5">
           <img
-            src={partner.logo}
+            src={logoSrc}
             alt={`${partner.name} Logo`}
             className="h-auto w-auto object-contain max-h-36 max-w-full opacity-90 group-hover:opacity-100 transition-opacity"
             loading="lazy"
@@ -237,7 +249,8 @@ const PartnerLogosCarousel = () => {
         </div>
       )}
     </a>
-  );
+    );
+  };
 
   return (
     <div className="relative w-full py-8">

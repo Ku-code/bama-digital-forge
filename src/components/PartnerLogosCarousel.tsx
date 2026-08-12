@@ -120,6 +120,12 @@ const PARTNERS: Partner[] = [
     url: "https://www.peri.bg/",
     hasWhiteBackground: true,
   },
+  {
+    logo: "/partnerlogos/concreef_logo.png",
+    logoDark: "/partnerlogos/concreef_logo_white.png",
+    name: "CONCREEF",
+    url: "https://www.concreef.eu/",
+  },
 ];
 
 // Duplicate partners for seamless infinite loop

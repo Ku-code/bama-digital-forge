@@ -1,4 +1,4 @@
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import { ExternalLink, Newspaper } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
@@ -8,11 +8,51 @@ interface NewsItem {
     title: string;
 }
 
+const TWO_ROWS_CHAR_THRESHOLD = 250;
+
+const MarqueeRow = ({ items }: { items: NewsItem[] }) => (
+    <div className="relative flex-grow overflow-hidden whitespace-nowrap group h-full flex items-center min-h-[2.5rem]">
+        <motion.div
+            className="flex items-center w-max"
+            initial={{ x: "0%" }}
+            animate={{ x: "-50%" }}
+            transition={{
+                duration: 30,
+                repeat: Infinity,
+                ease: "linear",
+                repeatType: "loop"
+            }}
+        >
+            {/* Render two identical sets to create a seamless infinite loop */}
+            {[1, 2].map((setIndex) => (
+                <div key={`set-${setIndex}`} className="flex items-center">
+                    {items.map((item, idx) => (
+                        <div key={`${setIndex}-${idx}`} className="flex items-center gap-16 px-8">
+                            <a
+                                href={item.url}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="inline-flex items-center gap-3 text-sm md:text-base lg:text-lg font-bold text-foreground/90 hover:text-primary transition-all duration-300 group/item whitespace-nowrap"
+                            >
+                                <span className="relative">
+                                    {item.title}
+                                    <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-primary transition-all duration-300 group-hover/item:w-full" />
+                                </span>
+                                <ExternalLink className="w-4 h-4 opacity-40 group-hover/item:opacity-100 group-hover/item:translate-x-1 group-hover/item:-translate-y-1 transition-all duration-300 text-primary" />
+                            </a>
+                            <span className="text-primary/40 font-bold select-none text-xl">✦</span>
+                        </div>
+                    ))}
+                </div>
+            ))}
+        </motion.div>
+    </div>
+);
+
 const NewsBanner = () => {
     const [news, setNews] = useState<NewsItem[]>([]);
     const [isVisible, setIsVisible] = useState(false);
     const { language } = useLanguage();
-    const containerRef = useRef<HTMLDivElement>(null);
 
     useEffect(() => {
         const fetchNews = async () => {
@@ -45,7 +85,11 @@ const NewsBanner = () => {
 
     if (!isVisible || news.length === 0) return null;
 
-    const marqueeItems = news;
+    // If total news text is too long, split into two rows instead of one
+    const totalChars = news.reduce((sum, item) => sum + item.title.length, 0);
+    const useTwoRows = totalChars > TWO_ROWS_CHAR_THRESHOLD;
+    const firstRow = useTwoRows ? news.filter((_, idx) => idx % 2 === 0) : news;
+    const secondRow = useTwoRows ? news.filter((_, idx) => idx % 2 === 1) : [];
 
     return (
         <div className="w-full bg-background/60 backdrop-blur-xl border-y border-primary/20 overflow-hidden py-4 md:py-5 relative z-[40] shadow-sm">
@@ -57,41 +101,9 @@ const NewsBanner = () => {
                     </span>
                 </div>
 
-                <div className="relative flex-grow overflow-hidden whitespace-nowrap group h-full flex items-center">
-                    <motion.div
-                        className="flex items-center w-max"
-                        initial={{ x: "0%" }}
-                        animate={{ x: "-50%" }}
-                        transition={{
-                            duration: 30,
-                            repeat: Infinity,
-                            ease: "linear",
-                            repeatType: "loop"
-                        }}
-                    >
-                        {/* Render two identical sets to create a seamless infinite loop */}
-                        {[1, 2].map((setIndex) => (
-                            <div key={`set-${setIndex}`} className="flex items-center">
-                                {news.map((item, idx) => (
-                                    <div key={`${setIndex}-${idx}`} className="flex items-center gap-16 px-8">
-                                        <a
-                                            href={item.url}
-                                            target="_blank"
-                                            rel="noopener noreferrer"
-                                            className="inline-flex items-center gap-3 text-sm md:text-base lg:text-lg font-bold text-foreground/90 hover:text-primary transition-all duration-300 group/item whitespace-nowrap"
-                                        >
-                                            <span className="relative">
-                                                {item.title}
-                                                <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-primary transition-all duration-300 group-hover/item:w-full" />
-                                            </span>
-                                            <ExternalLink className="w-4 h-4 opacity-40 group-hover/item:opacity-100 group-hover/item:translate-x-1 group-hover/item:-translate-y-1 transition-all duration-300 text-primary" />
-                                        </a>
-                                        <span className="text-primary/40 font-bold select-none text-xl">✦</span>
-                                    </div>
-                                ))}
-                            </div>
-                        ))}
-                    </motion.div>
+                <div className="relative flex-grow flex flex-col gap-1 overflow-hidden">
+                    <MarqueeRow items={firstRow} />
+                    {useTwoRows && <MarqueeRow items={secondRow} />}
 
                     {/* Gradient Fades for Smooth Edges */}
                     <div className="absolute inset-y-0 left-0 w-24 bg-gradient-to-r from-background via-background/20 to-transparent pointer-events-none z-10" />

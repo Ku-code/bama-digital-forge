@@ -100,6 +100,12 @@ const PARTNERS: Partner[] = [
     name: "3Druck.com",
     url: "https://3druck.com/",
   },
+  {
+    logo: "/partnerlogos/epma logo.png",
+    name: "EPMA",
+    url: "https://www.epma.com/",
+    hasWhiteBackground: true,
+  },
 ];
 
 // Duplicate partners for seamless infinite loop

@@ -25,7 +25,7 @@ import AdditiveDaysBanner from "@/components/AdditiveDaysBanner";
 import BannerCube from "@/components/BannerCube";
 import RSFBanner from "@/components/RSFBanner";
 import MachTechBanner from "@/components/MachTechBanner";
-import PlaceholderBanner from "@/components/banners/PlaceholderBanner";
+import IndustryInfoBanner from "@/components/IndustryInfoBanner";
 import { motion } from "framer-motion";
 import { ArrowRight, Zap as ZapIcon, Target, Rocket as RocketIcon, ChevronDown, ChevronUp } from "lucide-react";
 import { useIsMobile } from "@/hooks/use-mobile";
@@ -104,15 +104,14 @@ const Index = () => {
       <Navbar />
 
       <section id="home" className="relative pt-20 md:pt-24 scroll-mt-20 md:scroll-mt-24 overflow-hidden">
-        {/* Four banners on the faces of a forward-tumbling cube. Replace a
-            PlaceholderBanner with a real banner component to fill a slot. */}
+        {/* Four partner banners on the faces of a forward-tumbling cube. */}
         <BannerCube
           intervalMs={3500}
           faces={[
             <AdditiveDaysBanner key="additive-days" />,
             <RSFBanner key="rsf" />,
             <MachTechBanner key="machtech" />,
-            <PlaceholderBanner key="slot-4" slot={4} accent="#1E293B" />,
+            <IndustryInfoBanner key="industryinfo" />,
           ]}
         />
         <NewsBanner />

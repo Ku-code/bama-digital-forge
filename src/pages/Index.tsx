@@ -107,7 +107,7 @@ const Index = () => {
         {/* Four banners on the faces of a forward-tumbling cube. Replace a
             PlaceholderBanner with a real banner component to fill a slot. */}
         <BannerCube
-          intervalMs={7000}
+          intervalMs={3500}
           faces={[
             <AdditiveDaysBanner key="additive-days" />,
             <RSFBanner key="rsf" />,

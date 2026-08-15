@@ -23,65 +23,26 @@ export default defineConfig(({ mode }) => ({
     sourcemap: false,
     rollupOptions: {
       output: {
+        // NOTE: there is deliberately no `manualChunks` here.
+        //
+        // A hand-rolled vendor-splitting function used to live in this file. It
+        // stranded Rollup/Vite's shared helpers (`__vitePreload`, the CJS
+        // interop helpers) inside lazily-used vendor chunks, so every chunk that
+        // needed a helper had to import that vendor chunk — which forced three,
+        // maplibre-gl and the PDF libs to be `modulepreload`ed on the homepage
+        // even though nothing on the homepage uses them. Homepage eager JS was
+        // ~1,083 KB gzip; with Rollup's default chunking it is ~286 KB, and each
+        // heavy dependency now rides along with the lazy route that needs it
+        // (three → NetworkContent, maplibre-gl → AdditiveMapContent, pdf →
+        // PDFViewer). Do not reintroduce manualChunks without re-measuring
+        // `dist/index.html`'s preload list.
+
         // Ensure JSON files are treated as assets, not modules
         assetFileNames: (assetInfo) => {
           if (assetInfo.name && assetInfo.name.endsWith('.json')) {
             return 'translations/[name][extname]';
           }
           return 'assets/[name]-[hash][extname]';
-        },
-        manualChunks: (id) => {
-          // React core and router
-          if (id.includes('react') || id.includes('react-dom') || id.includes('react-router')) {
-            return 'react-vendor';
-          }
-          
-          // Three.js ecosystem
-          if (id.includes('three') || id.includes('@react-three')) {
-            return 'three-vendor';
-          }
-          
-          // MapLibre GL
-          if (id.includes('maplibre-gl')) {
-            return 'map-vendor';
-          }
-          
-          // All Radix UI packages
-          if (id.includes('@radix-ui')) {
-            return 'radix-vendor';
-          }
-          
-          // UI libraries
-          if (id.includes('framer-motion') || id.includes('lucide-react')) {
-            return 'ui-vendor';
-          }
-          
-          // Supabase
-          if (id.includes('@supabase/supabase-js')) {
-            return 'supabase-vendor';
-          }
-          
-          // Form libraries
-          if (id.includes('react-hook-form') || id.includes('zod') || id.includes('@hookform/resolvers')) {
-            return 'form-vendor';
-          }
-          
-          // Query library
-          if (id.includes('@tanstack/react-query')) {
-            return 'query-vendor';
-          }
-          
-          // PDF libraries
-          if (id.includes('react-pdf') || id.includes('pdf-lib')) {
-            return 'pdf-vendor';
-          }
-          
-          // Chart libraries - DO NOT split Recharts to avoid initialization order issues
-          // Keep Recharts in main bundle or with React to ensure proper initialization
-          if (id.includes('vis-network') || id.includes('react-force-graph')) {
-            return 'chart-vendor';
-          }
-          // Recharts should stay with main bundle to avoid circular dependency issues
         },
       },
     },
@@ -93,11 +54,11 @@ export default defineConfig(({ mode }) => ({
     include: [
       'react', 
       'react-dom', 
-      'react-router-dom', 
-      'recharts',
-      'three',
-      '@react-three/fiber',
-      '@react-three/drei'
+      'react-router-dom',
+      'recharts'
+      // three / @react-three/* deliberately omitted: they are dashboard-only
+      // (NetworkGraph3D) and reach the browser via lazy chunks, so prebundling
+      // them here only slows cold dev starts for the homepage.
     ],
     // Force Recharts to be pre-bundled to avoid initialization order issues
     esbuildOptions: {

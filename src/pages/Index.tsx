@@ -33,7 +33,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import MembershipForm, { ApplicationType } from "@/components/MembershipForm";
-import { DotGlobeHero } from "@/components/ui/globe-hero";
+import { GradientShaderHero } from "@/components/ui/gradient-shader-hero";
 
 const Index = () => {
   const { toast } = useToast();
@@ -102,8 +102,9 @@ const Index = () => {
       <section id="home" className="relative pt-20 md:pt-24 scroll-mt-20 md:scroll-mt-24 overflow-hidden">
         <AdditiveDaysBanner />
         <NewsBanner />
-        <DotGlobeHero
-          rotationSpeed={0.004}
+        <GradientShaderHero
+          speed={0.85}
+          amplitude={0.22}
           className="bg-gradient-to-br from-background via-background/95 to-muted/10 relative overflow-hidden"
         >
           <div className="absolute inset-0 bg-gradient-to-t from-background/30 via-transparent to-background/20 z-[2]" />
@@ -222,7 +223,7 @@ const Index = () => {
               </motion.button>
             </motion.div>
           </div>
-        </DotGlobeHero>
+        </GradientShaderHero>
       </section>
 
       <section id="about" className="py-12 md:py-20 bg-muted/30 relative overflow-hidden scroll-mt-20 md:scroll-mt-24">

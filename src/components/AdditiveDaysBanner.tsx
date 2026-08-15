@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { useLanguage } from "@/contexts/LanguageContext";
 
 /**
- * Additive Days III Edition partner banner.
+ * Additive Days IV Edition partner banner.
  *
  * Ported from the Additive Days design-system banner (1920×160, 12:1). The
  * desktop layout reproduces it 1:1 — positions are percentages of the design
@@ -113,8 +113,8 @@ const AdditiveDaysBanner = () => {
 
     const label =
         language === "bg"
-            ? "Additive Days III издание, 10.09.2026, София Тех Парк — отворете additivedays.com в нов раздел"
-            : "Additive Days III Edition, 10.09.2026, Sofia Tech Park — open additivedays.com in a new tab";
+            ? "Additive Days IV издание, 10.09.2026, София Тех Парк — отворете additivedays.com в нов раздел"
+            : "Additive Days IV Edition, 10.09.2026, Sofia Tech Park — open additivedays.com in a new tab";
 
     return (
         <div className="w-full bg-background relative z-[41]">
@@ -163,7 +163,7 @@ const AdditiveDaysBanner = () => {
                             fontWeight: 500,
                         }}
                     >
-                        <span style={{ fontWeight: 600 }}>III edition</span>
+                        <span style={{ fontWeight: 600 }}>IV edition</span>
                         <Dot size={t(6.35)} />
                         <span>additivedays.com</span>
                         <Dot size={t(6.35)} />

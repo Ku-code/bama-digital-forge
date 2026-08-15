@@ -107,7 +107,7 @@ const BannerCube: React.FC<BannerCubeProps> = ({ faces, intervalMs = 7000, class
                     style={{
                         transformStyle: "preserve-3d",
                         transform: `translateZ(-${depth}px) rotateX(${-90 * index}deg)`,
-                        transition: reducedMotion ? "none" : "transform 1.15s cubic-bezier(0.72, 0, 0.18, 1)",
+                        transition: reducedMotion ? "none" : "transform 0.7s cubic-bezier(0.72, 0, 0.18, 1)",
                     }}
                 >
                     {faces.map((face, i) => (

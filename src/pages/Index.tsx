@@ -23,6 +23,7 @@ import BoardMembersCarousel from "@/components/BoardMembersCarousel";
 import NewsBanner from "@/components/NewsBanner";
 import AdditiveDaysBanner from "@/components/AdditiveDaysBanner";
 import BannerCube from "@/components/BannerCube";
+import RSFBanner from "@/components/RSFBanner";
 import PlaceholderBanner from "@/components/banners/PlaceholderBanner";
 import { motion } from "framer-motion";
 import { ArrowRight, Zap as ZapIcon, Target, Rocket as RocketIcon, ChevronDown, ChevronUp } from "lucide-react";
@@ -108,7 +109,7 @@ const Index = () => {
           intervalMs={7000}
           faces={[
             <AdditiveDaysBanner key="additive-days" />,
-            <PlaceholderBanner key="slot-2" slot={2} accent="#052E40" />,
+            <RSFBanner key="rsf" />,
             <PlaceholderBanner key="slot-3" slot={3} accent="#0C9D6A" />,
             <PlaceholderBanner key="slot-4" slot={4} accent="#1E293B" />,
           ]}

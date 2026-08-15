@@ -11,7 +11,7 @@ interface NewsItem {
 const TWO_ROWS_CHAR_THRESHOLD = 250;
 
 const MarqueeRow = ({ items }: { items: NewsItem[] }) => (
-    <div className="relative flex-grow overflow-hidden whitespace-nowrap group h-full flex items-center min-h-[2.5rem]">
+    <div className="relative flex-grow overflow-hidden whitespace-nowrap group h-full flex items-center min-h-[1.75rem]">
         <motion.div
             className="flex items-center w-max"
             initial={{ x: "0%" }}
@@ -27,20 +27,20 @@ const MarqueeRow = ({ items }: { items: NewsItem[] }) => (
             {[1, 2].map((setIndex) => (
                 <div key={`set-${setIndex}`} className="flex items-center">
                     {items.map((item, idx) => (
-                        <div key={`${setIndex}-${idx}`} className="flex items-center gap-16 px-8">
+                        <div key={`${setIndex}-${idx}`} className="flex items-center gap-10 px-6">
                             <a
                                 href={item.url}
                                 target="_blank"
                                 rel="noopener noreferrer"
-                                className="inline-flex items-center gap-3 text-sm md:text-base lg:text-lg font-bold text-foreground/90 hover:text-primary transition-all duration-300 group/item whitespace-nowrap"
+                                className="inline-flex items-center gap-2.5 text-xs md:text-sm lg:text-base font-bold text-foreground/90 hover:text-primary transition-all duration-300 group/item whitespace-nowrap"
                             >
                                 <span className="relative">
                                     {item.title}
                                     <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-primary transition-all duration-300 group-hover/item:w-full" />
                                 </span>
-                                <ExternalLink className="w-4 h-4 opacity-40 group-hover/item:opacity-100 group-hover/item:translate-x-1 group-hover/item:-translate-y-1 transition-all duration-300 text-primary" />
+                                <ExternalLink className="w-3.5 h-3.5 opacity-40 group-hover/item:opacity-100 group-hover/item:translate-x-1 group-hover/item:-translate-y-1 transition-all duration-300 text-primary" />
                             </a>
-                            <span className="text-primary/40 font-bold select-none text-xl">✦</span>
+                            <span className="text-primary/40 font-bold select-none text-base">✦</span>
                         </div>
                     ))}
                 </div>
@@ -92,11 +92,11 @@ const NewsBanner = () => {
     const secondRow = useTwoRows ? news.filter((_, idx) => idx % 2 === 1) : [];
 
     return (
-        <div className="w-full bg-background/60 backdrop-blur-xl border-y border-primary/20 overflow-hidden py-4 md:py-5 relative z-[40] shadow-sm">
+        <div className="w-full bg-background/60 backdrop-blur-xl border-y border-primary/20 overflow-hidden py-2 md:py-2.5 relative z-[40] shadow-sm">
             <div className="container mx-auto px-4 flex items-center">
-                <div className="flex-shrink-0 flex items-center gap-2.5 px-4 py-1.5 rounded-full bg-primary/20 text-primary border border-primary/30 mr-8 shadow-[0_4px_12px_rgba(0,0,0,0.1)]">
-                    <Newspaper className="w-4 h-4 md:w-5 md:h-5 animate-pulse" />
-                    <span className="text-[10px] md:text-sm font-black uppercase tracking-widest leading-none">
+                <div className="flex-shrink-0 flex items-center gap-2 px-3 py-1 rounded-full bg-primary/20 text-primary border border-primary/30 mr-5 md:mr-6 shadow-[0_4px_12px_rgba(0,0,0,0.1)]">
+                    <Newspaper className="w-3.5 h-3.5 md:w-4 md:h-4 animate-pulse" />
+                    <span className="text-[9px] md:text-xs font-black uppercase tracking-widest leading-none">
                         {language === 'bg' ? 'НОВИНИ' : 'LATEST'}
                     </span>
                 </div>

@@ -21,6 +21,7 @@ import { useLanguage } from "@/contexts/LanguageContext";
 import PartnerLogosCarousel from "@/components/PartnerLogosCarousel";
 import BoardMembersCarousel from "@/components/BoardMembersCarousel";
 import NewsBanner from "@/components/NewsBanner";
+import AdditiveDaysBanner from "@/components/AdditiveDaysBanner";
 import { motion } from "framer-motion";
 import { ArrowRight, Zap as ZapIcon, Target, Rocket as RocketIcon, ChevronDown, ChevronUp } from "lucide-react";
 import { useIsMobile } from "@/hooks/use-mobile";
@@ -99,6 +100,7 @@ const Index = () => {
       <Navbar />
 
       <section id="home" className="relative pt-20 md:pt-24 scroll-mt-20 md:scroll-mt-24 overflow-hidden">
+        <AdditiveDaysBanner />
         <NewsBanner />
         <DotGlobeHero
           rotationSpeed={0.004}

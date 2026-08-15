@@ -23,7 +23,7 @@ import BoardMembersCarousel from "@/components/BoardMembersCarousel";
 import NewsBanner from "@/components/NewsBanner";
 import AdditiveDaysBanner from "@/components/AdditiveDaysBanner";
 import { motion } from "framer-motion";
-import { ArrowRight, Zap as ZapIcon, Target, Rocket as RocketIcon, ChevronDown, ChevronUp } from "lucide-react";
+import { ArrowRight, ArrowUpRight, Zap as ZapIcon, Target, Rocket as RocketIcon, ChevronDown, ChevronUp } from "lucide-react";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { useNavigate } from "react-router-dom";
 import {
@@ -105,125 +105,80 @@ const Index = () => {
         <GradientShaderHero
           speed={0.85}
           amplitude={0.22}
-          className="bg-gradient-to-br from-background via-background/95 to-muted/10 relative overflow-hidden"
-        >
-          <div className="absolute inset-0 bg-gradient-to-t from-background/30 via-transparent to-background/20 z-[2]" />
-          <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-primary/5 rounded-full blur-3xl animate-pulse pointer-events-none z-[2]" />
-          <div className="absolute bottom-1/4 right-1/4 w-64 h-64 bg-primary/3 rounded-full blur-3xl animate-pulse pointer-events-none z-[2]" />
-
-          <div className="absolute inset-0 z-[10] flex flex-col items-center justify-center text-center space-y-8 md:space-y-12 max-w-5xl mx-auto px-4 md:px-6 w-full h-full">
+          eyebrow={
             <motion.div
-              initial={{ opacity: 0, y: 20 }}
+              initial={{ opacity: 0, y: 12 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.8 }}
-              className="space-y-8"
+              transition={{ duration: 0.6 }}
+              className="flex items-center gap-2.5"
             >
-              <motion.div
-                initial={{ opacity: 0, scale: 0.9 }}
-                animate={{ opacity: 1, scale: 1 }}
-                transition={{ duration: 0.6, delay: 0.2 }}
-                className="relative inline-flex items-center gap-2 md:gap-3 px-4 md:px-6 py-2 md:py-3 rounded-full bg-gradient-to-r from-primary/20 via-primary/10 to-primary/20 border border-primary/30 backdrop-blur-xl shadow-2xl scale-90 md:scale-100"
+              <span className="w-2 h-2 rounded-full bg-primary animate-pulse" />
+              <span className="text-sm md:text-base font-semibold leading-snug text-white/85">
+                {t("hero.badge")}
+              </span>
+            </motion.div>
+          }
+          action={
+            <motion.button
+              initial={{ opacity: 0, y: 12 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: 0.15 }}
+              whileHover={{ scale: 1.04 }}
+              whileTap={{ scale: 0.98 }}
+              onClick={() => document.getElementById('membership')?.scrollIntoView({ behavior: 'smooth' })}
+              className="inline-flex items-center gap-2 rounded-full bg-white/15 hover:bg-white/25 backdrop-blur-md border border-white/25 px-5 md:px-7 py-2.5 md:py-3 text-sm md:text-base font-semibold text-white transition-colors duration-300"
+            >
+              {t("hero.cta")}
+              <ArrowRight className="w-4 h-4" />
+            </motion.button>
+          }
+          headline={
+            <motion.div
+              initial={{ opacity: 0, y: 24 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.9, delay: 0.25 }}
+            >
+              <h1
+                className={`font-extrabold text-white tracking-tight leading-[1.05] ${language === 'bg'
+                  ? 'text-3xl sm:text-4xl md:text-5xl lg:text-6xl'
+                  : 'text-4xl sm:text-5xl md:text-6xl lg:text-7xl'
+                  }`}
               >
-                <div className="absolute inset-0 rounded-full bg-gradient-to-r from-primary/10 via-transparent to-primary/10 animate-pulse" />
-                <div className="w-1.5 h-1.5 md:w-2 md:h-2 bg-primary rounded-full animate-ping" />
-                <span className="relative z-10 text-xs md:text-sm font-bold text-primary tracking-wider uppercase">{t("hero.badge")}</span>
-                <div className="w-1.5 h-1.5 md:w-2 md:h-2 bg-primary rounded-full animate-ping animation-delay-500" />
-              </motion.div>
-
-              <div className="space-y-6">
-                <motion.h1
-                  initial={{ opacity: 0, y: 30 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 1, delay: 0.3 }}
-                  className={`font-extrabold select-none ${language === 'bg'
-                    ? 'text-2xl sm:text-3xl md:text-4xl lg:text-5xl xl:text-6xl tracking-normal leading-[1.15] text-center px-2 sm:px-4 md:px-6 max-w-full'
-                    : 'text-3xl sm:text-4xl md:text-6xl lg:text-7xl xl:text-8xl tracking-tight leading-tight'
-                    }`}
+                {t("hero.title")}
+              </h1>
+              <motion.div
+                initial={{ width: 0 }}
+                animate={{ width: "6rem" }}
+                transition={{ duration: 1, delay: 1 }}
+                className="mt-5 h-1 rounded-full bg-primary"
+              />
+              <p className="mt-5 max-w-xl text-sm sm:text-base md:text-lg text-white/70 leading-relaxed">
+                {t("hero.subtitle")}
+              </p>
+            </motion.div>
+          }
+          links={
+            <>
+              {[
+                { label: t("nav.about"), id: 'about' },
+                { label: t("nav.membership"), id: 'membership' },
+                { label: t("nav.contact"), id: 'contact' },
+              ].map((l, i) => (
+                <motion.button
+                  key={l.id}
+                  initial={{ opacity: 0, x: 12 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ duration: 0.5, delay: 0.5 + i * 0.1 }}
+                  onClick={() => document.getElementById(l.id)?.scrollIntoView({ behavior: 'smooth' })}
+                  className="group inline-flex items-center gap-1.5 text-sm md:text-base text-foreground/55 hover:text-primary transition-colors duration-300"
                 >
-                  <span className={`block relative ${language === 'bg' ? 'text-center' : ''}`}>
-                    <span className={`bg-gradient-to-br from-primary via-primary to-primary/60 bg-clip-text text-transparent font-extrabold relative z-10 ${language === 'bg' ? 'inline-block break-words' : ''
-                      }`}>
-                      {t("hero.title")}
-                    </span>
-                    <div className={`absolute inset-0 bg-gradient-to-br from-primary via-primary to-primary/60 bg-clip-text text-transparent font-extrabold blur-2xl opacity-50 scale-105 ${language === 'bg' ? 'text-center' : ''
-                      }`}>
-                      {t("hero.title")}
-                    </div>
-                    <motion.div
-                      initial={{ width: 0 }}
-                      animate={{ width: "100%" }}
-                      transition={{ duration: 1.5, delay: 1.2, ease: "easeOut" }}
-                      className={`absolute -bottom-4 sm:-bottom-6 h-2 sm:h-3 bg-gradient-to-r from-primary via-primary/80 to-transparent rounded-full shadow-lg shadow-primary/50 ${language === 'bg' ? 'left-1/2 -translate-x-1/2 w-3/4 sm:w-2/3 md:w-1/2' : 'left-0'
-                        }`}
-                    />
-                  </span>
-                </motion.h1>
-              </div>
-
-              <motion.div
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ duration: 0.8, delay: 0.8 }}
-                className="max-w-3xl mx-auto space-y-4"
-              >
-                <p className="text-base sm:text-xl md:text-2xl text-muted-foreground leading-relaxed px-4 font-normal">
-                  {t("hero.subtitle")}
-                </p>
-              </motion.div>
-            </motion.div>
-
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.8, delay: 1 }}
-              className="flex flex-col sm:flex-row gap-6 justify-center items-center pt-4"
-            >
-              <motion.button
-                whileHover={{
-                  scale: 1.05,
-                  boxShadow: "0 20px 40px rgba(0,0,0,0.2), 0 0 25px hsl(var(--primary) / 0.3)",
-                  y: -2
-                }}
-                whileTap={{ scale: 0.98 }}
-                className="group relative inline-flex items-center gap-2 md:gap-3 px-6 md:px-8 py-3 md:py-4 bg-gradient-to-r from-primary via-primary to-primary/90 text-primary-foreground rounded-xl font-semibold text-sm md:text-lg shadow-xl hover:shadow-primary/30 transition-all duration-500 overflow-hidden border border-primary/20"
-                onClick={() => {
-                  const membershipSection = document.getElementById('membership');
-                  membershipSection?.scrollIntoView({ behavior: 'smooth' });
-                }}
-              >
-                <div className="absolute inset-0 bg-gradient-to-r from-white/20 via-white/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-                <motion.div
-                  className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent"
-                  initial={{ x: "-100%" }}
-                  whileHover={{ x: "100%" }}
-                  transition={{ duration: 0.8 }}
-                />
-                <span className="relative z-10 tracking-wide">{t("hero.cta")}</span>
-                <ArrowRight className="relative z-10 w-5 h-5 group-hover:translate-x-2 transition-transform duration-300" />
-              </motion.button>
-
-              <motion.button
-                whileHover={{
-                  scale: 1.05,
-                  backgroundColor: "hsl(var(--accent))",
-                  borderColor: "hsl(var(--primary))",
-                  boxShadow: "0 15px 30px rgba(0,0,0,0.1), 0 0 15px hsl(var(--primary) / 0.1)",
-                  y: -2
-                }}
-                whileTap={{ scale: 0.98 }}
-                className="group relative inline-flex items-center gap-2 md:gap-3 px-6 md:px-8 py-3 md:py-4 border-2 border-border/40 rounded-xl font-semibold text-sm md:text-lg hover:border-primary/40 transition-all duration-500 backdrop-blur-xl bg-background/60 hover:bg-background/90 shadow-lg overflow-hidden"
-                onClick={() => {
-                  const aboutSection = document.getElementById('about');
-                  aboutSection?.scrollIntoView({ behavior: 'smooth' });
-                }}
-              >
-                <div className="absolute inset-0 bg-gradient-to-r from-primary/5 via-transparent to-primary/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-                <ZapIcon className="relative z-10 w-5 h-5 group-hover:scale-110 group-hover:rotate-6 transition-all duration-300" />
-                <span className="relative z-10 tracking-wide">{t("nav.about")}</span>
-              </motion.button>
-            </motion.div>
-          </div>
-        </GradientShaderHero>
+                  {l.label}
+                  <ArrowUpRight className="w-4 h-4 transition-transform duration-300 group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
+                </motion.button>
+              ))}
+            </>
+          }
+        />
       </section>
 
       <section id="about" className="py-12 md:py-20 bg-muted/30 relative overflow-hidden scroll-mt-20 md:scroll-mt-24">

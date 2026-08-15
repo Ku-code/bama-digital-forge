@@ -117,19 +117,18 @@ const AdditiveDaysBanner = () => {
             : "Additive Days IV Edition, 10.09.2026, Sofia Tech Park — open additivedays.com in a new tab";
 
     return (
-        <div className="w-full bg-background relative z-[41]">
+        <div className="w-full h-full">
             <a
                 href={EVENT_URL}
                 target="_blank"
                 rel="noopener noreferrer"
                 aria-label={label}
-                className="group block w-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-white"
+                className="group block w-full h-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-white"
             >
                 {/* ── Desktop: faithful 12:1 strip ─────────────────────── */}
                 <div
-                    className="hidden md:block relative w-full overflow-hidden"
+                    className="hidden md:block relative w-full h-full overflow-hidden"
                     style={{
-                        aspectRatio: `${W} / ${H}`,
                         containerType: "inline-size",
                         backgroundColor: BLUE,
                     }}
@@ -278,7 +277,7 @@ const AdditiveDaysBanner = () => {
                 </div>
 
                 {/* ── Mobile: stacked ──────────────────────────────────── */}
-                <div className="md:hidden" style={{ backgroundColor: BLUE }}>
+                <div className="md:hidden h-full flex flex-col justify-between" style={{ backgroundColor: BLUE }}>
                     <div className="px-4 pb-2 pt-3">
                         <div className="h-9 w-[168px] overflow-hidden">
                             <LogoMark reducedMotion={reducedMotion} className="h-full w-full object-cover" />

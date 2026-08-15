@@ -22,6 +22,8 @@ import PartnerLogosCarousel from "@/components/PartnerLogosCarousel";
 import BoardMembersCarousel from "@/components/BoardMembersCarousel";
 import NewsBanner from "@/components/NewsBanner";
 import AdditiveDaysBanner from "@/components/AdditiveDaysBanner";
+import BannerCube from "@/components/BannerCube";
+import PlaceholderBanner from "@/components/banners/PlaceholderBanner";
 import { motion } from "framer-motion";
 import { ArrowRight, Zap as ZapIcon, Target, Rocket as RocketIcon, ChevronDown, ChevronUp } from "lucide-react";
 import { useIsMobile } from "@/hooks/use-mobile";
@@ -100,7 +102,17 @@ const Index = () => {
       <Navbar />
 
       <section id="home" className="relative pt-20 md:pt-24 scroll-mt-20 md:scroll-mt-24 overflow-hidden">
-        <AdditiveDaysBanner />
+        {/* Four banners on the faces of a forward-tumbling cube. Replace a
+            PlaceholderBanner with a real banner component to fill a slot. */}
+        <BannerCube
+          intervalMs={7000}
+          faces={[
+            <AdditiveDaysBanner key="additive-days" />,
+            <PlaceholderBanner key="slot-2" slot={2} accent="#052E40" />,
+            <PlaceholderBanner key="slot-3" slot={3} accent="#0C9D6A" />,
+            <PlaceholderBanner key="slot-4" slot={4} accent="#1E293B" />,
+          ]}
+        />
         <NewsBanner />
         <DotGlobeHero
           rotationSpeed={0.004}

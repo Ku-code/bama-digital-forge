@@ -53,7 +53,6 @@ const AnimatedMark = ({ reducedMotion, className }: { reducedMotion: boolean; cl
                 alt="Additive Days"
                 className={className}
                 style={MARK_FILTER}
-                loading="lazy"
                 decoding="async"
             />
         );
@@ -168,7 +167,6 @@ const RSFBanner = () => {
                         alt="Robotics Strategy Forum 2026"
                         className="absolute object-contain"
                         style={{ left: x(570), top: y(24), width: x(239), height: y(112) }}
-                        loading="lazy"
                         decoding="async"
                     />
 
@@ -190,7 +188,6 @@ const RSFBanner = () => {
                         alt="PARAi"
                         className="absolute object-contain"
                         style={{ left: x(830), top: y(70), width: x(136), height: y(42) }}
-                        loading="lazy"
                         decoding="async"
                     />
 

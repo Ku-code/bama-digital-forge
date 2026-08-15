@@ -24,6 +24,7 @@ import NewsBanner from "@/components/NewsBanner";
 import AdditiveDaysBanner from "@/components/AdditiveDaysBanner";
 import BannerCube from "@/components/BannerCube";
 import RSFBanner from "@/components/RSFBanner";
+import MachTechBanner from "@/components/MachTechBanner";
 import PlaceholderBanner from "@/components/banners/PlaceholderBanner";
 import { motion } from "framer-motion";
 import { ArrowRight, Zap as ZapIcon, Target, Rocket as RocketIcon, ChevronDown, ChevronUp } from "lucide-react";
@@ -110,7 +111,7 @@ const Index = () => {
           faces={[
             <AdditiveDaysBanner key="additive-days" />,
             <RSFBanner key="rsf" />,
-            <PlaceholderBanner key="slot-3" slot={3} accent="#0C9D6A" />,
+            <MachTechBanner key="machtech" />,
             <PlaceholderBanner key="slot-4" slot={4} accent="#1E293B" />,
           ]}
         />

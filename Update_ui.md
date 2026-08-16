@@ -1,6 +1,58 @@
 # BAMAS.xyz — Complete UI/UX, Performance, SEO & GEO Enhancement Plan
 
-**Status: PLAN ONLY — nothing here has been executed. Awaiting approval.**
+**Status: EXECUTED (2026-08-16) — Phases 0–2 and the SEO/GEO technical layer are live.
+See "Execution status & required user actions" at the top. Phase 3 (editorial content) and
+§5.1 prerendering remain open, plus the user-action items below.**
+
+---
+
+## Execution status & required user actions
+
+### Shipped (commits 73360bb, d247105, 8ccbdf0 + follow-ups)
+- **Phase 0 — all 12 items**: 63 MB team photos → 96 KB WebP; newsletter really
+  subscribes; og:url/og:image fixed; dynamic <html lang>; content visible-by-default
+  (js-anim progressive enhancement + 3s fail-safe); Context7 key removed from repo;
+  single h1 + <main> + skip link; membership function hardened (origin allow-list,
+  rate limit, honeypot, store-before-email); analytics consent-gated + gptengineer.js
+  removed; remaining big images compressed; aria-labels + newsletter label; navbar
+  active-state and cross-route links fixed.
+- **SEO/GEO layer**: robots.txt with AI-crawler allows + Sitemap; sitemap.xml; llms.txt;
+  JSON-LD Organization/WebSite (static) + Event + FAQPage + DefinedTermSet (in-app);
+  canonical/hreflang/OG/Twitter complete; per-route meta on all pages via
+  useDocumentMeta; noscript canon block; RSS autodiscovery.
+- **Phase 1**: hero factual tagline + height cap; About canon paragraph; Upcoming-events
+  grid with Event schema + history split; pricing FAQ; real stored contact form +
+  lazy map facade + legal identity lines; footer links/legal; news.json ticker
+  (dated/typed/localized, pause-on-hover, reading-speed duration, links to /news);
+  cube pause-after-3-cycles + GA4 banner_click events + mobile min-height; mobile
+  menu stagger halved; /join alias.
+- **Phase 2**: /faq, /news, /glossary (+/rechnik) public pages; rss.xml generated at
+  build; migrations 026 (newsletter_subscribers, contact_messages,
+  membership_applications) and 027 (public glossary read).
+
+### ⚠️ Requires your action (cannot be done from this machine)
+1. **Apply migrations 026 + 027** in the Supabase SQL editor
+   (`supabase/migrations/026_newsletter_and_contact.sql`, `027_public_glossary_read.sql`).
+   Until 026 runs, newsletter/contact submissions return a friendly error;
+   until 027 runs, /glossary shows the members-teaser state.
+2. **Redeploy the edge function** `send-membership-application`
+   (`supabase functions deploy send-membership-application`) to activate the
+   origin allow-list, rate limit, honeypot and store-first behavior.
+3. **Rotate the Context7 API key** (it was committed historically; removal from the
+   repo does not un-leak it).
+4. **Search Console**: submit https://www.bamas.xyz/sitemap.xml; verify domain.
+5. **Off-page (§5.4/§6.6)**: Wikidata entity, Google Business Profile, partner
+   backlink round, LinkedIn completeness — human-owned tasks.
+
+### Still open from the plan
+- §5.1 prerendering (biggest remaining SEO lever) — recommend vite prerender or Astro
+  migration for public routes as a dedicated project.
+- Phase 3 editorial: 4 pillar articles, monthly news posts, annual report.
+- §3.4 board roles/affiliations/LinkedIn (needs real data from you).
+- §3.8 dashboard screenshot tour (needs an account/screenshots you approve).
+- Pricing per-tier feature matrix (§3.7) — deferred in favour of the FAQ.
+
+---
 
 Prepared after a full audit of the live site (www.bamas.xyz) and the codebase: every homepage
 section walked at desktop (1512px) and mobile (390px), a programmatic DOM/accessibility audit,

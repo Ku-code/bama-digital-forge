@@ -195,7 +195,7 @@ const Navbar = () => {
         <nav className="hidden md:flex items-center space-x-6">
           <ul className="flex space-x-6">
             {navLinks.map((link) => (
-              <li key={link.name}>
+              <li key={link.href}>
                 {link.isRoute ? (
                   <Link
                     to={link.href}
@@ -378,7 +378,7 @@ const Navbar = () => {
                 <ul className="space-y-2">
                   {navLinks.map((link, index) => (
                     <motion.li
-                      key={link.name}
+                      key={link.href}
                       initial={{ opacity: 0, x: 20 }}
                       animate={{ opacity: 1, x: 0 }}
                       transition={{ delay: index * 0.025, duration: 0.18 }}

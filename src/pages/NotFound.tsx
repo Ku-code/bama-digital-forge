@@ -1,7 +1,13 @@
 import { useLocation } from "react-router-dom";
 import { useEffect } from "react";
 
+import { useDocumentMeta } from "@/hooks/useDocumentMeta";
 const NotFound = () => {
+  useDocumentMeta({
+    title: '404 — Page Not Found | BAMAS',
+    noindex: true,
+  });
+
   const location = useLocation();
 
   useEffect(() => {

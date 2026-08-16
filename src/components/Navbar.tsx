@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo, useCallback } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useLocation } from "react-router-dom";
 import { Menu, X } from "./ui/icons";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useAuth } from "@/contexts/AuthContext";
@@ -23,6 +23,18 @@ const Navbar = () => {
   const { t, language } = useLanguage();
   const { isAuthenticated, user, logout } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
+  const onHomePage = location.pathname === "/";
+
+  // Off the homepage there are no scroll sections — highlight by route
+  // instead of leaving "Home" stuck as active (e.g. on /documents).
+  useEffect(() => {
+    if (!onHomePage) {
+      setActiveSection(location.pathname === "/documents" ? "documents" : "");
+    } else if (window.scrollY < 100) {
+      setActiveSection("home");
+    }
+  }, [onHomePage, location.pathname]);
 
   // Update scroll state with throttling for performance
   useEffect(() => {
@@ -32,6 +44,12 @@ const Navbar = () => {
       if (!ticking) {
         window.requestAnimationFrame(() => {
           setIsScrolled(window.scrollY > 50);
+
+          // Section highlighting only applies on the homepage
+          if (!onHomePage) {
+            ticking = false;
+            return;
+          }
 
           // Find the current active section (throttled)
           const sections = document.querySelectorAll("section[id]");
@@ -51,7 +69,7 @@ const Navbar = () => {
 
     window.addEventListener("scroll", handleScroll, { passive: true });
     return () => window.removeEventListener("scroll", handleScroll);
-  }, []);
+  }, [onHomePage]);
 
   // Close menu on scroll (mobile only)
   useEffect(() => {
@@ -149,7 +167,7 @@ const Navbar = () => {
       style={{ minHeight: isScrolled ? '64px' : '80px' }}
     >
       <div className="container mx-auto px-4 flex items-center justify-between">
-        <a href="#home" className="flex items-center">
+        <a href={onHomePage ? "#home" : "/"} className="flex items-center" aria-label="BAMAS — начало">
           <div className="h-12 w-12">
             <img
               key={`${logoPath}-${isDarkMode}`}
@@ -187,7 +205,7 @@ const Navbar = () => {
                   </Link>
                 ) : (
                   <a
-                    href={link.href}
+                    href={onHomePage ? link.href : `/${link.href}`}
                     className={`text-sm font-semibold transition-colors ${activeSection === link.href.substring(1)
                       ? "text-destructive"
                       : "text-foreground hover:text-primary"
@@ -375,7 +393,7 @@ const Navbar = () => {
                         </Link>
                       ) : (
                         <a
-                          href={link.href}
+                          href={onHomePage ? link.href : `/${link.href}`}
                           className={`block text-lg font-semibold transition-all duration-200 py-3 px-4 rounded-lg ${activeSection === link.href.substring(1)
                               ? "text-primary bg-primary/10 border-l-4 border-primary"
                               : "text-foreground hover:text-primary hover:bg-muted/50"

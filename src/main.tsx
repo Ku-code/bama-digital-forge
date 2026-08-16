@@ -8,6 +8,13 @@ if (window.location.search.includes('?/')) {
   window.history.replaceState(null, '', path);
 }
 
+// Enable scroll-entrance animations only when JS runs and motion is allowed.
+// Runs before React renders, so animated elements never flash. Without this
+// class (crawlers, no-JS, reduced motion) all content is simply visible.
+if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+  document.documentElement.classList.add('js-anim');
+}
+
 // Error handling for root rendering
 try {
   const rootElement = document.getElementById("root");

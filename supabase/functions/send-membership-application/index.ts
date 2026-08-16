@@ -5,11 +5,38 @@ import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { PDFDocument, StandardFonts, rgb } from "https://esm.sh/pdf-lib@1.17.1";
 
-const corsHeaders = {
-  "Access-Control-Allow-Origin": "*",
+// Only the association's own origins may call this relay (was "*": an open
+// email relay that anyone could script against the Resend quota).
+const ALLOWED_ORIGINS = new Set([
+  "https://www.bamas.xyz",
+  "https://bamas.xyz",
+  "http://localhost:8080",
+  "http://localhost:4173",
+]);
+
+const corsHeadersFor = (origin: string | null) => ({
+  "Access-Control-Allow-Origin":
+    origin && ALLOWED_ORIGINS.has(origin) ? origin : "https://www.bamas.xyz",
+  "Vary": "Origin",
   "Access-Control-Allow-Headers":
     "authorization, x-client-info, apikey, content-type",
-};
+});
+
+// Naive in-instance rate limit: max N submissions per IP per hour. Edge
+// instances recycle, so this is best-effort — combined with the origin check
+// and honeypot it stops casual abuse without adding a dependency.
+const RATE_LIMIT = 5;
+const rateBuckets = new Map<string, { count: number; reset: number }>();
+function rateLimited(ip: string): boolean {
+  const now = Date.now();
+  const bucket = rateBuckets.get(ip);
+  if (!bucket || now > bucket.reset) {
+    rateBuckets.set(ip, { count: 1, reset: now + 60 * 60 * 1000 });
+    return false;
+  }
+  bucket.count++;
+  return bucket.count > RATE_LIMIT;
+}
 
 interface FormData {
   applicationType: string;
@@ -676,18 +703,39 @@ function createEmailHTML(formData: FormData, isAdminCopy: boolean): string {
 }
 
 serve(async (req) => {
+  const corsHeaders = corsHeadersFor(req.headers.get("origin"));
+
   // Handle CORS preflight requests
   if (req.method === "OPTIONS") {
     return new Response("ok", { headers: corsHeaders });
   }
 
   try {
+    // Best-effort per-IP rate limit
+    const ip =
+      req.headers.get("x-forwarded-for")?.split(",")[0].trim() ?? "unknown";
+    if (rateLimited(ip)) {
+      return new Response(
+        JSON.stringify({ error: "Too many requests. Please try again later." }),
+        { status: 429, headers: { ...corsHeaders, "Content-Type": "application/json" } },
+      );
+    }
+
     // Get environment variables
     const resendApiKey = Deno.env.get("RESEND_API_KEY") ?? "";
     const adminEmail = "info@bamas.xyz";
 
     // Parse request body
-    const { formData, language }: MembershipApplicationRequest = await req.json();
+    const { formData, language, website_hp }: MembershipApplicationRequest & { website_hp?: string } = await req.json();
+
+    // Honeypot: real users never fill this hidden field. Bots do — pretend
+    // success so they don't adapt, send nothing.
+    if (website_hp) {
+      return new Response(JSON.stringify({ success: true }), {
+        status: 200,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
 
     if (!formData || !formData.email) {
       return new Response(
@@ -697,6 +745,23 @@ serve(async (req) => {
           headers: { ...corsHeaders, "Content-Type": "application/json" },
         }
       );
+    }
+
+    // Store the application FIRST — it must survive any email failure.
+    try {
+      const supabaseAdmin = createClient(
+        Deno.env.get("SUPABASE_URL") ?? "",
+        Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "",
+      );
+      await supabaseAdmin.from("membership_applications").insert({
+        application_type: formData.applicationType ?? "unknown",
+        applicant_name: formData.fullName || formData.legalName || "unknown",
+        applicant_email: formData.email,
+        payload: formData,
+      });
+    } catch (dbError) {
+      // Don't block the email path on a storage error, but make it visible.
+      console.error("Failed to store membership application:", dbError);
     }
 
     console.log(`Processing membership application for: ${formData.email}`);

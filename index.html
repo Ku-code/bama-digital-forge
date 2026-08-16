@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en" class="dark">
+<html lang="bg" class="dark">
 
 <head>
   <meta charset="UTF-8" />
@@ -31,22 +31,37 @@
     }
   </style>
 
-  <!-- Google tag (gtag.js) -->
-  <script async src="https://www.googletagmanager.com/gtag/js?id=G-RPJCMNG6NH"></script>
+  <!-- Analytics (GA4 + Microsoft Clarity) — loaded ONLY after cookie consent.
+       GDPR: no analytics cookies before the user accepts. The CookieConsent
+       component dispatches "cookie-consent-accepted" on accept; returning
+       visitors with stored consent load immediately. -->
   <script>
-    window.dataLayer = window.dataLayer || [];
-    function gtag() { dataLayer.push(arguments); }
-    gtag('js', new Date());
-    gtag('config', 'G-RPJCMNG6NH');
-  </script>
-
-  <!-- Microsoft Clarity -->
-  <script type="text/javascript">
-    (function (c, l, a, r, i, t, y) {
-      c[a] = c[a] || function () { (c[a].q = c[a].q || []).push(arguments) };
-      t = l.createElement(r); t.async = 1; t.src = "https://www.clarity.ms/tag/" + i;
-      y = l.getElementsByTagName(r)[0]; y.parentNode.insertBefore(t, y);
-    })(window, document, "clarity", "script", "v0iipjyh6t");
+    (function () {
+      var loaded = false;
+      function loadAnalytics() {
+        if (loaded) return;
+        loaded = true;
+        // GA4
+        var s = document.createElement('script');
+        s.async = true;
+        s.src = 'https://www.googletagmanager.com/gtag/js?id=G-RPJCMNG6NH';
+        document.head.appendChild(s);
+        window.dataLayer = window.dataLayer || [];
+        window.gtag = function () { dataLayer.push(arguments); };
+        gtag('js', new Date());
+        gtag('config', 'G-RPJCMNG6NH', { anonymize_ip: true });
+        // Microsoft Clarity
+        (function (c, l, a, r, i, t, y) {
+          c[a] = c[a] || function () { (c[a].q = c[a].q || []).push(arguments) };
+          t = l.createElement(r); t.async = 1; t.src = "https://www.clarity.ms/tag/" + i;
+          y = l.getElementsByTagName(r)[0]; y.parentNode.insertBefore(t, y);
+        })(window, document, "clarity", "script", "v0iipjyh6t");
+      }
+      try {
+        if (localStorage.getItem('cookieConsent') === 'accepted') loadAnalytics();
+      } catch (e) { /* storage unavailable */ }
+      window.addEventListener('cookie-consent-accepted', loadAnalytics);
+    })();
   </script>
 
   <!-- Performance hints -->
@@ -74,25 +89,72 @@
   <!-- Google Tag Manager preconnect -->
   <link rel="preconnect" href="https://www.googletagmanager.com" />
   <link rel="dns-prefetch" href="https://www.googletagmanager.com" />
-  <!-- CDN preconnect for third-party scripts -->
-  <link rel="dns-prefetch" href="https://cdn.gpteng.co" />
   <link rel="preload" href="/bamas-uploads/6e77d85a-74ad-47e5-b141-a339ec981d57.png" as="image" />
   <link rel="preload" href="/bamas-uploads/BAMAS_Logo_bg.png" as="image" />
   <!-- Preload default language translation (bg) -->
   <link rel="modulepreload" href="/src/translations/bg.json" />
-  <title>БАЗАП - Българска Асоциация за Адитивно Производство</title>
+  <title>БАЗАП — Българска асоциация за адитивно производство | 3D печат България</title>
   <meta name="description"
-    content="БАЗАП е посветен на развитието на технологиите за адитивно производство и насърчаването на сътрудничеството в индустрията в България." />
-  <meta property="og:title" content="БАЗАП - Българска Асоциация за Адитивно Производство" />
+    content="БАЗАП (BAMAS) е националната асоциация за адитивно производство и 3D печат в България — обединява производители, университети и стартъпи за развитие на Industry 4.0 екосистемата." />
+  <meta name="keywords"
+    content="адитивно производство, 3D печат, БАЗАП, BAMAS, additive manufacturing Bulgaria, 3D printing Bulgaria, Industry 4.0 България, метален 3D печат, прототипиране" />
+  <meta name="author" content="Bulgarian Additive Manufacturing Association" />
+  <link rel="canonical" href="https://www.bamas.xyz/" />
+  <link rel="alternate" hreflang="bg" href="https://www.bamas.xyz/" />
+  <link rel="alternate" hreflang="x-default" href="https://www.bamas.xyz/" />
+
+  <!-- Open Graph -->
+  <meta property="og:type" content="website" />
+  <meta property="og:site_name" content="BAMAS / БАЗАП" />
+  <meta property="og:title" content="БАЗАП — Българска асоциация за адитивно производство" />
   <meta property="og:description"
-    content="БАЗАП е посветен на развитието на технологиите за адитивно производство и насърчаването на сътрудничеството в индустрията в България." />
-  <meta property="og:image" content="/bamas-uploads/BamasMain.png" />
-  <meta property="og:url" content="https://bamas.bg" />
+    content="Националната асоциация за адитивно производство и 3D печат в България. Обединяваме производители, университети и стартъпи." />
+  <meta property="og:image" content="https://www.bamas.xyz/bamas-uploads/BamasMain.png" />
+  <meta property="og:image:width" content="1903" />
+  <meta property="og:image:height" content="935" />
+  <meta property="og:url" content="https://www.bamas.xyz/" />
+  <meta property="og:locale" content="bg_BG" />
+  <meta property="og:locale:alternate" content="en_US" />
+
+  <!-- Twitter -->
   <meta name="twitter:card" content="summary_large_image" />
-  <meta name="twitter:title" content="БАЗАП - Българска Асоциация за Адитивно Производство" />
+  <meta name="twitter:title" content="БАЗАП — Българска асоциация за адитивно производство" />
   <meta name="twitter:description"
-    content="БАЗАП е посветен на развитието на технологиите за адитивно производство и насърчаването на сътрудничеството в индустрията в България." />
-  <meta name="twitter:image" content="/bamas-uploads/BamasMain.png" />
+    content="Националната асоциация за адитивно производство и 3D печат в България." />
+  <meta name="twitter:image" content="https://www.bamas.xyz/bamas-uploads/BamasMain.png" />
+
+  <!-- Structured data: the entity search engines and AI assistants retrieve -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@graph": [
+      {
+        "@type": "Organization",
+        "@id": "https://www.bamas.xyz/#organization",
+        "name": "Bulgarian Additive Manufacturing Association",
+        "alternateName": ["BAMAS", "БАЗАП", "Българска асоциация за адитивно производство"],
+        "url": "https://www.bamas.xyz/",
+        "logo": "https://www.bamas.xyz/bamas-uploads/6e77d85a-74ad-47e5-b141-a339ec981d57.png",
+        "email": "info@bamas.xyz",
+        "foundingDate": "2026",
+        "nonprofitStatus": "Nonprofit",
+        "address": { "@type": "PostalAddress", "addressLocality": "Sofia", "addressCountry": "BG" },
+        "areaServed": { "@type": "Country", "name": "Bulgaria" },
+        "knowsAbout": ["Additive manufacturing", "3D printing", "Industry 4.0", "Metal additive manufacturing", "Rapid prototyping", "Digital manufacturing"],
+        "memberOf": { "@type": "Organization", "name": "(Add)liance — European Centre for Additive Manufacturing", "url": "https://addliance.eu/" },
+        "sameAs": ["https://www.linkedin.com/company/bulgarian-additive-manufacturing-association/"]
+      },
+      {
+        "@type": "WebSite",
+        "@id": "https://www.bamas.xyz/#website",
+        "url": "https://www.bamas.xyz/",
+        "name": "BAMAS / БАЗАП",
+        "publisher": { "@id": "https://www.bamas.xyz/#organization" },
+        "inLanguage": ["bg", "en"]
+      }
+    ]
+  }
+  </script>
 </head>
 
 <body style="margin: 0; padding: 0; min-height: 100vh;">
@@ -128,8 +190,20 @@
     })();
   </script>
   <div id="root" style="min-height: 100vh;"></div>
-  <!-- IMPORTANT: DO NOT REMOVE THIS SCRIPT TAG OR THIS VERY COMMENT! -->
-  <script src="https://cdn.gpteng.co/gptengineer.js" type="module" defer></script>
+  <noscript>
+    <!-- Canonical facts for non-JS agents (crawlers, AI assistants, text browsers) -->
+    <div style="max-width:720px;margin:40px auto;padding:0 20px;font-family:sans-serif;color:#e2e8f0">
+      <h1>Българска асоциация за адитивно производство (БАЗАП / BAMAS)</h1>
+      <p>БАЗАП е националната неутрална нетърговска организация за адитивно производство и 3D
+        печат в България, основана през 2026 г. Обединява производители, университети и стартъпи
+        и е част от (Add)liance — European Centre for Additive Manufacturing.</p>
+      <p>BAMAS is the national non-profit association for additive manufacturing and 3D printing
+        in Bulgaria, founded in 2026, uniting manufacturers, universities and startups. Part of
+        (Add)liance — European Centre for Additive Manufacturing.</p>
+      <p>Контакт / Contact: <a href="mailto:info@bamas.xyz">info@bamas.xyz</a> ·
+        <a href="https://www.bamas.xyz/documents">Официални документи</a></p>
+    </div>
+  </noscript>
   <script type="module" src="/src/main.tsx"></script>
   <script>
     // Function to update favicon based on language

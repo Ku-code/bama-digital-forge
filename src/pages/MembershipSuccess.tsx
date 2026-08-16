@@ -15,6 +15,7 @@ import {
     ArrowRight
 } from 'lucide-react';
 import { toast } from 'sonner';
+import { useDocumentMeta } from '@/hooks/useDocumentMeta';
 
 interface LocationState {
     email: string;
@@ -22,6 +23,8 @@ interface LocationState {
 }
 
 const MembershipSuccess: React.FC = () => {
+  useDocumentMeta({ title: 'Application Sent | BAMAS', noindex: true });
+
     const location = useLocation();
     const state = location.state as LocationState | null;
 

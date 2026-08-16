@@ -23,6 +23,7 @@ import { useSessionHeartbeat } from "@/hooks/useSessionHeartbeat";
 import PendingApproval from "@/components/dashboard/PendingApproval";
 import AccountStatus from "@/components/dashboard/AccountStatus";
 import { PanelErrorBoundary } from "@/components/dashboard/PanelErrorBoundary";
+import { useDocumentMeta } from "@/hooks/useDocumentMeta";
 import {
   Clock,
   CheckSquare,
@@ -83,6 +84,11 @@ const ContentLoadingFallback = () => (
 type MenuItem = "history" | "votes" | "agenda" | "documents" | "budget" | "network" | "resources" | "additivemap" | "workinggroups" | "signatures" | "meetings" | "terminology" | "jobboard" | "materials" | "eufunds" | "whiteboard" | "vault" | "strategiccalendar" | "standards" | "amclub" | "embed" | "calendarintegration";
 
 const Dashboard = () => {
+  useDocumentMeta({
+    title: language === 'bg' ? 'Табло | БАЗАП' : 'Dashboard | BAMAS',
+    noindex: true,
+  });
+
   const { user } = useAuth();
   const { t, language } = useLanguage();
   const navigate = useNavigate();

@@ -23,6 +23,8 @@ const CookieConsent = () => {
   const handleAccept = () => {
     localStorage.setItem("cookieConsent", "accepted");
     setShow(false);
+    // index.html listens for this and only then loads GA4 + Clarity (GDPR).
+    window.dispatchEvent(new Event("cookie-consent-accepted"));
   };
 
   const handleReject = () => {

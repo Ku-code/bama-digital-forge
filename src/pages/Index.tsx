@@ -37,6 +37,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import MembershipForm, { ApplicationType } from "@/components/MembershipForm";
+import { supabase } from "@/lib/supabase";
 import { DotGlobeHero } from "@/components/ui/globe-hero";
 
 const Index = () => {
@@ -59,12 +60,17 @@ const Index = () => {
   };
 
   useEffect(() => {
+    // Entrance animations are pure enhancement: elements are hidden only when
+    // <html> carries .js-anim (set in main.tsx when JS runs + motion allowed).
+    if (!document.documentElement.classList.contains('js-anim')) return;
+
+    const animatedElements = document.querySelectorAll('.animate-on-scroll');
+
     const observer = new IntersectionObserver(
       (entries) => {
         entries.forEach(entry => {
           if (entry.isIntersecting) {
-            entry.target.classList.add('opacity-100');
-            entry.target.classList.add('translate-y-0');
+            entry.target.classList.add('in-view');
             // Unobserve after animation to improve performance
             observer.unobserve(entry.target);
           }
@@ -76,10 +82,16 @@ const Index = () => {
       }
     );
 
-    const animatedElements = document.querySelectorAll('.animate-on-scroll');
     animatedElements.forEach(el => observer.observe(el));
 
+    // Safety net: if anything is still hidden after 3s (observer edge cases,
+    // fast deep-links), reveal it — content must never stay invisible.
+    const failSafe = window.setTimeout(() => {
+      animatedElements.forEach(el => el.classList.add('in-view'));
+    }, 3000);
+
     return () => {
+      window.clearTimeout(failSafe);
       animatedElements.forEach(el => observer.unobserve(el));
     };
   }, []);
@@ -101,8 +113,15 @@ const Index = () => {
 
   return (
     <div className="min-h-screen bg-background overflow-x-hidden">
+      <a
+        href="#home"
+        className="sr-only focus:not-sr-only focus:absolute focus:top-2 focus:left-2 focus:z-[100] focus:rounded-md focus:bg-primary focus:px-4 focus:py-2 focus:text-primary-foreground"
+      >
+        {language === 'bg' ? 'Към съдържанието' : 'Skip to content'}
+      </a>
       <Navbar />
 
+      <main>
       <section id="home" className="relative pt-20 md:pt-24 scroll-mt-20 md:scroll-mt-24 overflow-hidden">
         {/* Four partner banners on the faces of a forward-tumbling cube. */}
         <BannerCube
@@ -157,7 +176,7 @@ const Index = () => {
                       }`}>
                       {t("hero.title")}
                     </span>
-                    <div className={`absolute inset-0 bg-gradient-to-br from-primary via-primary to-primary/60 bg-clip-text text-transparent font-extrabold blur-2xl opacity-50 scale-105 ${language === 'bg' ? 'text-center' : ''
+                    <div aria-hidden="true" className={`absolute inset-0 bg-gradient-to-br from-primary via-primary to-primary/60 bg-clip-text text-transparent font-extrabold blur-2xl opacity-50 scale-105 ${language === 'bg' ? 'text-center' : ''
                       }`}>
                       {t("hero.title")}
                     </div>
@@ -243,7 +262,7 @@ const Index = () => {
         <div
           className="absolute inset-0 pointer-events-none z-0"
           style={{
-            backgroundImage: 'url(/bamas-map-logo.png)',
+            backgroundImage: 'url(/bamas-map-logo.webp)',
             backgroundRepeat: 'no-repeat',
             backgroundPosition: 'center 10%',
             backgroundSize: isMobile ? 'auto 70%' : 'auto 120%',
@@ -252,10 +271,10 @@ const Index = () => {
         />
 
         <div className="container mx-auto px-4 relative z-10">
-          <h2 className="text-2xl md:text-3xl lg:text-4xl font-extrabold mb-8 md:mb-12 text-center text-foreground animate-on-scroll opacity-0 translate-y-4 transition-all duration-700 ease-out px-4">
+          <h2 className="text-2xl md:text-3xl lg:text-4xl font-extrabold mb-8 md:mb-12 text-center text-foreground animate-on-scroll transition-all duration-700 ease-out px-4">
             {t("about.title")}
           </h2>
-          <div className="max-w-3xl mx-auto animate-on-scroll opacity-0 translate-y-4 transition-all duration-700 ease-out delay-100">
+          <div className="max-w-3xl mx-auto animate-on-scroll transition-all duration-700 ease-out delay-100">
             <p className="text-base md:text-lg text-foreground/80 leading-relaxed mb-4 md:mb-6 px-4 font-normal">
               {t("about.description")}
             </p>
@@ -265,7 +284,7 @@ const Index = () => {
           </div>
 
           {/* Board Members Section */}
-          <div className="mt-16 animate-on-scroll opacity-0 translate-y-4 transition-all duration-700 ease-out delay-200">
+          <div className="mt-16 animate-on-scroll transition-all duration-700 ease-out delay-200">
             <h3 className="text-xl md:text-2xl lg:text-3xl font-extrabold mb-8 text-center text-foreground px-4">
               {language === "bg" ? "Управителен съвет и Представителство" : "Board of Directors"}
             </h3>
@@ -282,7 +301,7 @@ const Index = () => {
 
         <div className="container mx-auto px-4 relative z-10">
           {/* Section Header */}
-          <div className="text-center mb-16 animate-on-scroll opacity-0 translate-y-4 transition-all duration-700 ease-out">
+          <div className="text-center mb-16 animate-on-scroll transition-all duration-700 ease-out">
             <h2 className="text-4xl md:text-5xl font-extrabold text-foreground mb-4">
               {t("mission.section.title")}
             </h2>
@@ -297,7 +316,7 @@ const Index = () => {
                 initial={{ opacity: 0, x: -30 }}
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ duration: 0.8, delay: 0.2 }}
-                className="animate-on-scroll opacity-0 translate-y-4 transition-all duration-700 ease-out delay-100"
+                className="animate-on-scroll transition-all duration-700 ease-out delay-100"
               >
                 <Card
                   className="h-full bg-gradient-to-br from-primary/10 via-primary/5 to-transparent border-2 border-primary/20 shadow-xl hover:shadow-2xl hover:shadow-primary/20 transition-all duration-300 cursor-pointer"
@@ -346,7 +365,7 @@ const Index = () => {
                 initial={{ opacity: 0, x: 30 }}
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ duration: 0.8, delay: 0.3 }}
-                className="animate-on-scroll opacity-0 translate-y-4 transition-all duration-700 ease-out delay-200"
+                className="animate-on-scroll transition-all duration-700 ease-out delay-200"
               >
                 <Card
                   className="h-full bg-gradient-to-br from-primary/10 via-primary/5 to-transparent border-2 border-primary/20 shadow-xl hover:shadow-2xl hover:shadow-primary/20 transition-all duration-300 cursor-pointer"
@@ -393,7 +412,7 @@ const Index = () => {
 
             {/* Mission Pillars Grid */}
             <div className="max-w-6xl mx-auto">
-              <div className="text-center mb-12 animate-on-scroll opacity-0 translate-y-4 transition-all duration-700 ease-out delay-300">
+              <div className="text-center mb-12 animate-on-scroll transition-all duration-700 ease-out delay-300">
                 <h3 className="text-2xl md:text-3xl font-extrabold text-foreground mb-3">
                   {t("mission.mission.subtitle")}
                 </h3>
@@ -439,7 +458,7 @@ const Index = () => {
                     initial={{ opacity: 0, y: 30 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.6, delay: 0.4 + index * 0.1 }}
-                    className="animate-on-scroll opacity-0 translate-y-4 transition-all duration-700 ease-out"
+                    className="animate-on-scroll transition-all duration-700 ease-out"
                     style={{ transitionDelay: `${400 + index * 100}ms` }}
                   >
                     <Card className={`h-full bg-card border-2 ${item.borderColor} hover:shadow-xl hover:shadow-primary/20 transition-all duration-300 hover:scale-[1.02] bg-gradient-to-br ${item.color}`}>
@@ -462,7 +481,7 @@ const Index = () => {
 
       <section id="objectives" className="py-12 md:py-20 bg-muted/30 scroll-mt-20 md:scroll-mt-24">
         <div className="container mx-auto px-4">
-          <h2 className="text-2xl md:text-3xl lg:text-4xl font-extrabold mb-8 md:mb-12 text-center text-foreground animate-on-scroll opacity-0 translate-y-4 transition-all duration-700 ease-out px-4">
+          <h2 className="text-2xl md:text-3xl lg:text-4xl font-extrabold mb-8 md:mb-12 text-center text-foreground animate-on-scroll transition-all duration-700 ease-out px-4">
             {t("objectives.title")}
           </h2>
           <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6 mt-12">
@@ -488,7 +507,7 @@ const Index = () => {
                 description: t("objectives.item4.description")
               }
             ].map((objective, index) => (
-              <Card key={index} className="bg-card shadow-md hover:shadow-lg transition-all animate-on-scroll opacity-0 translate-y-4 transition-all duration-700 ease-out" style={{ transitionDelay: `${index * 100}ms` }}>
+              <Card key={index} className="bg-card shadow-md hover:shadow-lg transition-all animate-on-scroll transition-all duration-700 ease-out" style={{ transitionDelay: `${index * 100}ms` }}>
                 <div className="p-6 flex flex-col items-center text-center">
                   <div className="p-3 rounded-full bg-primary/10 mb-4 text-primary">
                     {objective.icon}
@@ -504,10 +523,10 @@ const Index = () => {
 
       <section id="membership-pricing" className="py-12 md:py-20 bg-muted/30 scroll-mt-20 md:scroll-mt-24">
         <div className="container mx-auto px-4">
-          <h2 className="text-3xl md:text-4xl font-extrabold mb-4 text-center text-foreground animate-on-scroll opacity-0 translate-y-4 transition-all duration-700 ease-out">
+          <h2 className="text-3xl md:text-4xl font-extrabold mb-4 text-center text-foreground animate-on-scroll transition-all duration-700 ease-out">
             {t("membership.pricing.title")}
           </h2>
-          <p className="text-lg text-center text-foreground/70 mb-12 animate-on-scroll opacity-0 translate-y-4 transition-all duration-700 ease-out delay-100 font-normal">
+          <p className="text-lg text-center text-foreground/70 mb-12 animate-on-scroll transition-all duration-700 ease-out delay-100 font-normal">
             {t("membership.pricing.subtitle")}
           </p>
           <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6 mt-12">
@@ -547,7 +566,7 @@ const Index = () => {
             ].map((tier, index) => (
               <Card
                 key={index}
-                className={`relative overflow-hidden transition-all duration-300 hover:shadow-xl animate-on-scroll opacity-0 translate-y-4 bg-card ${tier.isHighlighted
+                className={`relative overflow-hidden transition-all duration-300 hover:shadow-xl animate-on-scroll bg-card ${tier.isHighlighted
                   ? "border-2 border-primary shadow-lg scale-105"
                   : "border border-border/40 hover:border-primary/50"
                   }`}
@@ -612,7 +631,7 @@ const Index = () => {
 
       <section id="membership" className="py-12 md:py-20 bg-background scroll-mt-20 md:scroll-mt-24">
         <div className="container mx-auto px-4">
-          <h2 className="text-2xl md:text-3xl lg:text-4xl font-extrabold mb-8 md:mb-12 text-center text-foreground animate-on-scroll opacity-0 translate-y-4 transition-all duration-700 ease-out px-4">
+          <h2 className="text-2xl md:text-3xl lg:text-4xl font-extrabold mb-8 md:mb-12 text-center text-foreground animate-on-scroll transition-all duration-700 ease-out px-4">
             {t("membership.title")}
           </h2>
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 mt-12">
@@ -648,7 +667,7 @@ const Index = () => {
                 description: t("membership.benefits.item6.description")
               }
             ].map((benefit, index) => (
-              <Card key={index} className="border border-primary/20 hover:border-primary/50 transition-all animate-on-scroll opacity-0 translate-y-4 transition-all duration-700 ease-out bg-card" style={{ transitionDelay: `${index * 100}ms` }}>
+              <Card key={index} className="border border-primary/20 hover:border-primary/50 transition-all animate-on-scroll transition-all duration-700 ease-out bg-card" style={{ transitionDelay: `${index * 100}ms` }}>
                 <div className="p-6 flex flex-col">
                   <div className="flex items-center mb-4">
                     <div className="text-destructive mr-4">
@@ -663,7 +682,7 @@ const Index = () => {
           </div>
 
           {/* Apply for Membership CTA */}
-          <div className="mt-12 text-center animate-on-scroll opacity-0 translate-y-4 transition-all duration-700 ease-out delay-500">
+          <div className="mt-12 text-center animate-on-scroll transition-all duration-700 ease-out delay-500">
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
@@ -690,7 +709,7 @@ const Index = () => {
 
       <section id="events" className="py-16 md:py-24 bg-muted/30 scroll-mt-20 md:scroll-mt-24 relative overflow-hidden">
         <div className="container mx-auto px-4">
-          <div className="text-center mb-10 animate-on-scroll opacity-0 translate-y-4 transition-all duration-700 ease-out">
+          <div className="text-center mb-10 animate-on-scroll transition-all duration-700 ease-out">
             <h2 className="text-2xl md:text-3xl font-extrabold text-foreground mb-4">
               {t("events.title")}
             </h2>
@@ -822,11 +841,11 @@ const Index = () => {
 
       <section id="partner" className="py-12 md:py-20 bg-background scroll-mt-20 md:scroll-mt-24">
         <div className="container mx-auto px-4">
-          <h2 className="text-2xl md:text-3xl lg:text-4xl font-extrabold mb-8 md:mb-12 text-center text-foreground animate-on-scroll opacity-0 translate-y-4 transition-all duration-700 ease-out px-4">
+          <h2 className="text-2xl md:text-3xl lg:text-4xl font-extrabold mb-8 md:mb-12 text-center text-foreground animate-on-scroll transition-all duration-700 ease-out px-4">
             {t("partner.title")}
           </h2>
           <div className="grid md:grid-cols-2 gap-12 mt-8">
-            <div className="animate-on-scroll opacity-0 translate-y-4 transition-all duration-700 ease-out">
+            <div className="animate-on-scroll transition-all duration-700 ease-out">
               <p className="text-base md:text-lg text-foreground/80 leading-relaxed mb-4 md:mb-6 px-4 font-body-light">
                 {t("partner.description1")}
               </p>
@@ -834,7 +853,7 @@ const Index = () => {
                 {t("partner.description2")}
               </p>
             </div>
-            <div className="bg-card p-8 rounded-lg shadow-sm animate-on-scroll opacity-0 translate-y-4 transition-all duration-700 ease-out delay-100">
+            <div className="bg-card p-8 rounded-lg shadow-sm animate-on-scroll transition-all duration-700 ease-out delay-100">
               <h3 className="text-xl font-semibold text-foreground mb-4">{t("partner.interest.title")}</h3>
               <p className="text-base md:text-lg text-foreground/80 leading-relaxed mb-4 md:mb-6 px-4">
                 {t("partner.interest.description")}
@@ -853,13 +872,13 @@ const Index = () => {
       {/* Current Partners Section */}
       <section className="py-12 md:py-20 bg-muted/30 scroll-mt-20 md:scroll-mt-24">
         <div className="container mx-auto px-4">
-          <h2 className="text-2xl md:text-3xl lg:text-4xl font-extrabold mb-4 md:mb-6 text-center text-primary animate-on-scroll opacity-0 translate-y-4 transition-all duration-700 ease-out px-4">
+          <h2 className="text-2xl md:text-3xl lg:text-4xl font-extrabold mb-4 md:mb-6 text-center text-primary animate-on-scroll transition-all duration-700 ease-out px-4">
             {language === "bg" ? "Компаниите, които формират индустрията за адитивно производство в България" : "The Companies Shaping Bulgaria's Additive Manufacturing Industry"}
           </h2>
-          <p className="text-base md:text-lg text-muted-foreground text-center mb-8 md:mb-12 px-4 max-w-3xl mx-auto animate-on-scroll opacity-0 translate-y-4 transition-all duration-700 ease-out delay-100 font-light">
+          <p className="text-base md:text-lg text-muted-foreground text-center mb-8 md:mb-12 px-4 max-w-3xl mx-auto animate-on-scroll transition-all duration-700 ease-out delay-100 font-light">
             {language === "bg" ? "Заедно изграждаме бъдещето на 3D технологиите и иновациите" : "Building the future of 3D technologies and innovation, together"}
           </p>
-          <div className="animate-on-scroll opacity-0 translate-y-4 transition-all duration-700 ease-out">
+          <div className="animate-on-scroll transition-all duration-700 ease-out">
             <PartnerLogosCarousel />
           </div>
         </div>
@@ -867,12 +886,12 @@ const Index = () => {
 
       <section id="contact" className="py-12 md:py-20 bg-muted/30 scroll-mt-20 md:scroll-mt-24">
         <div className="container mx-auto px-4">
-          <h2 className="text-2xl md:text-3xl lg:text-4xl font-extrabold mb-8 md:mb-12 text-center text-foreground animate-on-scroll opacity-0 translate-y-4 transition-all duration-700 ease-out px-4">
+          <h2 className="text-2xl md:text-3xl lg:text-4xl font-extrabold mb-8 md:mb-12 text-center text-foreground animate-on-scroll transition-all duration-700 ease-out px-4">
             {t("contact.title")}
           </h2>
           <div className="max-w-7xl mx-auto">
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 lg:gap-8 mb-8">
-              <div className="bg-card p-6 sm:p-8 rounded-lg shadow-md animate-on-scroll opacity-0 translate-y-4 transition-all duration-700 ease-out delay-100 flex flex-col h-full">
+              <div className="bg-card p-6 sm:p-8 rounded-lg shadow-md animate-on-scroll transition-all duration-700 ease-out delay-100 flex flex-col h-full">
                 <h3 className="text-lg sm:text-xl font-extrabold text-foreground mb-3 sm:mb-4">{t("contact.form.title")}</h3>
                 <p className="text-sm sm:text-base md:text-lg text-foreground/80 leading-relaxed mb-4 sm:mb-6 flex-grow font-body-light">
                   {t("contact.form.description")}
@@ -887,7 +906,7 @@ const Index = () => {
                 </Button>
               </div>
 
-              <div className="bg-card p-6 sm:p-8 rounded-lg shadow-md animate-on-scroll opacity-0 translate-y-4 transition-all duration-700 ease-out delay-200 flex flex-col h-full">
+              <div className="bg-card p-6 sm:p-8 rounded-lg shadow-md animate-on-scroll transition-all duration-700 ease-out delay-200 flex flex-col h-full">
                 <h3 className="text-lg sm:text-xl font-extrabold text-foreground mb-3 sm:mb-4">{t("contact.discord.title")}</h3>
                 <p className="text-sm sm:text-base md:text-lg text-foreground/80 leading-relaxed mb-4 sm:mb-6 flex-grow font-body-light">
                   {t("contact.discord.description")}
@@ -902,7 +921,7 @@ const Index = () => {
                 </Button>
               </div>
 
-              <div className="bg-card p-6 sm:p-8 rounded-lg shadow-md animate-on-scroll opacity-0 translate-y-4 transition-all duration-700 ease-out delay-300 sm:col-span-2 lg:col-span-1 flex flex-col h-full">
+              <div className="bg-card p-6 sm:p-8 rounded-lg shadow-md animate-on-scroll transition-all duration-700 ease-out delay-300 sm:col-span-2 lg:col-span-1 flex flex-col h-full">
                 <h3 className="text-lg sm:text-xl font-extrabold text-foreground mb-3 sm:mb-4">{t("contact.viber.title")}</h3>
                 <p className="text-sm sm:text-base md:text-lg text-foreground/80 leading-relaxed mb-4 sm:mb-6 flex-grow font-body-light">
                   {t("contact.viber.description")}
@@ -919,7 +938,7 @@ const Index = () => {
             </div>
 
             {/* Google Maps Section */}
-            <div className="bg-card p-8 rounded-lg shadow-md animate-on-scroll opacity-0 translate-y-4 transition-all duration-700 ease-out delay-400">
+            <div className="bg-card p-8 rounded-lg shadow-md animate-on-scroll transition-all duration-700 ease-out delay-400">
               <h3 className="text-xl font-extrabold text-foreground mb-4 text-center">
                 {t("contact.location.title")}
               </h3>
@@ -943,6 +962,7 @@ const Index = () => {
           </div>
         </div>
       </section>
+      </main>
 
       <FooterSection
         translations={{
@@ -981,10 +1001,28 @@ const Index = () => {
         }}
         currentLanguage={language}
         onLanguageChange={setLanguage}
-        onNewsletterSubmit={(email) => {
+        onNewsletterSubmit={async (email) => {
+          // Persist the subscription — never claim success without storing it.
+          const { error } = await supabase
+            .from('newsletter_subscribers')
+            .insert({ email: email.trim().toLowerCase(), language, source: 'footer' });
+          if (error && error.code !== '23505') {
+            // 23505 = already subscribed — treat as success for the visitor
+            console.error('Newsletter subscribe failed:', error);
+            toast({
+              title: language === 'bg' ? 'Грешка' : 'Something went wrong',
+              description: language === 'bg'
+                ? 'Абонирането не се получи. Опитайте отново или ни пишете на info@bamas.xyz.'
+                : 'Subscription failed. Please try again or email info@bamas.xyz.',
+              variant: 'destructive',
+            });
+            return;
+          }
           toast({
-            title: "Newsletter Subscription",
-            description: `Thank you for subscribing with ${email}! We'll keep you updated.`,
+            title: language === 'bg' ? 'Успешен абонамент' : 'Subscribed',
+            description: language === 'bg'
+              ? `Благодарим! ${email} е добавен към бюлетина на БАЗАП.`
+              : `Thank you! ${email} has been added to the BAMAS newsletter.`,
           });
         }}
       />

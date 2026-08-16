@@ -215,6 +215,7 @@ const PartnerLogosCarousel = () => {
       href={partner.url}
       target="_blank"
       rel="noopener noreferrer"
+      aria-label={`${partner.name} — ${partner.url.replace(/^https?:\/\//, '').replace(/\/$/, '')}`}
       className="flex-shrink-0 flex items-center justify-center h-52 w-96 hover:opacity-80 transition-opacity duration-300 group cursor-pointer"
     >
       {partner.hasWhiteBackground ? (

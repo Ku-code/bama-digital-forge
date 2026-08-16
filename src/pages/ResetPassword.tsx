@@ -11,7 +11,13 @@ import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/lib/supabase";
 import { Lock, X, ArrowLeft, Eye, EyeOff, CheckCircle2 } from "lucide-react";
 
+import { useDocumentMeta } from "@/hooks/useDocumentMeta";
 const ResetPassword = () => {
+  useDocumentMeta({
+    title: language === 'bg' ? 'Нова парола | БАЗАП' : 'Reset Password | BAMAS',
+    noindex: true,
+  });
+
   const { t, language, setLanguage } = useLanguage();
   const { toast } = useToast();
   const navigate = useNavigate();

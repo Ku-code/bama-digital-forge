@@ -144,9 +144,26 @@
   display: none;
 }
 
+/* Scroll-entrance animation — progressive enhancement ONLY.
+   Content is fully visible by default (search/AI crawlers don't scroll and
+   often don't run JS; hiding content behind IntersectionObserver made whole
+   sections invisible to them). When JS boots AND the user allows motion,
+   main.tsx adds .js-anim to <html>; only then do elements start hidden and
+   animate in as they enter the viewport. */
 .animate-on-scroll {
   @apply transform transition-all duration-700 ease-out;
+}
+
+html.js-anim .animate-on-scroll {
+  opacity: 0;
+  transform: translateY(1rem);
   will-change: transform, opacity;
+}
+
+html.js-anim .animate-on-scroll.in-view {
+  opacity: 1;
+  transform: translateY(0);
+  will-change: auto;
 }
 
 /* Optimize animations for performance */
@@ -203,8 +220,6 @@ img {
   img {
     max-width: 100%;
     height: auto;
-    loading: lazy;
-    decoding: async;
   }
 
   /* Reduce backdrop blur on mobile for performance */

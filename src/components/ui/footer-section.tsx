@@ -197,8 +197,15 @@ function FooterSection({
               {translations?.newsletter?.description || "Join our newsletter for the latest updates and exclusive offers."}
             </p>
             <form className="relative" onSubmit={handleSubmit}>
+              <label htmlFor="newsletter-email" className="sr-only">
+                {translations?.newsletter?.placeholder || "Enter your email"}
+              </label>
               <Input
+                id="newsletter-email"
+                name="email"
                 type="email"
+                required
+                autoComplete="email"
                 placeholder={translations?.newsletter?.placeholder || "Enter your email"}
                 className="pr-12 backdrop-blur-sm rounded-full"
                 value={email}
@@ -394,10 +401,11 @@ function FooterSection({
       {/* Large stylized text at bottom - full width */}
       <div className="w-screen relative left-1/2 right-1/2 -ml-[50vw] -mr-[50vw] mt-12 pt-12 border-t border-border/10 overflow-hidden">
         <div className="w-full text-center px-2 sm:px-4 md:px-6 lg:px-8">
-          <h1
+          <div
+            aria-hidden="true"
             className="w-full font-black tracking-tighter leading-none select-none pointer-events-none block"
             style={{
-              fontSize: 'clamp(3.5rem, 30vw, 22rem)',
+              fontSize: 'clamp(2.5rem, 16vw, 11rem)',
               color: 'transparent',
               WebkitTextStroke: isDarkMode ? '1.5px' : '2px',
               WebkitTextStrokeColor: isDarkMode
@@ -417,7 +425,7 @@ function FooterSection({
             }}
           >
             {currentLanguage === "bg" ? "БАЗАП" : "BAMAS"}
-          </h1>
+          </div>
         </div>
       </div>
     </footer>

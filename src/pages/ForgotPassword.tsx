@@ -11,7 +11,13 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/hooks/use-toast";
 import { Mail, X, ArrowLeft, CheckCircle2 } from "lucide-react";
 
+import { useDocumentMeta } from "@/hooks/useDocumentMeta";
 const ForgotPassword = () => {
+  useDocumentMeta({
+    title: language === 'bg' ? 'Забравена парола | БАЗАП' : 'Forgot Password | BAMAS',
+    noindex: true,
+  });
+
   const { t, language, setLanguage } = useLanguage();
   const { toast } = useToast();
   const { resetPassword } = useAuth();

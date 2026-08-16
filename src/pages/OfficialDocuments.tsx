@@ -5,6 +5,7 @@ import Navbar from "@/components/Navbar";
 import { FooterSection } from "@/components/ui/footer-section";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import { useDocumentMeta } from "@/hooks/useDocumentMeta";
 import {
   FileText,
   ExternalLink,
@@ -65,6 +66,15 @@ const OFFICIAL_DOCS: OfficialDocument[] = [
 ];
 
 const OfficialDocuments = () => {
+  useDocumentMeta({
+    title: language === 'bg'
+      ? 'Официални документи | БАЗАП — Българска асоциация за адитивно производство'
+      : 'Official Documents | BAMAS — Bulgarian Additive Manufacturing Association',
+    description: language === 'bg'
+      ? 'Устав, регистърна информация и информационен пакет за членство на БАЗАП.'
+      : 'Articles of Association, registry information and membership information package of BAMAS.',
+  });
+
   const { t, language } = useLanguage();
   const navigate = useNavigate();
   const [selectedDoc, setSelectedDoc] = useState<OfficialDocument | null>(null);

@@ -39,3 +39,6 @@ supabase/.branches/
 *.njsproj
 *.sln
 *.sw?
+
+# Editor MCP configs can contain API keys — never commit
+.cursor/mcp.json

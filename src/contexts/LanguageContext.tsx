@@ -66,6 +66,12 @@ export const LanguageProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     deferLoad(loadTranslations);
   }, [language]);
 
+  // Keep the document language in sync — screen readers, search engines and
+  // AI crawlers all rely on <html lang> for language detection.
+  useEffect(() => {
+    document.documentElement.lang = language;
+  }, [language]);
+
   const handleLanguageChange = (newLanguage: Language) => {
     if (typeof window !== "undefined") {
       localStorage.setItem(LANGUAGE_STORAGE_KEY, newLanguage);

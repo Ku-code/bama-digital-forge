@@ -16,63 +16,63 @@ const BOARD_MEMBERS: BoardMember[] = [
         nameEn: "KUZO DONCHEV",
         roleBg: "Председател",
         roleEn: "Chairman",
-        image: "/no background images members/kuzo_donchev.png",
+        image: "/team/kuzo_donchev.webp",
     },
     {
         nameBg: "БОЯН ПЕХЛИВАНОВ",
         nameEn: "BOYAN PEHLIVANOV",
         roleBg: "Заместник-председател",
         roleEn: "Vice Chairman",
-        image: "/no background images members/boyan_pehlevanov.png",
+        image: "/team/boyan_pehlevanov.webp",
     },
     {
         nameBg: "НИКОЛАЙ ЙОРДАНОВ",
         nameEn: "NIKOLAY YORDANOV",
         roleBg: "Член на УС",
         roleEn: "Board Member",
-        image: "/no background images members/nikolay_yordanov.png",
+        image: "/team/nikolay_yordanov.webp",
     },
     {
         nameBg: "ГЕОРГИ ТОЛЕВ",
         nameEn: "GEORGI TOLEV",
         roleBg: "Член на УС",
         roleEn: "Board Member",
-        image: "/no background images members/georgi_tolev.png",
+        image: "/team/georgi_tolev.webp",
     },
     {
         nameBg: "КРАСИМИР ГЕОРГИЕВ",
         nameEn: "KRASIMIR GEORGIEV",
         roleBg: "Член на УС",
         roleEn: "Board Member",
-        image: "/no background images members/krasimir_georgiev.png",
+        image: "/team/krasimir_georgiev.webp",
     },
     {
         nameBg: "ЛЮБОМИР ГЕРАСИМОВ",
         nameEn: "LYUBOMIR GERASIMOV",
         roleBg: "Член на УС",
         roleEn: "Board Member",
-        image: "/no background images members/lyubomir_gerasimov.png",
+        image: "/team/lyubomir_gerasimov.webp",
     },
     {
         nameBg: "ВАСИЛ НИКОЛОВ",
         nameEn: "VASIL NIKOLOV",
         roleBg: "Член на УС",
         roleEn: "Board Member",
-        image: "/no background images members/vasil_nikolov.png",
+        image: "/team/vasil_nikolov.webp",
     },
     {
         nameBg: "ДАНИЕЛ ХРИСТЕВ",
         nameEn: "DANIEL HRISTEV",
         roleBg: "Член на УС",
         roleEn: "Board Member",
-        image: "/no background images members/daniel_hristev.png",
+        image: "/team/daniel_hristev.webp",
     },
     {
         nameBg: "АНДРЕЙ ДУНИЦОВ",
         nameEn: "ANDREY DUNITSOV",
         roleBg: "Член на УС",
         roleEn: "Board Member",
-        image: "/no background images members/andrey_dunitsov.png",
+        image: "/team/andrey_dunitsov.webp",
     },
     {
         nameBg: "ДИМО ДИМОВ",
@@ -95,12 +95,16 @@ const BoardMembersCarousel = () => {
     const renderMemberCard = (member: BoardMember, index: number) => {
         const name = language === "bg" ? member.nameBg : member.nameEn;
         const role = language === "bg" ? member.roleBg : member.roleEn;
+        // Copies 2 and 3 exist only for the seamless loop — hide them from
+        // assistive tech and the document outline (was 27 duplicate headings).
+        const isClone = index >= BOARD_MEMBERS.length;
 
         return (
             <div
                 key={`${member.nameEn}-${index}`}
                 className="w-full px-2 sm:px-4 py-2 flex-shrink-0"
                 style={{ height: `${CARD_HEIGHT}px` }}
+                aria-hidden={isClone || undefined}
             >
                 <motion.div
                     whileHover={{ scale: 1.02, transition: { duration: 0.2 } }}
@@ -122,9 +126,10 @@ const BoardMembersCarousel = () => {
                                             src={member.image}
                                             alt={name}
                                             className="w-full h-full object-contain object-bottom transition-all duration-700 group-hover:scale-110 drop-shadow-2xl"
-                                            loading="eager"
-                                            decoding="sync"
-                                            fetchPriority="high"
+                                            loading={isClone ? "lazy" : "eager"}
+                                            decoding="async"
+                                            width={240}
+                                            height={320}
                                             onError={(e) => {
                                                 console.error(`Failed to load image for ${name}: ${member.image}`);
                                                 const target = e.target as HTMLImageElement;
@@ -154,9 +159,15 @@ const BoardMembersCarousel = () => {
                                 <span className="text-[10px] sm:text-[11px] md:text-xs font-black uppercase tracking-[0.15em] sm:tracking-[0.2em] text-primary/70 mb-0.5 sm:mb-1">
                                     {role}
                                 </span>
-                                <h3 className="text-lg sm:text-2xl md:text-3xl font-black text-foreground tracking-tight leading-none group-hover:text-primary transition-colors duration-300 truncate pb-1">
-                                    {name}
-                                </h3>
+                                {isClone ? (
+                                    <div className="text-lg sm:text-2xl md:text-3xl font-black text-foreground tracking-tight leading-none group-hover:text-primary transition-colors duration-300 truncate pb-1">
+                                        {name}
+                                    </div>
+                                ) : (
+                                    <h3 className="text-lg sm:text-2xl md:text-3xl font-black text-foreground tracking-tight leading-none group-hover:text-primary transition-colors duration-300 truncate pb-1">
+                                        {name}
+                                    </h3>
+                                )}
                                 <div className="w-8 sm:w-16 h-1 sm:h-1.5 bg-primary/20 rounded-full group-hover:w-24 sm:group-hover:w-32 group-hover:bg-primary/40 transition-all duration-500" />
                             </motion.div>
                         </div>

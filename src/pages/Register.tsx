@@ -14,7 +14,13 @@ import { useToast } from "@/hooks/use-toast";
 import { formatErrorForToast } from "@/lib/error-messages";
 import { UserPlus, Mail, Lock, User, X, ArrowLeft, Eye, EyeOff } from "lucide-react";
 
+import { useDocumentMeta } from "@/hooks/useDocumentMeta";
 const Register = () => {
+  useDocumentMeta({
+    title: language === 'bg' ? 'Регистрация | БАЗАП' : 'Register | BAMAS',
+    noindex: true,
+  });
+
   const { t, language, setLanguage } = useLanguage();
   const { toast } = useToast();
   const { signUpWithEmail, signInWithGoogle } = useAuth();

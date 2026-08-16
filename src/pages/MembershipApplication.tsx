@@ -5,7 +5,17 @@ import { useLanguage } from '../contexts/LanguageContext';
 import Navbar from '../components/Navbar';
 import MembershipForm from '../components/MembershipForm';
 
+import { useDocumentMeta } from "@/hooks/useDocumentMeta";
 const MembershipApplication: React.FC = () => {
+  useDocumentMeta({
+    title: language === 'bg'
+      ? 'Кандидатствай за членство | БАЗАП'
+      : 'Apply for Membership | BAMAS',
+    description: language === 'bg'
+      ? 'Станете член на Българската асоциация за адитивно производство — за компании, организации и физически лица.'
+      : 'Join the Bulgarian Additive Manufacturing Association — for companies, organizations and individuals.',
+  });
+
     const navigate = useNavigate();
     const { language } = useLanguage();
 

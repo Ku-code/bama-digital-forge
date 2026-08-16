@@ -27,6 +27,9 @@ const Dashboard = lazy(() => import("./pages/Dashboard"));
 const Settings = lazy(() => import("./pages/Settings"));
 const MembershipApplication = lazy(() => import("./pages/MembershipApplication"));
 const MembershipSuccess = lazy(() => import("./pages/MembershipSuccess"));
+const FAQ = lazy(() => import("./pages/FAQ"));
+const News = lazy(() => import("./pages/News"));
+const Glossary = lazy(() => import("./pages/Glossary"));
 
 // Lightweight loading fallback component
 const LoadingFallback = () => (
@@ -157,6 +160,10 @@ const AppContent: React.FC = () => {
                 {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
                 <Route path="/membership-application" element={<MembershipApplication />} />
                 <Route path="/join" element={<Navigate to="/membership-application" replace />} />
+                <Route path="/faq" element={<FAQ />} />
+                <Route path="/news" element={<News />} />
+                <Route path="/glossary" element={<Glossary />} />
+                <Route path="/rechnik" element={<Navigate to="/glossary" replace />} />
                 <Route path="/membership-success" element={<MembershipSuccess />} />
                 <Route path="*" element={<NotFound />} />
               </Routes>

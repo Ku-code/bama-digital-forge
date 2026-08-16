@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>BAMAS / БАЗАП — Новини</title>
+    <link>https://www.bamas.xyz/news</link>
+    <atom:link href="https://www.bamas.xyz/rss.xml" rel="self" type="application/rss+xml" />
+    <description>Партньорства, събития и съобщения от Българската асоциация за адитивно производство.</description>
+    <language>bg</language>
+    <item>
+      <title>БАЗАП ще участва с щанд и кийноут сесия на MACH-TECH 2026, 6–9 октомври 2026</title>
+      <link>https://machtech.bg/</link>
+      <guid isPermaLink="false">https://machtech.bg/#2026-08-12</guid>
+      <pubDate>Wed, 12 Aug 2026 09:00:00 GMT</pubDate>
+      <category>event</category>
+      <description>BAMAS will attend and organize a keynote session at MACH-TECH 2026, 6–9 October 2026</description>
+    </item>
+    <item>
+      <title>EPMA организира Конгрес и изложение по прахова металургия 2026 в Будапеща, 11–14 октомври 2026</title>
+      <link>https://www.powdermetallurgycongress.com/</link>
+      <guid isPermaLink="false">https://www.powdermetallurgycongress.com/#2026-08-12</guid>
+      <pubDate>Wed, 12 Aug 2026 09:00:00 GMT</pubDate>
+      <category>event</category>
+      <description>EPMA organizes the 2026 Powder Metallurgy Congress &amp; Exhibition in Budapest, 11–14 October 2026</description>
+    </item>
+    <item>
+      <title>BETMA — Balkan Engineering, Tech &amp; Makers Association — става партньор на БАЗАП</title>
+      <link>https://www.betma.eu/</link>
+      <guid isPermaLink="false">https://www.betma.eu/#2026-08-12</guid>
+      <pubDate>Wed, 12 Aug 2026 09:00:00 GMT</pubDate>
+      <category>partner</category>
+      <description>BETMA — Balkan Engineering, Tech &amp; Makers Association — becomes BAMAS partner</description>
+    </item>
+    <item>
+      <title>PERI България става партньор на БАЗАП</title>
+      <link>https://www.peri.bg/</link>
+      <guid isPermaLink="false">https://www.peri.bg/#2026-08-12</guid>
+      <pubDate>Wed, 12 Aug 2026 09:00:00 GMT</pubDate>
+      <category>partner</category>
+      <description>PERI Bulgaria becomes BAMAS partner</description>
+    </item>
+    <item>
+      <title>CONCREEF — иновации в адитивното производство с бетон в България — става партньор на БАЗАП</title>
+      <link>https://www.concreef.eu/</link>
+      <guid isPermaLink="false">https://www.concreef.eu/#2026-08-12</guid>
+      <pubDate>Wed, 12 Aug 2026 09:00:00 GMT</pubDate>
+      <category>partner</category>
+      <description>CONCREEF — additive manufacturing concrete innovation in Bulgaria — becomes BAMAS partner</description>
+    </item>
+    <item>
+      <title>Кандидатстването за членство в БАЗАП е отворено!</title>
+      <link>https://www.bamas.xyz/documents</link>
+      <guid isPermaLink="false">https://www.bamas.xyz/documents#2026-02-18</guid>
+      <pubDate>Wed, 18 Feb 2026 09:00:00 GMT</pubDate>
+      <category>announcement</category>
+      <description>BAMAS membership applications are open now!</description>
+    </item>
+    <item>
+      <title>3Druck.com става официален медиен партньор на БАЗАП за Австрия</title>
+      <link>https://3druck.com</link>
+      <guid isPermaLink="false">https://3druck.com#2026-02-18</guid>
+      <pubDate>Wed, 18 Feb 2026 09:00:00 GMT</pubDate>
+      <category>media</category>
+      <description>3Druck.com becomes the official BAMAS media partner in Austria</description>
+    </item>
+    <item>
+      <title>БАЗАП, Кузо Дончев: Развитието на адитивното производство в България изисква последователна стратегия</title>
+      <link>https://www.engineering-review.bg/bg/bazap-kuzo-donchev-razvitieto-na-aditivnoto-proizvodstvo-v-balgariya-iziskva-posledovatelna-strategiya/2/5420/</link>
+      <guid isPermaLink="false">https://www.engineering-review.bg/bg/bazap-kuzo-donchev-razvitieto-na-aditivnoto-proizvodstvo-v-balgariya-iziskva-posledovatelna-strategiya/2/5420/#2026-02-18</guid>
+      <pubDate>Wed, 18 Feb 2026 09:00:00 GMT</pubDate>
+      <category>media</category>
+      <description>BAMAS, Kuzo Donchev: The development of additive manufacturing in Bulgaria requires a consistent strategy</description>
+    </item>
+    <item>
+      <title>Waaters.org е официален партньор на БАЗАП за Обединеното кралство</title>
+      <link>https://waaters.org/</link>
+      <guid isPermaLink="false">https://waaters.org/#2026-02-18</guid>
+      <pubDate>Wed, 18 Feb 2026 09:00:00 GMT</pubDate>
+      <category>partner</category>
+      <description>Waaters.org is now the official BAMAS partner in the UK</description>
+    </item>
+  </channel>
+</rss>

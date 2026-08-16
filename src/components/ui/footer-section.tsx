@@ -245,6 +245,15 @@ function FooterSection({
               <a href="#contact" className="block transition-colors hover:text-primary">
                 {translations?.quickLinks?.contact || "Contact"}
               </a>
+              <a href="/documents" className="block transition-colors hover:text-primary">
+                {currentLanguage === "bg" ? "Документи" : "Documents"}
+              </a>
+              <a href="/news" className="block transition-colors hover:text-primary">
+                {currentLanguage === "bg" ? "Новини" : "News"}
+              </a>
+              <a href="/faq" className="block transition-colors hover:text-primary">
+                {currentLanguage === "bg" ? "Въпроси и отговори" : "FAQ"}
+              </a>
             </nav>
           </div>
           <div>
@@ -384,6 +393,11 @@ function FooterSection({
         <div className="mt-12 flex flex-col items-center justify-between gap-4 border-t pt-8 text-center md:flex-row">
           <p className="text-sm text-muted-foreground">
             {translations?.copyright || `© ${new Date().getFullYear()} BAMAS. All rights reserved.`}
+            <span className="block mt-1 text-xs text-muted-foreground/80">
+              {currentLanguage === "bg"
+                ? "Българска асоциация за адитивно производство (БАЗАП) · сдружение с нестопанска цел · София"
+                : "Bulgarian Additive Manufacturing Association (BAMAS) · non-profit association · Sofia, Bulgaria"}
+            </span>
           </p>
           <nav className="flex gap-4 text-sm">
             <a href="/privacy-policy" className="transition-colors hover:text-primary">

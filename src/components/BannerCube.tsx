@@ -53,11 +53,20 @@ const BannerCube: React.FC<BannerCubeProps> = ({ faces, intervalMs = 7000, class
 
     const count = faces.length;
 
+    // Auto-advance retires after a few full cycles so the page eventually
+    // settles for readers; hovering or using the dots re-arms it.
+    const MAX_AUTO_STEPS = count * 3;
+    const autoSteps = useRef(0);
+
     useEffect(() => {
         if (paused || reducedMotion || count < 2) return;
-        const id = window.setInterval(() => setIndex((i) => i + 1), intervalMs);
+        const id = window.setInterval(() => {
+            if (autoSteps.current >= MAX_AUTO_STEPS) return;
+            autoSteps.current += 1;
+            setIndex((i) => i + 1);
+        }, intervalMs);
         return () => window.clearInterval(id);
-    }, [paused, reducedMotion, intervalMs, count]);
+    }, [paused, reducedMotion, intervalMs, count, MAX_AUTO_STEPS]);
 
     // Pause while the banner is off-screen or the tab is hidden.
     useEffect(() => {
@@ -77,6 +86,7 @@ const BannerCube: React.FC<BannerCubeProps> = ({ faces, intervalMs = 7000, class
 
     const goTo = useCallback(
         (target: number) => {
+            autoSteps.current = 0; // interaction re-arms the auto cycle
             // Step forward to the requested face without ever spinning backwards.
             setIndex((i) => {
                 const current = ((i % count) + count) % count;
@@ -87,19 +97,28 @@ const BannerCube: React.FC<BannerCubeProps> = ({ faces, intervalMs = 7000, class
         [count]
     );
 
+    // Partner banners get click analytics — partners will ask for numbers.
+    const trackClick = useCallback((face: number) => (e: React.MouseEvent) => {
+        const href = (e.target as HTMLElement).closest('a')?.href;
+        const w = window as unknown as { gtag?: (...args: unknown[]) => void };
+        if (typeof w.gtag === 'function') {
+            w.gtag('event', 'banner_click', { banner_face: face + 1, banner_url: href ?? '' });
+        }
+    }, []);
+
     const active = ((index % count) + count) % count;
 
     return (
         <div
             className={`w-full bg-background relative z-[41] ${className ?? ""}`}
-            onMouseEnter={() => setPaused(true)}
+            onMouseEnter={() => { setPaused(true); autoSteps.current = 0; }}
             onMouseLeave={() => setPaused(false)}
             onFocusCapture={() => setPaused(true)}
             onBlurCapture={() => setPaused(false)}
         >
             <div
                 ref={stageRef}
-                className="relative w-full h-[132px] md:h-auto md:aspect-[12/1]"
+                className="relative w-full h-[132px] min-h-[132px] md:h-auto md:min-h-0 md:aspect-[12/1]"
                 style={{ perspective: "1600px" }}
             >
                 <div
@@ -121,6 +140,7 @@ const BannerCube: React.FC<BannerCubeProps> = ({ faces, intervalMs = 7000, class
                             // Faces that aren't showing are hidden from AT and tab order.
                             aria-hidden={i !== active}
                             {...(i !== active ? { inert: "" } : {})}
+                            onClickCapture={trackClick(i)}
                         >
                             {face}
                         </div>

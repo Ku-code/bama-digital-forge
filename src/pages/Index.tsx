@@ -38,6 +38,8 @@ import {
 } from "@/components/ui/dialog";
 import MembershipForm, { ApplicationType } from "@/components/MembershipForm";
 import { supabase } from "@/lib/supabase";
+import ContactForm from "@/components/ContactForm";
+import LazyMap from "@/components/LazyMap";
 import { DotGlobeHero } from "@/components/ui/globe-hero";
 
 const Index = () => {
@@ -136,7 +138,7 @@ const Index = () => {
         <NewsBanner />
         <DotGlobeHero
           rotationSpeed={0.004}
-          className="bg-gradient-to-br from-background via-background/95 to-muted/10 relative overflow-hidden"
+          className="bg-gradient-to-br from-background via-background/95 to-muted/10 relative overflow-hidden min-h-[82svh] md:min-h-[85svh]"
         >
           <div className="absolute inset-0 bg-gradient-to-t from-background/30 via-transparent to-background/20 z-[2]" />
           <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-primary/5 rounded-full blur-3xl animate-pulse pointer-events-none z-[2]" />
@@ -197,7 +199,10 @@ const Index = () => {
                 transition={{ duration: 0.8, delay: 0.8 }}
                 className="max-w-3xl mx-auto space-y-4"
               >
-                <p className="text-base sm:text-xl md:text-2xl text-muted-foreground leading-relaxed px-4 font-normal">
+                <p className="text-base sm:text-xl md:text-2xl text-foreground/85 leading-relaxed px-4 font-normal">
+                  {t("hero.tagline")}
+                </p>
+                <p className="text-sm sm:text-base md:text-lg text-muted-foreground leading-relaxed px-4 font-body-light">
                   {t("hero.subtitle")}
                 </p>
               </motion.div>
@@ -274,6 +279,12 @@ const Index = () => {
           <h2 className="text-2xl md:text-3xl lg:text-4xl font-extrabold mb-8 md:mb-12 text-center text-foreground animate-on-scroll transition-all duration-700 ease-out px-4">
             {t("about.title")}
           </h2>
+          {/* Canonical facts paragraph — the sentence search engines and AI
+              assistants should retrieve verbatim (kept in sync with llms.txt
+              and the Organization JSON-LD). */}
+          <p className="max-w-3xl mx-auto text-base md:text-lg text-foreground/90 leading-relaxed mb-6 md:mb-8 px-4 font-normal text-center">
+            {t("about.intro")}
+          </p>
           <div className="max-w-3xl mx-auto animate-on-scroll transition-all duration-700 ease-out delay-100">
             <p className="text-base md:text-lg text-foreground/80 leading-relaxed mb-4 md:mb-6 px-4 font-normal">
               {t("about.description")}
@@ -626,6 +637,35 @@ const Index = () => {
               </Card>
             ))}
           </div>
+
+          {/* Pricing FAQ — answers the questions that block a join decision.
+              Native <details> so it is crawlable without JS. */}
+          <div className="max-w-3xl mx-auto mt-12">
+            <h3 className="text-lg md:text-xl font-extrabold text-foreground mb-4 text-center">
+              {language === 'bg' ? 'Често задавани въпроси за членството' : 'Membership FAQ'}
+            </h3>
+            <div className="space-y-2">
+              {(language === 'bg' ? [
+                { q: 'Кога започва членството ми?', a: 'Членството започва след одобрение на заявката от Управителния съвет и заплащане на годишния членски внос. Обикновено разглеждаме заявките до 14 дни.' },
+                { q: 'Получавам ли фактура за членския внос?', a: 'Да — след одобрение издаваме фактура с банковите данни на асоциацията. Плащането е по банков път.' },
+                { q: 'Защо членството за университети и организации с нестопанска цел е безплатно?', a: 'Мисията ни изисква силна връзка между индустрията и академичните среди. Затова университети, изследователски организации и фондации членуват безплатно.' },
+                { q: 'Мога ли да сменя типа членство по-късно?', a: 'Да — пишете ни на info@bamas.xyz и ще прехвърлим членството към новия тип от следващия период.' },
+              ] : [
+                { q: 'When does my membership start?', a: 'Membership starts once the Management Board approves your application and the annual fee is paid. Applications are typically reviewed within 14 days.' },
+                { q: 'Do I get an invoice for the membership fee?', a: 'Yes — after approval we issue an invoice with the association’s bank details. Payment is by bank transfer.' },
+                { q: 'Why is membership free for universities and non-profits?', a: 'Our mission depends on a strong bridge between industry and academia, so universities, research organizations and foundations join free of charge.' },
+                { q: 'Can I switch membership tiers later?', a: 'Yes — email info@bamas.xyz and we will move your membership to the new tier from the next period.' },
+              ]).map((f) => (
+                <details key={f.q} className="group rounded-lg border border-border/60 bg-card px-4 py-3">
+                  <summary className="cursor-pointer list-none font-semibold text-foreground flex items-center justify-between gap-3">
+                    {f.q}
+                    <ChevronDown className="h-4 w-4 flex-shrink-0 text-primary transition-transform group-open:rotate-180" aria-hidden="true" />
+                  </summary>
+                  <p className="mt-2 text-sm md:text-base text-foreground/80 leading-relaxed">{f.a}</p>
+                </details>
+              ))}
+            </div>
+          </div>
         </div>
       </section>
 
@@ -716,6 +756,68 @@ const Index = () => {
             <div className="w-16 h-1 bg-primary mx-auto"></div>
           </div>
 
+          {/* Upcoming events — the reason to come back. Event schema included
+              so search engines can surface them as rich results. */}
+          <div className="max-w-5xl mx-auto mb-14">
+            <h3 className="text-lg md:text-xl font-extrabold text-primary mb-6 text-center uppercase tracking-wider">
+              {language === 'bg' ? 'Предстоящи събития' : 'Upcoming events'}
+            </h3>
+            <div className="grid gap-4 sm:grid-cols-3">
+              {[
+                {
+                  name: 'Additive Days 2026',
+                  date: '2026-09-10',
+                  dateLabel: language === 'bg' ? '10 септември 2026' : '10 September 2026',
+                  place: language === 'bg' ? 'София Тех Парк, София' : 'Sofia Tech Park, Sofia',
+                  url: 'https://additivedays.com/',
+                  note: language === 'bg' ? 'Конференция · Експо · Уъркшопи — със специална зона на БАЗАП' : 'Conference · Expo · Workshops — with a BAMAS special zone',
+                },
+                {
+                  name: 'MACH-TECH & INNOTECH Expo 2026',
+                  date: '2026-10-06',
+                  dateLabel: language === 'bg' ? '6–9 октомври 2026' : '6–9 October 2026',
+                  place: language === 'bg' ? 'Интер Експо Център, София' : 'Inter Expo Center, Sofia',
+                  url: 'https://machtech.bg/',
+                  note: language === 'bg' ? 'Щанд и кийноут сесия на БАЗАП' : 'BAMAS booth and keynote session',
+                },
+                {
+                  name: 'EPMA Powder Metallurgy Congress 2026',
+                  date: '2026-10-11',
+                  dateLabel: language === 'bg' ? '11–14 октомври 2026' : '11–14 October 2026',
+                  place: language === 'bg' ? 'Будапеща, Унгария' : 'Budapest, Hungary',
+                  url: 'https://www.powdermetallurgycongress.com/',
+                  note: language === 'bg' ? 'Организирано от партньора ни EPMA' : 'Organized by our partner EPMA',
+                },
+              ].map((ev) => (
+                <a
+                  key={ev.name}
+                  href={ev.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="group rounded-xl border border-primary/20 bg-card p-5 shadow-sm transition-all hover:border-primary/50 hover:shadow-md"
+                >
+                  <div className="text-xs font-black uppercase tracking-widest text-primary mb-2">{ev.dateLabel}</div>
+                  <div className="font-extrabold text-foreground leading-snug group-hover:text-primary transition-colors">{ev.name}</div>
+                  <div className="text-sm text-muted-foreground mt-1">{ev.place}</div>
+                  <div className="text-xs text-foreground/70 mt-2">{ev.note}</div>
+                </a>
+              ))}
+            </div>
+            <script
+              type="application/ld+json"
+              dangerouslySetInnerHTML={{
+                __html: JSON.stringify([
+                  { '@context': 'https://schema.org', '@type': 'Event', name: 'Additive Days 2026', startDate: '2026-09-10', location: { '@type': 'Place', name: 'Sofia Tech Park', address: { '@type': 'PostalAddress', addressLocality: 'Sofia', addressCountry: 'BG' } }, url: 'https://additivedays.com/', organizer: { '@type': 'Organization', name: 'B2N' }, eventStatus: 'https://schema.org/EventScheduled', eventAttendanceMode: 'https://schema.org/OfflineEventAttendanceMode' },
+                  { '@context': 'https://schema.org', '@type': 'Event', name: 'MACH-TECH & INNOTECH Expo 2026', startDate: '2026-10-06', endDate: '2026-10-09', location: { '@type': 'Place', name: 'Inter Expo Center', address: { '@type': 'PostalAddress', addressLocality: 'Sofia', addressCountry: 'BG' } }, url: 'https://machtech.bg/', eventStatus: 'https://schema.org/EventScheduled', eventAttendanceMode: 'https://schema.org/OfflineEventAttendanceMode' },
+                  { '@context': 'https://schema.org', '@type': 'Event', name: 'EPMA Powder Metallurgy Congress & Exhibition 2026', startDate: '2026-10-11', endDate: '2026-10-14', location: { '@type': 'Place', name: 'Budapest', address: { '@type': 'PostalAddress', addressLocality: 'Budapest', addressCountry: 'HU' } }, url: 'https://www.powdermetallurgycongress.com/', organizer: { '@type': 'Organization', name: 'EPMA' }, eventStatus: 'https://schema.org/EventScheduled', eventAttendanceMode: 'https://schema.org/OfflineEventAttendanceMode' },
+                ]),
+              }}
+            />
+          </div>
+
+          <h3 className="text-lg md:text-xl font-extrabold text-muted-foreground mb-8 text-center uppercase tracking-wider">
+            {language === 'bg' ? 'История на асоциацията' : 'Association history'}
+          </h3>
           <div className="max-w-4xl mx-auto relative px-4">
             {/* Minimalist Vertical Line */}
             <div className="absolute left-6 md:left-1/2 md:-translate-x-px top-2 bottom-0 w-px bg-border sm:block"></div>
@@ -893,17 +995,7 @@ const Index = () => {
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 lg:gap-8 mb-8">
               <div className="bg-card p-6 sm:p-8 rounded-lg shadow-md animate-on-scroll transition-all duration-700 ease-out delay-100 flex flex-col h-full">
                 <h3 className="text-lg sm:text-xl font-extrabold text-foreground mb-3 sm:mb-4">{t("contact.form.title")}</h3>
-                <p className="text-sm sm:text-base md:text-lg text-foreground/80 leading-relaxed mb-4 sm:mb-6 flex-grow font-body-light">
-                  {t("contact.form.description")}
-                </p>
-                <Button
-                  className="bg-primary hover:bg-primary/90 text-primary-foreground w-full text-sm sm:text-base mt-auto"
-                  asChild
-                >
-                  <a href="mailto:info@bamas.xyz?subject=Contact%20from%20BAMAS%20Website">
-                    {t("contact.form.cta")}
-                  </a>
-                </Button>
+                <ContactForm />
               </div>
 
               <div className="bg-card p-6 sm:p-8 rounded-lg shadow-md animate-on-scroll transition-all duration-700 ease-out delay-200 flex flex-col h-full">
@@ -945,19 +1037,18 @@ const Index = () => {
               <p className="text-base md:text-lg text-foreground/80 leading-relaxed mb-6 text-center px-4 font-body-light">
                 {t("contact.location.description")}
               </p>
-              <div className="w-full rounded-lg overflow-hidden border border-border/50 shadow-sm">
-                <iframe
-                  src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d6019356.767090495!2d14.43004323370686!3d42.5523403136874!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x6dbf683d01fab4c3%3A0x74dbbf4def49e93a!2sBulgarian%20Additive%20Manufacturing%20Association%20(BAMAS)!5e0!3m2!1sen!2sbg!4v1767378707394!5m2!1sen!2sbg"
-                  width="100%"
-                  height="450"
-                  style={{ border: 0 }}
-                  allowFullScreen
-                  loading="lazy"
-                  referrerPolicy="no-referrer-when-downgrade"
-                  className="w-full"
-                  title="BAMAS Location"
-                />
-              </div>
+              <LazyMap
+                src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d6019356.767090495!2d14.43004323370686!3d42.5523403136874!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x6dbf683d01fab4c3%3A0x74dbbf4def49e93a!2sBulgarian%20Additive%20Manufacturing%20Association%20(BAMAS)!5e0!3m2!1sen!2sbg!4v1767378707394!5m2!1sen!2sbg"
+                title="BAMAS Location"
+                className="w-full rounded-lg overflow-hidden border border-border/50 shadow-sm"
+              />
+
+              {/* Legal identity — trust signal and Organization-schema consistency */}
+              <p className="mt-4 text-center text-xs text-muted-foreground">
+                {language === 'bg'
+                  ? 'Българска асоциация за адитивно производство (БАЗАП) · сдружение с нестопанска цел · София, България · info@bamas.xyz'
+                  : 'Bulgarian Additive Manufacturing Association (BAMAS) · non-profit association · Sofia, Bulgaria · info@bamas.xyz'}
+              </p>
             </div>
           </div>
         </div>

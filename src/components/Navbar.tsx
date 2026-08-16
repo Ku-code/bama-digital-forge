@@ -381,7 +381,7 @@ const Navbar = () => {
                       key={link.name}
                       initial={{ opacity: 0, x: 20 }}
                       animate={{ opacity: 1, x: 0 }}
-                      transition={{ delay: index * 0.05, duration: 0.3 }}
+                      transition={{ delay: index * 0.025, duration: 0.18 }}
                     >
                       {link.isRoute ? (
                         <Link
@@ -415,7 +415,7 @@ const Navbar = () => {
                         <motion.div
                           initial={{ opacity: 0, x: 20 }}
                           animate={{ opacity: 1, x: 0 }}
-                          transition={{ delay: navLinks.length * 0.05, duration: 0.3 }}
+                          transition={{ delay: navLinks.length * 0.025, duration: 0.18 }}
                         >
                           <Link
                             to="/dashboard"
@@ -429,7 +429,7 @@ const Navbar = () => {
                         <motion.div
                           initial={{ opacity: 0, x: 20 }}
                           animate={{ opacity: 1, x: 0 }}
-                          transition={{ delay: (navLinks.length + 1) * 0.05, duration: 0.3 }}
+                          transition={{ delay: (navLinks.length + 1) * 0.025, duration: 0.18 }}
                         >
                           <Link
                             to="/settings"
@@ -443,7 +443,7 @@ const Navbar = () => {
                         <motion.div
                           initial={{ opacity: 0, x: 20 }}
                           animate={{ opacity: 1, x: 0 }}
-                          transition={{ delay: (navLinks.length + 2) * 0.05, duration: 0.3 }}
+                          transition={{ delay: (navLinks.length + 2) * 0.025, duration: 0.18 }}
                         >
                           <button
                             onClick={() => { handleLogout(); closeMenu(); }}
@@ -459,7 +459,7 @@ const Navbar = () => {
                         <motion.div
                           initial={{ opacity: 0, x: 20 }}
                           animate={{ opacity: 1, x: 0 }}
-                          transition={{ delay: navLinks.length * 0.05, duration: 0.3 }}
+                          transition={{ delay: navLinks.length * 0.025, duration: 0.18 }}
                         >
                           <Link
                             to="/login"
@@ -472,7 +472,7 @@ const Navbar = () => {
                         <motion.div
                           initial={{ opacity: 0, x: 20 }}
                           animate={{ opacity: 1, x: 0 }}
-                          transition={{ delay: (navLinks.length + 1) * 0.05, duration: 0.3 }}
+                          transition={{ delay: (navLinks.length + 1) * 0.025, duration: 0.18 }}
                         >
                           <Link
                             to="/register"

@@ -1874,5 +1874,11 @@
   "dashboard.history.clear.confirm.button": "Clear All",
   "dashboard.history.clear.cancel": "Cancel",
   "dashboard.documents.docuseal.error.fileRequired": "File Required",
-  "dashboard.documents.docuseal.error.fileRequiredDesc": "Critical documents must have an attached file (PDF, Word, etc.) to enable digital signatures."
+  "dashboard.documents.docuseal.error.fileRequiredDesc": "Critical documents must have an attached file (PDF, Word, etc.) to enable digital signatures.",
+  "hero.tagline": "The national association for additive manufacturing and 3D printing in Bulgaria — uniting manufacturers, universities and startups since 2026.",
+  "about.intro": "The Bulgarian Additive Manufacturing Association (BAMAS / БАЗАП) is the national, neutral, non-profit organization for additive manufacturing and 3D printing in Bulgaria, founded in 2026. We unite manufacturers, academic institutions and startups, and are part of (Add)liance — the European Centre for Additive Manufacturing.",
+  "news.pageTitle": "News",
+  "news.pageSubtitle": "Partnerships, events and announcements from the Bulgarian additive manufacturing ecosystem.",
+  "faq.pageTitle": "Frequently Asked Questions",
+  "faq.pageSubtitle": "Everything about BAMAS, membership and additive manufacturing in Bulgaria."
 }

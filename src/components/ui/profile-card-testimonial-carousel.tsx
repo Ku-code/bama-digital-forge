@@ -92,7 +92,7 @@ export function ProfileCardCarousel({
                 sizeClasses
             )}
         >
-            <AnimatePresence mode="wait">
+            <AnimatePresence mode="wait" initial={false}>
                 <motion.div
                     key={current.imageUrl}
                     initial={{ opacity: 0 }}
@@ -118,7 +118,7 @@ export function ProfileCardCarousel({
                     ) : (
                         /* No photo yet — initial-letter placeholder */
                         <div className="flex h-full w-full items-center justify-center">
-                            <span className="text-8xl font-black text-primary/40">
+                            <span className="text-7xl font-black text-primary/40">
                                 {current.name.charAt(0)}
                             </span>
                         </div>
@@ -137,7 +137,7 @@ export function ProfileCardCarousel({
                         href={url}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="flex h-12 w-12 items-center justify-center rounded-full bg-primary text-primary-foreground transition-all hover:scale-105 hover:bg-primary/90"
+                        className="flex h-10 w-10 items-center justify-center rounded-full bg-primary text-primary-foreground transition-all hover:scale-105 hover:bg-primary/90"
                         aria-label={label}
                     >
                         <IconComponent className="h-5 w-5" />
@@ -148,17 +148,17 @@ export function ProfileCardCarousel({
 
     return (
         <div
-            className={cn("mx-auto w-full max-w-5xl px-4", className)}
+            className={cn("mx-auto w-full max-w-3xl px-4", className)}
             onMouseEnter={() => setPaused(true)}
             onMouseLeave={() => setPaused(false)}
         >
             {/* Desktop layout */}
             <div className="relative hidden items-center md:flex">
-                {imageTile("h-[420px] w-[420px]", 470)}
+                {imageTile("h-[300px] w-[300px]", 300)}
 
                 {/* Card */}
-                <div className="z-10 ml-[-80px] max-w-xl flex-1 rounded-3xl border border-primary/15 bg-card p-8 shadow-2xl backdrop-blur-xl">
-                    <AnimatePresence mode="wait">
+                <div className="z-10 ml-[-60px] max-w-md flex-1 rounded-2xl border border-primary/15 bg-card p-6 shadow-2xl backdrop-blur-xl">
+                    <AnimatePresence mode="wait" initial={false}>
                         <motion.div
                             key={current.name}
                             initial={{ opacity: 0 }}
@@ -170,13 +170,13 @@ export function ProfileCardCarousel({
                                 <p className="mb-2 text-xs font-black uppercase tracking-[0.2em] text-primary">
                                     {current.title}
                                 </p>
-                                <h3 className="text-3xl font-extrabold text-foreground">
+                                <h3 className="text-2xl font-extrabold text-foreground">
                                     {current.name}
                                 </h3>
                             </div>
 
                             {current.description && (
-                                <p className="mb-8 text-base leading-relaxed text-foreground/80">
+                                <p className="mb-6 text-sm leading-relaxed text-foreground/80">
                                     {current.description}
                                 </p>
                             )}
@@ -191,10 +191,10 @@ export function ProfileCardCarousel({
 
             {/* Mobile layout */}
             <div className="mx-auto max-w-sm bg-transparent text-center md:hidden">
-                {imageTile("mb-6 aspect-square w-full", 400)}
+                {imageTile("mb-5 mx-auto aspect-square w-64", 320)}
 
                 <div className="px-4">
-                    <AnimatePresence mode="wait">
+                    <AnimatePresence mode="wait" initial={false}>
                         <motion.div
                             key={current.name}
                             initial={{ opacity: 0 }}
@@ -220,13 +220,13 @@ export function ProfileCardCarousel({
             </div>
 
             {/* Bottom navigation */}
-            <div className="mt-8 flex items-center justify-center gap-6">
+            <div className="mt-6 flex items-center justify-center gap-5">
                 <button
                     onClick={handlePrevious}
                     aria-label={prevLabel}
-                    className="flex h-12 w-12 cursor-pointer items-center justify-center rounded-full border border-border bg-card shadow-md transition-colors hover:border-primary/50 hover:bg-muted"
+                    className="flex h-10 w-10 cursor-pointer items-center justify-center rounded-full border border-border bg-card shadow-md transition-colors hover:border-primary/50 hover:bg-muted"
                 >
-                    <ChevronLeft className="h-6 w-6 text-foreground" />
+                    <ChevronLeft className="h-5 w-5 text-foreground" />
                 </button>
 
                 <div className="flex gap-2">
@@ -251,7 +251,7 @@ export function ProfileCardCarousel({
                     aria-label={nextLabel}
                     className="flex h-12 w-12 cursor-pointer items-center justify-center rounded-full border border-border bg-card shadow-md transition-colors hover:border-primary/50 hover:bg-muted"
                 >
-                    <ChevronRight className="h-6 w-6 text-foreground" />
+                    <ChevronRight className="h-5 w-5 text-foreground" />
                 </button>
             </div>
         </div>

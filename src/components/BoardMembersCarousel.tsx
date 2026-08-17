@@ -41,7 +41,7 @@ const BoardMembersCarousel = () => {
     return (
         /* Backdrop panel — separates the slideshow from the busy Bulgaria-map
            artwork behind this section. */
-        <div className="mx-auto max-w-5xl rounded-[2rem] border border-primary/10 bg-background/70 p-4 backdrop-blur-md sm:p-8">
+        <div className="mx-auto max-w-4xl rounded-[2rem] border border-primary/10 bg-background/70 p-4 backdrop-blur-md sm:p-6">
             <ProfileCardCarousel
                 items={items}
                 imageFit="contain"

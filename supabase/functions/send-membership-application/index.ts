@@ -4,6 +4,7 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { PDFDocument, StandardFonts, rgb } from "https://esm.sh/pdf-lib@1.17.1";
+import { SMTPClient } from "https://deno.land/x/denomailer@1.6.0/mod.ts";
 
 // Only the association's own origins may call this relay (was "*": an open
 // email relay that anyone could script against the Resend quota).
@@ -702,6 +703,81 @@ function createEmailHTML(formData: FormData, isAdminCopy: boolean): string {
   }
 }
 
+// ────────────────────────────────────────────────────────────
+// Email transport: Google Workspace SMTP first (GMAIL_USER +
+// GMAIL_APP_PASSWORD secrets), Resend API as fallback (RESEND_API_KEY).
+// Returns "gmail" | "resend" | null (not configured).
+// ────────────────────────────────────────────────────────────
+interface OutgoingEmail {
+  to: string;
+  subject: string;
+  html: string;
+  attachment?: { filename: string; base64: string };
+}
+
+function emailTransport(): "gmail" | "resend" | null {
+  if (Deno.env.get("GMAIL_USER") && Deno.env.get("GMAIL_APP_PASSWORD")) return "gmail";
+  if (Deno.env.get("RESEND_API_KEY")) return "resend";
+  return null;
+}
+
+async function sendViaGmail(mail: OutgoingEmail): Promise<void> {
+  const user = Deno.env.get("GMAIL_USER")!;
+  const client = new SMTPClient({
+    connection: {
+      hostname: "smtp.gmail.com",
+      port: 465,
+      tls: true,
+      auth: { username: user, password: Deno.env.get("GMAIL_APP_PASSWORD")! },
+    },
+  });
+  try {
+    await client.send({
+      from: `BAMAS | БАЗАП <${user}>`,
+      to: mail.to,
+      subject: mail.subject,
+      html: mail.html,
+      attachments: mail.attachment
+        ? [{
+            filename: mail.attachment.filename,
+            content: mail.attachment.base64,
+            encoding: "base64",
+            contentType: "application/pdf",
+          }]
+        : [],
+    });
+  } finally {
+    await client.close();
+  }
+}
+
+async function sendViaResend(mail: OutgoingEmail): Promise<void> {
+  const res = await fetch("https://api.resend.com/emails", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${Deno.env.get("RESEND_API_KEY")}`,
+    },
+    body: JSON.stringify({
+      from: "BAMAS Membership <noreply@bamas.xyz>",
+      to: [mail.to],
+      subject: mail.subject,
+      html: mail.html,
+      attachments: mail.attachment
+        ? [{ filename: mail.attachment.filename, content: mail.attachment.base64 }]
+        : [],
+    }),
+  });
+  if (!res.ok) throw new Error(`Resend error: ${await res.text()}`);
+}
+
+async function sendEmail(mail: OutgoingEmail): Promise<void> {
+  const transport = emailTransport();
+  if (transport === "gmail") return sendViaGmail(mail);
+  if (transport === "resend") return sendViaResend(mail);
+  throw new Error("No email transport configured");
+}
+
 serve(async (req) => {
   const corsHeaders = corsHeadersFor(req.headers.get("origin"));
 
@@ -721,8 +797,6 @@ serve(async (req) => {
       );
     }
 
-    // Get environment variables
-    const resendApiKey = Deno.env.get("RESEND_API_KEY") ?? "";
     const adminEmail = "info@bamas.xyz";
 
     // Parse request body
@@ -748,17 +822,23 @@ serve(async (req) => {
     }
 
     // Store the application FIRST — it must survive any email failure.
+    const supabaseAdmin = createClient(
+      Deno.env.get("SUPABASE_URL") ?? "",
+      Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "",
+    );
+    let applicationId: string | null = null;
     try {
-      const supabaseAdmin = createClient(
-        Deno.env.get("SUPABASE_URL") ?? "",
-        Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "",
-      );
-      await supabaseAdmin.from("membership_applications").insert({
-        application_type: formData.applicationType ?? "unknown",
-        applicant_name: formData.fullName || formData.legalName || "unknown",
-        applicant_email: formData.email,
-        payload: formData,
-      });
+      const { data: inserted } = await supabaseAdmin
+        .from("membership_applications")
+        .insert({
+          application_type: formData.applicationType ?? "unknown",
+          applicant_name: formData.fullName || formData.legalName || "unknown",
+          applicant_email: formData.email,
+          payload: formData,
+        })
+        .select("id")
+        .single();
+      applicationId = inserted?.id ?? null;
     } catch (dbError) {
       // Don't block the email path on a storage error, but make it visible.
       console.error("Failed to store membership application:", dbError);
@@ -779,64 +859,35 @@ serve(async (req) => {
     const applicantName = formData.fullName || formData.legalName || "Applicant";
     const fileName = `BAMAS_Application_${applicantName.replace(/\s+/g, "_")}_${formData.signatureDate}.pdf`;
 
-    // Send emails using Resend API
-    if (resendApiKey) {
-      // Send to admin (info@bamas.xyz)
-      const adminResponse = await fetch("https://api.resend.com/emails", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${resendApiKey}`,
-        },
-        body: JSON.stringify({
-          from: "BAMAS Membership <noreply@bamas.xyz>",
-          to: [adminEmail],
-          subject: `New Membership Application: ${applicantName}`,
-          html: adminEmailHtml,
-          attachments: [
-            {
-              filename: fileName,
-              content: pdfBase64,
-            },
-          ],
-        }),
+    // Send emails: Google Workspace SMTP preferred, Resend fallback.
+    if (emailTransport()) {
+      // Admin notification (info@bamas.xyz) — must succeed
+      await sendEmail({
+        to: adminEmail,
+        subject: `New Membership Application: ${applicantName}`,
+        html: adminEmailHtml,
+        attachment: { filename: fileName, base64: pdfBase64 },
       });
-
-      if (!adminResponse.ok) {
-        const error = await adminResponse.text();
-        console.error("Failed to send admin email:", error);
-        throw new Error(`Failed to send admin email: ${error}`);
-      }
-
       console.log("Admin email sent successfully");
 
-      // Send to applicant
-      const applicantResponse = await fetch("https://api.resend.com/emails", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${resendApiKey}`,
-        },
-        body: JSON.stringify({
-          from: "BAMAS <noreply@bamas.xyz>",
-          to: [formData.email],
+      if (applicationId) {
+        await supabaseAdmin
+          .from("membership_applications")
+          .update({ email_sent: true })
+          .eq("id", applicationId);
+      }
+
+      // Applicant confirmation — best-effort
+      try {
+        await sendEmail({
+          to: formData.email,
           subject: "Application Received - BAMAS Membership",
           html: applicantEmailHtml,
-          attachments: [
-            {
-              filename: fileName,
-              content: pdfBase64,
-            },
-          ],
-        }),
-      });
-
-      if (!applicantResponse.ok) {
-        const error = await applicantResponse.text();
-        console.error("Failed to send applicant email:", error);
-        // Don't throw here, admin email was sent successfully
-      } else {
+          attachment: { filename: fileName, base64: pdfBase64 },
+        });
         console.log("Applicant confirmation email sent successfully");
+      } catch (applicantError) {
+        console.error("Failed to send applicant email:", applicantError);
       }
 
       return new Response(
@@ -852,10 +903,7 @@ serve(async (req) => {
         }
       );
     } else {
-      // No Resend API key - just log
-      console.warn("RESEND_API_KEY not configured. Emails not sent.");
-      console.log("Application would be sent to:", adminEmail);
-      console.log("Confirmation would be sent to:", formData.email);
+      console.warn("No email transport configured (GMAIL_USER/GMAIL_APP_PASSWORD or RESEND_API_KEY). Emails not sent.");
 
       return new Response(
         JSON.stringify({

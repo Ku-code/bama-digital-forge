@@ -8,14 +8,14 @@ import { Link } from "react-router-dom";
 
 import { useDocumentMeta } from "@/hooks/useDocumentMeta";
 const CookiePolicy = () => {
+
+  const { t, language, setLanguage } = useLanguage();
   useDocumentMeta({
     title: language === 'bg' ? 'Политика за бисквитки | БАЗАП' : 'Cookie Policy | BAMAS',
     description: language === 'bg'
       ? 'Какви бисквитки използва сайтът на БАЗАП и как да ги управлявате.'
       : 'Which cookies the BAMAS website uses and how to manage them.',
   });
-
-  const { t, language, setLanguage } = useLanguage();
 
   const content = {
     en: {

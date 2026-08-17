@@ -7,6 +7,9 @@ import MembershipForm from '../components/MembershipForm';
 
 import { useDocumentMeta } from "@/hooks/useDocumentMeta";
 const MembershipApplication: React.FC = () => {
+
+    const navigate = useNavigate();
+    const { language } = useLanguage();
   useDocumentMeta({
     title: language === 'bg'
       ? 'Кандидатствай за членство | БАЗАП'
@@ -15,9 +18,6 @@ const MembershipApplication: React.FC = () => {
       ? 'Станете член на Българската асоциация за адитивно производство — за компании, организации и физически лица.'
       : 'Join the Bulgarian Additive Manufacturing Association — for companies, organizations and individuals.',
   });
-
-    const navigate = useNavigate();
-    const { language } = useLanguage();
 
     const handleSuccess = (data: { email: string; name: string }) => {
         navigate('/membership-success', { state: data });

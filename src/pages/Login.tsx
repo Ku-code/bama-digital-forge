@@ -16,12 +16,12 @@ import { LogIn, Mail, Lock, X, ArrowLeft, Eye, EyeOff } from "lucide-react";
 
 import { useDocumentMeta } from "@/hooks/useDocumentMeta";
 const Login = () => {
+
+  const { t, language, setLanguage } = useLanguage();
   useDocumentMeta({
     title: language === 'bg' ? 'Вход | БАЗАП' : 'Login | BAMAS',
     noindex: true,
   });
-
-  const { t, language, setLanguage } = useLanguage();
   const { toast } = useToast();
   const { signInWithEmail, signInWithGoogle } = useAuth();
   const navigate = useNavigate();

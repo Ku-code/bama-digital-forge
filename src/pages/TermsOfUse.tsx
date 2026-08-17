@@ -8,14 +8,14 @@ import { Link } from "react-router-dom";
 
 import { useDocumentMeta } from "@/hooks/useDocumentMeta";
 const TermsOfUse = () => {
+
+  const { t, language, setLanguage } = useLanguage();
   useDocumentMeta({
     title: language === 'bg' ? 'Условия за ползване | БАЗАП' : 'Terms of Use | BAMAS',
     description: language === 'bg'
       ? 'Условия за ползване на сайта и платформата на БАЗАП.'
       : 'Terms of use for the BAMAS website and platform.',
   });
-
-  const { t, language, setLanguage } = useLanguage();
 
   const content = {
     en: {

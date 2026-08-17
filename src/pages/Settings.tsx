@@ -24,13 +24,13 @@ import { format, formatDistanceToNow, addYears } from "date-fns";
 
 import { useDocumentMeta } from "@/hooks/useDocumentMeta";
 const Settings = () => {
+
+  const { user, updateUser, logout } = useAuth();
+  const { t, language, setLanguage } = useLanguage();
   useDocumentMeta({
     title: language === 'bg' ? 'Настройки | БАЗАП' : 'Settings | BAMAS',
     noindex: true,
   });
-
-  const { user, updateUser, logout } = useAuth();
-  const { t, language, setLanguage } = useLanguage();
   const { theme, setTheme, resolvedTheme } = useTheme();
   const { toast } = useToast();
   const navigate = useNavigate();

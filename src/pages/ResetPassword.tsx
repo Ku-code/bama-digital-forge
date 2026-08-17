@@ -13,12 +13,12 @@ import { Lock, X, ArrowLeft, Eye, EyeOff, CheckCircle2 } from "lucide-react";
 
 import { useDocumentMeta } from "@/hooks/useDocumentMeta";
 const ResetPassword = () => {
+
+  const { t, language, setLanguage } = useLanguage();
   useDocumentMeta({
     title: language === 'bg' ? 'Нова парола | БАЗАП' : 'Reset Password | BAMAS',
     noindex: true,
   });
-
-  const { t, language, setLanguage } = useLanguage();
   const { toast } = useToast();
   const navigate = useNavigate();
   const location = useLocation();

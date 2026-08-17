@@ -16,12 +16,12 @@ import { UserPlus, Mail, Lock, User, X, ArrowLeft, Eye, EyeOff } from "lucide-re
 
 import { useDocumentMeta } from "@/hooks/useDocumentMeta";
 const Register = () => {
+
+  const { t, language, setLanguage } = useLanguage();
   useDocumentMeta({
     title: language === 'bg' ? 'Регистрация | БАЗАП' : 'Register | BAMAS',
     noindex: true,
   });
-
-  const { t, language, setLanguage } = useLanguage();
   const { toast } = useToast();
   const { signUpWithEmail, signInWithGoogle } = useAuth();
   const navigate = useNavigate();

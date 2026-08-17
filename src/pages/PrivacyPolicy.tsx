@@ -8,14 +8,14 @@ import { Link } from "react-router-dom";
 
 import { useDocumentMeta } from "@/hooks/useDocumentMeta";
 const PrivacyPolicy = () => {
+
+  const { t, language, setLanguage } = useLanguage();
   useDocumentMeta({
     title: language === 'bg' ? 'Политика за поверителност | БАЗАП' : 'Privacy Policy | BAMAS',
     description: language === 'bg'
       ? 'Как БАЗАП събира, използва и защитава личните данни.'
       : 'How BAMAS collects, uses and protects personal data.',
   });
-
-  const { t, language, setLanguage } = useLanguage();
 
   const content = {
     en: {

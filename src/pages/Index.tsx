@@ -199,11 +199,8 @@ const Index = () => {
                 transition={{ duration: 0.8, delay: 0.8 }}
                 className="max-w-3xl mx-auto space-y-4"
               >
-                <p className="text-base sm:text-xl md:text-2xl text-foreground/85 leading-relaxed px-4 font-normal">
+                <p className="max-w-2xl mx-auto text-base sm:text-lg md:text-xl text-foreground/80 leading-relaxed px-4 font-normal">
                   {t("hero.tagline")}
-                </p>
-                <p className="text-sm sm:text-base md:text-lg text-muted-foreground leading-relaxed px-4 font-body-light">
-                  {t("hero.subtitle")}
                 </p>
               </motion.div>
             </motion.div>
@@ -279,12 +276,15 @@ const Index = () => {
           <h2 className="text-2xl md:text-3xl lg:text-4xl font-extrabold mb-8 md:mb-12 text-center text-foreground animate-on-scroll transition-all duration-700 ease-out px-4">
             {t("about.title")}
           </h2>
-          {/* Canonical facts paragraph — the sentence search engines and AI
+          {/* Canonical facts block — the sentence search engines and AI
               assistants should retrieve verbatim (kept in sync with llms.txt
-              and the Organization JSON-LD). */}
-          <p className="max-w-3xl mx-auto text-base md:text-lg text-foreground/90 leading-relaxed mb-6 md:mb-8 px-4 font-normal text-center">
-            {t("about.intro")}
-          </p>
+              and the Organization JSON-LD). Styled as a distinct lead card so
+              it doesn't read as a duplicate of the description below. */}
+          <div className="max-w-3xl mx-auto mb-8 md:mb-10 rounded-xl border-l-4 border-primary bg-primary/5 px-5 py-4 md:px-6 md:py-5">
+            <p className="text-base md:text-lg text-foreground/90 leading-relaxed font-normal">
+              {t("about.intro")}
+            </p>
+          </div>
           <div className="max-w-3xl mx-auto animate-on-scroll transition-all duration-700 ease-out delay-100">
             <p className="text-base md:text-lg text-foreground/80 leading-relaxed mb-4 md:mb-6 px-4 font-normal">
               {t("about.description")}

@@ -1,7 +1,8 @@
 import { useEffect, useRef, useState } from "react";
-import { ChevronLeft, ChevronRight } from "lucide-react";
+import { ChevronLeft, ChevronRight, ChevronDown, ChevronUp } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useTheme } from "@/components/ThemeProvider";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 interface Partner {
   logo: string;
@@ -140,7 +141,9 @@ const PartnerLogosCarousel = () => {
   const [canScrollLeft, setCanScrollLeft] = useState(false);
   const [canScrollRight, setCanScrollRight] = useState(true);
   const [isAutoScrolling, setIsAutoScrolling] = useState(true);
+  const [showAll, setShowAll] = useState(false);
   const { resolvedTheme } = useTheme();
+  const { language } = useLanguage();
 
   // Check scroll position
   const checkScrollPosition = () => {
@@ -211,7 +214,7 @@ const PartnerLogosCarousel = () => {
     setTimeout(() => setIsAutoScrolling(true), 5000);
   };
 
-  const renderLogo = (partner: Partner, key: string) => {
+  const renderLogo = (partner: Partner, key: string, compact = false) => {
     const logoSrc = partner.logoDark && resolvedTheme === "dark" ? partner.logoDark : partner.logo;
     return (
     <a
@@ -220,17 +223,19 @@ const PartnerLogosCarousel = () => {
       target="_blank"
       rel="noopener noreferrer"
       aria-label={`${partner.name} — ${partner.url.replace(/^https?:\/\//, '').replace(/\/$/, '')}`}
-      className="flex-shrink-0 flex items-center justify-center h-52 w-96 hover:opacity-80 transition-opacity duration-300 group cursor-pointer"
+      className={`flex items-center justify-center hover:opacity-80 transition-opacity duration-300 group cursor-pointer ${
+        compact ? "h-36 w-full" : "flex-shrink-0 h-52 w-96"
+      }`}
     >
       {partner.hasWhiteBackground ? (
         /* Dark artwork needs a light plate to stay readable on the dark
            theme — kept as a snug chip around the logo, not a full card. */
         <div className="flex flex-col items-center justify-center">
-          <div className="inline-flex items-center justify-center rounded-xl bg-white px-6 py-4">
+          <div className={`inline-flex items-center justify-center rounded-xl bg-white ${compact ? "px-4 py-2.5" : "px-6 py-4"}`}>
             <img
               src={logoSrc}
               alt={`${partner.name} Logo`}
-              className="h-auto w-auto object-contain max-h-24 max-w-[280px]"
+              className={`h-auto w-auto object-contain ${compact ? "max-h-16 max-w-[180px]" : "max-h-24 max-w-[280px]"}`}
               loading="lazy"
               decoding="async"
               onError={(e) => {
@@ -249,7 +254,7 @@ const PartnerLogosCarousel = () => {
           <img
             src={logoSrc}
             alt={`${partner.name} Logo`}
-            className="h-auto w-auto object-contain max-h-36 max-w-[320px] opacity-90 group-hover:opacity-100 transition-opacity drop-shadow-[0_2px_8px_rgba(0,0,0,0.25)]"
+            className={`h-auto w-auto object-contain opacity-90 group-hover:opacity-100 transition-opacity drop-shadow-[0_2px_8px_rgba(0,0,0,0.25)] ${compact ? "max-h-20 max-w-[200px]" : "max-h-36 max-w-[320px]"}`}
             loading="lazy"
             decoding="async"
             onError={(e) => {
@@ -271,7 +276,7 @@ const PartnerLogosCarousel = () => {
     <div className="relative w-full py-8">
       <div className="relative">
         {/* Left scroll button */}
-        {canScrollLeft && (
+        {!showAll && canScrollLeft && (
           <Button
             variant="outline"
             size="icon"
@@ -284,7 +289,7 @@ const PartnerLogosCarousel = () => {
         )}
 
         {/* Right scroll button */}
-        {canScrollRight && (
+        {!showAll && canScrollRight && (
           <Button
             variant="outline"
             size="icon"
@@ -297,16 +302,45 @@ const PartnerLogosCarousel = () => {
         )}
 
         {/* Scrollable container with infinite loop */}
-        <div
-          ref={scrollContainerRef}
-          className="flex gap-12 overflow-x-auto scrollbar-hide px-16 py-8"
-          onMouseEnter={() => setIsAutoScrolling(false)}
-          onMouseLeave={() => setIsAutoScrolling(true)}
+        {!showAll && (
+          <div
+            ref={scrollContainerRef}
+            className="flex gap-12 overflow-x-auto scrollbar-hide px-16 py-8"
+            onMouseEnter={() => setIsAutoScrolling(false)}
+            onMouseLeave={() => setIsAutoScrolling(true)}
+          >
+            {INFINITE_PARTNERS.map((partner, index) =>
+              renderLogo(partner, `${partner.name}-${index}`)
+            )}
+          </div>
+        )}
+
+        {/* Static all-partners grid */}
+        {showAll && (
+          <div className="grid grid-cols-2 gap-x-6 gap-y-4 px-4 py-8 sm:grid-cols-3 lg:grid-cols-4">
+            {PARTNERS.map((partner) => renderLogo(partner, `grid-${partner.name}`, true))}
+          </div>
+        )}
+      </div>
+
+      {/* Expand / collapse */}
+      <div className="mt-2 flex justify-center">
+        <Button
+          variant="outline"
+          onClick={() => {
+            setShowAll((v) => {
+              const next = !v;
+              setIsAutoScrolling(!next);
+              return next;
+            });
+          }}
+          className="gap-2 rounded-full border-primary/30 px-6 font-semibold hover:border-primary/60 hover:bg-primary/10"
         >
-          {INFINITE_PARTNERS.map((partner, index) =>
-            renderLogo(partner, `${partner.name}-${index}`)
-          )}
-        </div>
+          {showAll
+            ? (language === "bg" ? "Скрий" : "Collapse")
+            : (language === "bg" ? `Виж всички (${PARTNERS.length})` : `View all (${PARTNERS.length})`)}
+          {showAll ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
+        </Button>
       </div>
     </div>
   );

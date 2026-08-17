@@ -41,6 +41,7 @@ const PARTNERS: Partner[] = [
     logo: "/partnerlogos/B2N_logo.jpg",
     name: "B2N",
     url: "https://b2n.bg/",
+    hasWhiteBackground: true,
   },
   {
     logo: "/partnerlogos/01_HabitAdd_Logo_RGB.png",
@@ -61,6 +62,7 @@ const PARTNERS: Partner[] = [
     logo: "/partnerlogos/edufacturing_logo.jpeg",
     name: "EduFacturing",
     url: "https://edufacturing.com/en/home/",
+    hasWhiteBackground: true,
   },
   {
     logo: "/partnerlogos/parai_logo.png",
@@ -71,6 +73,7 @@ const PARTNERS: Partner[] = [
     logo: "/partnerlogos/solidfill_logo.jpg",
     name: "SolidFill",
     url: "https://solidfill.com/en/home-en/",
+    hasWhiteBackground: true,
   },
   {
     logo: "/partnerlogos/3dopendesign_logo.png",
@@ -81,6 +84,7 @@ const PARTNERS: Partner[] = [
     logo: "/partnerlogos/3dprintx_logo.png",
     name: "3D PrintX",
     url: "https://3dprintx.bg/",
+    hasWhiteBackground: true,
   },
   {
     logo: "/partnerlogos/resonator_logo.png",
@@ -164,9 +168,9 @@ const PartnerLogosCarousel = () => {
         container.scrollLeft = scrollLeft - singleSetWidth;
       }
 
-      // Continuous scroll to the right (faster: 2px per frame instead of 1px)
+      // Continuous scroll to the right (4px per 10ms tick)
       container.scrollBy({
-        left: 2,
+        left: 4,
         behavior: "auto", // Use auto for smoother infinite scroll
       });
     };
@@ -219,29 +223,33 @@ const PartnerLogosCarousel = () => {
       className="flex-shrink-0 flex items-center justify-center h-52 w-96 hover:opacity-80 transition-opacity duration-300 group cursor-pointer"
     >
       {partner.hasWhiteBackground ? (
-        <div className="h-40 w-96 flex flex-col items-center justify-center bg-white rounded-lg p-4 shadow-sm">
-          <img
-            src={logoSrc}
-            alt={`${partner.name} Logo`}
-            className="h-auto w-auto object-contain max-h-28 max-w-full"
-            loading="lazy"
-            decoding="async"
-            onError={(e) => {
-              console.error(`Failed to load logo: ${partner.logo}`);
-            }}
-          />
+        /* Dark artwork needs a light plate to stay readable on the dark
+           theme — kept as a snug chip around the logo, not a full card. */
+        <div className="flex flex-col items-center justify-center">
+          <div className="inline-flex items-center justify-center rounded-xl bg-white px-6 py-4">
+            <img
+              src={logoSrc}
+              alt={`${partner.name} Logo`}
+              className="h-auto w-auto object-contain max-h-24 max-w-[280px]"
+              loading="lazy"
+              decoding="async"
+              onError={(e) => {
+                console.error(`Failed to load logo: ${partner.logo}`);
+              }}
+            />
+          </div>
           {partner.subtext && (
-            <p className="text-xs font-extrabold text-gray-700 mt-2 text-center uppercase tracking-wider">
+            <p className="text-xs font-black text-primary mt-3 text-center uppercase tracking-widest">
               {partner.subtext}
             </p>
           )}
         </div>
       ) : (
-        <div className="h-52 w-96 flex flex-col items-center justify-center bg-card/50 rounded-lg p-6 shadow-sm border border-white/5">
+        <div className="flex flex-col items-center justify-center">
           <img
             src={logoSrc}
             alt={`${partner.name} Logo`}
-            className="h-auto w-auto object-contain max-h-36 max-w-full opacity-90 group-hover:opacity-100 transition-opacity"
+            className="h-auto w-auto object-contain max-h-36 max-w-[320px] opacity-90 group-hover:opacity-100 transition-opacity drop-shadow-[0_2px_8px_rgba(0,0,0,0.25)]"
             loading="lazy"
             decoding="async"
             onError={(e) => {

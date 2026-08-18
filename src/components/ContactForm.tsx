@@ -147,13 +147,15 @@ const ContactForm = () => {
                     placeholder={bg ? "Вашето съобщение…" : "Your message…"} className="h-full min-h-[96px]" />
             </div>
 
-            <Button type="submit" disabled={sending} className="w-full bg-primary text-primary-foreground hover:bg-primary/90">
-                {sending ? (bg ? "Изпращане…" : "Sending…") : (bg ? "Изпрати съобщение" : "Send message")}
-            </Button>
+            {/* Footnote sits above the button so the submit button lands on
+                the card bottom — level with the Discord/Viber buttons. */}
             <p className="text-center text-xs text-muted-foreground">
                 {bg ? "или директно на " : "or directly at "}
                 <a href="mailto:info@bamas.xyz" className="text-primary hover:underline">info@bamas.xyz</a>
             </p>
+            <Button type="submit" disabled={sending} className="mt-auto w-full bg-primary text-primary-foreground hover:bg-primary/90">
+                {sending ? (bg ? "Изпращане…" : "Sending…") : (bg ? "Изпрати съобщение" : "Send message")}
+            </Button>
         </form>
     );
 };

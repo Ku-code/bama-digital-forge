@@ -8,7 +8,7 @@
 
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
-import { SMTPClient } from "https://deno.land/x/denomailer@1.6.0/mod.ts";
+import { sendMail as smtpSend, smtpConfigured } from "../_shared/mailer.ts";
 
 const ADMIN_EMAIL = "info@bamas.xyz";
 const FROM_ADDRESS = "noreply@bamas.xyz"; // requires alias on the Workspace account; Gmail falls back to the authenticated user otherwise
@@ -55,34 +55,12 @@ interface Payload {
 }
 
 async function sendMail(to: string, subject: string, html: string): Promise<void> {
-  const user = Deno.env.get("GMAIL_USER");
-  const pass = Deno.env.get("GMAIL_APP_PASSWORD");
-  if (!user || !pass) throw new Error("SMTP not configured");
-  const client = new SMTPClient({
-    connection: {
-      hostname: "smtp.gmail.com",
-      port: 465,
-      tls: true,
-      auth: { username: user, password: pass },
-    },
-  });
-  try {
-    await client.send({
-      from: `BAMAS | БАЗАП <${FROM_ADDRESS}>`,
-      to,
-      replyTo: ADMIN_EMAIL,
-      subject,
-      html,
-    });
-  } finally {
-    await client.close();
-  }
+  if (!smtpConfigured()) throw new Error("SMTP not configured");
+  await smtpSend({ to, subject, html });
 }
 
 const LOGO_URL = "https://www.bamas.xyz/email/bamas-logo.png";
 
-/** Bulletproof branded shell: table layout + inline styles (email clients),
- *  BAMAS logo in every email, green accent bar, footer with links. */
 const wrap = (body: string, preheader = "") => `<!DOCTYPE html>
 <html>
 <head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"></head>

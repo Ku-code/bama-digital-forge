@@ -4,7 +4,7 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { PDFDocument, StandardFonts, rgb } from "https://esm.sh/pdf-lib@1.17.1";
-import { SMTPClient } from "https://deno.land/x/denomailer@1.6.0/mod.ts";
+import { sendMail as smtpSend } from "../_shared/mailer.ts";
 
 // Only the association's own origins may call this relay (was "*": an open
 // email relay that anyone could script against the Resend quota).
@@ -732,33 +732,14 @@ function emailTransport(): "gmail" | "resend" | null {
 }
 
 async function sendViaGmail(mail: OutgoingEmail): Promise<void> {
-  const user = Deno.env.get("GMAIL_USER")!;
-  const client = new SMTPClient({
-    connection: {
-      hostname: "smtp.gmail.com",
-      port: 465,
-      tls: true,
-      auth: { username: user, password: Deno.env.get("GMAIL_APP_PASSWORD")! },
-    },
+  await smtpSend({
+    to: mail.to,
+    subject: mail.subject,
+    html: mail.html,
+    attachments: mail.attachment
+      ? [{ filename: mail.attachment.filename, base64: mail.attachment.base64 }]
+      : [],
   });
-  try {
-    await client.send({
-      from: `BAMAS | БАЗАП <${user}>`,
-      to: mail.to,
-      subject: mail.subject,
-      html: mail.html,
-      attachments: mail.attachment
-        ? [{
-            filename: mail.attachment.filename,
-            content: mail.attachment.base64,
-            encoding: "base64",
-            contentType: "application/pdf",
-          }]
-        : [],
-    });
-  } finally {
-    await client.close();
-  }
 }
 
 async function sendViaResend(mail: OutgoingEmail): Promise<void> {

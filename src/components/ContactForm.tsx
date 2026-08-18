@@ -39,17 +39,32 @@ const ContactForm = () => {
         }
 
         setSending(true);
-        const { error } = await supabase.from("contact_messages").insert({
+        const record = {
             name: String(data.get("name") ?? "").trim(),
             email: String(data.get("email") ?? "").trim().toLowerCase(),
             topic: String(data.get("topic") ?? "general"),
             message: String(data.get("message") ?? "").trim(),
             language,
-        });
+        };
+        // Preferred path: edge function stores AND emails (confirmation to the
+        // sender, notification to info@bamas.xyz). Fallback: direct insert.
+        let failed = false;
+        try {
+            const { data: fnData, error: fnError } = await supabase.functions.invoke("notify-signup", {
+                body: { type: "contact", ...record },
+            });
+            failed = !!fnError || (fnData as { success?: boolean } | null)?.success !== true;
+        } catch {
+            failed = true;
+        }
+        if (failed) {
+            const { error } = await supabase.from("contact_messages").insert(record);
+            failed = !!error;
+        }
         setSending(false);
 
-        if (error) {
-            console.error("Contact message failed:", error);
+        if (failed) {
+            console.error("Contact message could not be stored or sent");
             toast({
                 title: bg ? "Грешка при изпращане" : "Sending failed",
                 description: bg

@@ -1093,13 +1093,23 @@ const Index = () => {
         currentLanguage={language}
         onLanguageChange={setLanguage}
         onNewsletterSubmit={async (email) => {
-          // Persist the subscription — never claim success without storing it.
-          const { error } = await supabase
-            .from('newsletter_subscribers')
-            .insert({ email: email.trim().toLowerCase(), language, source: 'footer' });
-          if (error && error.code !== '23505') {
-            // 23505 = already subscribed — treat as success for the visitor
-            console.error('Newsletter subscribe failed:', error);
+          // Store + confirmation email via edge function; direct insert as a
+          // fallback so a subscription is never lost if the function is down.
+          const clean = email.trim().toLowerCase();
+          let ok = false;
+          try {
+            const { data, error } = await supabase.functions.invoke('notify-signup', {
+              body: { type: 'newsletter', email: clean, language, source: 'footer' },
+            });
+            ok = !error && (data as { success?: boolean } | null)?.success === true;
+          } catch { /* fall through to direct insert */ }
+          if (!ok) {
+            const { error } = await supabase
+              .from('newsletter_subscribers')
+              .insert({ email: clean, language, source: 'footer' });
+            ok = !error || error.code === '23505';
+          }
+          if (!ok) {
             toast({
               title: language === 'bg' ? 'Грешка' : 'Something went wrong',
               description: language === 'bg'
@@ -1112,8 +1122,8 @@ const Index = () => {
           toast({
             title: language === 'bg' ? 'Успешен абонамент' : 'Subscribed',
             description: language === 'bg'
-              ? `Благодарим! ${email} е добавен към бюлетина на БАЗАП.`
-              : `Thank you! ${email} has been added to the BAMAS newsletter.`,
+              ? `Благодарим! Изпратихме потвърждение на ${clean}.`
+              : `Thank you! A confirmation was sent to ${clean}.`,
           });
         }}
       />

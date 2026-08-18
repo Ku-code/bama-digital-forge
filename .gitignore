@@ -42,3 +42,5 @@ supabase/.branches/
 
 # Editor MCP configs can contain API keys — never commit
 .cursor/mcp.json
+.vercel
+.env*

@@ -498,6 +498,10 @@ function createEmailHTML(formData: FormData, isAdminCopy: boolean): string {
 <body>
   <div class="container">
     <div class="header">
+      <div style="text-align:center;padding-bottom:18px;">
+        <a href="https://www.bamas.xyz"><img src="https://www.bamas.xyz/email/bamas-logo.png" width="150" alt="BAMAS — Bulgarian Additive Manufacturing Association" style="display:inline-block;width:150px;height:auto;border:0;"></a>
+      </div>
+      <div style="height:4px;background:#0C9D6A;border-radius:2px;margin-bottom:22px;"></div>
       <h1>New Membership Application</h1>
       <span class="badge">Pending Review</span>
     </div>
@@ -539,9 +543,10 @@ function createEmailHTML(formData: FormData, isAdminCopy: boolean): string {
     
     <p><strong>The complete application form is attached as a PDF.</strong></p>
     
-    <div class="footer">
-      <p>Bulgarian Additive Manufacturing Association (BAMAS)</p>
-      <p>www.bamas.xyz | info@bamas.xyz</p>
+<div class="footer" style="background:#052e40;border-radius:10px;padding:18px;text-align:center;margin-top:26px;">
+      <p style="margin:0 0 4px;color:#ffffff;font-weight:bold;font-size:13px;">БАЗАП | BAMAS</p>
+      <p style="margin:0 0 8px;color:#9fc7bb;font-size:11px;">Българска асоциация за адитивно производство · София, България</p>
+      <p style="margin:0;font-size:12px;"><a href="https://www.bamas.xyz" style="color:#5FE0AC;text-decoration:none;">bamas.xyz</a> · <a href="mailto:info@bamas.xyz" style="color:#5FE0AC;text-decoration:none;">info@bamas.xyz</a></p>
     </div>
   </div>
 </body>
@@ -659,6 +664,10 @@ function createEmailHTML(formData: FormData, isAdminCopy: boolean): string {
 <body>
   <div class="container">
     <div class="header">
+      <div style="text-align:center;padding-bottom:18px;">
+        <a href="https://www.bamas.xyz"><img src="https://www.bamas.xyz/email/bamas-logo.png" width="150" alt="BAMAS — Bulgarian Additive Manufacturing Association" style="display:inline-block;width:150px;height:auto;border:0;"></a>
+      </div>
+      <div style="height:4px;background:#0C9D6A;border-radius:2px;margin-bottom:22px;"></div>
       <div class="success-icon">
         <svg viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>
       </div>
@@ -692,9 +701,10 @@ function createEmailHTML(formData: FormData, isAdminCopy: boolean): string {
       <p>Best regards,<br>The BAMAS Team</p>
     </div>
     
-    <div class="footer">
-      <p>Bulgarian Additive Manufacturing Association (BAMAS)</p>
-      <p><a href="https://bamas.xyz">www.bamas.xyz</a> | <a href="mailto:info@bamas.xyz">info@bamas.xyz</a></p>
+<div class="footer" style="background:#052e40;border-radius:10px;padding:18px;text-align:center;margin-top:26px;">
+      <p style="margin:0 0 4px;color:#ffffff;font-weight:bold;font-size:13px;">БАЗАП | BAMAS</p>
+      <p style="margin:0 0 8px;color:#9fc7bb;font-size:11px;">Българска асоциация за адитивно производство · София, България</p>
+      <p style="margin:0;font-size:12px;"><a href="https://www.bamas.xyz" style="color:#5FE0AC;text-decoration:none;">bamas.xyz</a> · <a href="mailto:info@bamas.xyz" style="color:#5FE0AC;text-decoration:none;">info@bamas.xyz</a></p>
     </div>
   </div>
 </body>

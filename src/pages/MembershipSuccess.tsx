@@ -1,5 +1,5 @@
 import React from 'react';
-import { useLocation, Link, Navigate } from 'react-router-dom';
+import { useLocation, Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import Navbar from '../components/Navbar';
 import {
@@ -28,12 +28,11 @@ const MembershipSuccess: React.FC = () => {
     const location = useLocation();
     const state = location.state as LocationState | null;
 
-    // Redirect if no state (direct access)
-    if (!state) {
-        return <Navigate to="/membership-application" replace />;
-    }
-
-    const { email, name } = state;
+    // No redirect on missing state: after a stale-build auto-reload the
+    // navigation state is lost, but the application WAS submitted — show the
+    // success page with generic copy rather than bouncing the user away.
+    const email = state?.email ?? '';
+    const name = state?.name ?? '';
 
     // Bank payment details
     const paymentDetails = {
@@ -152,7 +151,7 @@ const MembershipSuccess: React.FC = () => {
                                         step: 1,
                                         titleEn: 'Email Confirmation',
                                         titleBg: 'Имейл потвърждение',
-                                        descEn: `A copy of your application has been sent to ${email}`,
+                                        descEn: email ? `A copy of your application has been sent to ${email}` : 'A copy of your application has been sent to your email address',
                                         descBg: 'Копие от Вашето заявление беше изпратено на посочения имейл',
                                         icon: Mail,
                                     },
@@ -274,7 +273,7 @@ const MembershipSuccess: React.FC = () => {
 
                                     <div className="p-4 bg-teal-500/20 rounded-lg border border-teal-500/30">
                                         <label className="text-teal-300 text-sm font-medium block mb-1">Payment Purpose / Основание</label>
-                                        <p className="text-white">{paymentDetails.paymentPurpose} - {name}</p>
+                                        <p className="text-white">{paymentDetails.paymentPurpose}{name ? ` - ${name}` : ''}</p>
                                     </div>
                                 </div>
 

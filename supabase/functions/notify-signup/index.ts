@@ -79,22 +79,45 @@ async function sendMail(to: string, subject: string, html: string): Promise<void
   }
 }
 
-const wrap = (body: string) => `
-  <div style="font-family:Arial,Helvetica,sans-serif;max-width:560px;margin:0 auto;color:#1a2332">
-    <div style="background:#052e40;padding:20px 24px;border-radius:12px 12px 0 0">
-      <span style="color:#ffffff;font-size:18px;font-weight:bold">BAMAS | БАЗАП</span><br>
-      <span style="color:#9fc7bb;font-size:12px">Bulgarian Additive Manufacturing Association</span>
-    </div>
-    <div style="border:1px solid #e2e8f0;border-top:none;border-radius:0 0 12px 12px;padding:24px">
-      ${body}
-      <hr style="border:none;border-top:1px solid #e2e8f0;margin:24px 0 12px">
-      <p style="font-size:11px;color:#64748b">
-        Българска асоциация за адитивно производство (БАЗАП) · София, България ·
-        <a href="https://www.bamas.xyz" style="color:#0C9D6A">bamas.xyz</a> ·
-        <a href="mailto:info@bamas.xyz" style="color:#0C9D6A">info@bamas.xyz</a>
-      </p>
-    </div>
-  </div>`;
+const LOGO_URL = "https://www.bamas.xyz/email/bamas-logo.png";
+
+/** Bulletproof branded shell: table layout + inline styles (email clients),
+ *  BAMAS logo in every email, green accent bar, footer with links. */
+const wrap = (body: string, preheader = "") => `<!DOCTYPE html>
+<html>
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"></head>
+<body style="margin:0;padding:0;background-color:#eef2f6;">
+  <span style="display:none;max-height:0;overflow:hidden;">${preheader}</span>
+  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background-color:#eef2f6;padding:24px 12px;">
+    <tr><td align="center">
+      <table role="presentation" width="600" cellpadding="0" cellspacing="0" style="max-width:600px;width:100%;">
+        <!-- Logo header -->
+        <tr><td style="background-color:#ffffff;border-radius:14px 14px 0 0;padding:26px 32px 18px;text-align:center;">
+          <a href="https://www.bamas.xyz" style="text-decoration:none;">
+            <img src="${LOGO_URL}" width="150" alt="BAMAS — Bulgarian Additive Manufacturing Association" style="display:inline-block;width:150px;height:auto;border:0;">
+          </a>
+        </td></tr>
+        <!-- Accent bar -->
+        <tr><td style="height:5px;background:#0C9D6A;font-size:0;line-height:0;">&nbsp;</td></tr>
+        <!-- Body -->
+        <tr><td style="background-color:#ffffff;padding:32px;font-family:Arial,Helvetica,sans-serif;font-size:15px;line-height:1.6;color:#1a2332;">
+          ${body}
+        </td></tr>
+        <!-- Footer -->
+        <tr><td style="background-color:#052e40;border-radius:0 0 14px 14px;padding:20px 32px;text-align:center;font-family:Arial,Helvetica,sans-serif;">
+          <p style="margin:0 0 6px;color:#ffffff;font-size:13px;font-weight:bold;">БАЗАП | BAMAS</p>
+          <p style="margin:0 0 10px;color:#9fc7bb;font-size:11px;">Българска асоциация за адитивно производство · София, България</p>
+          <p style="margin:0;font-size:12px;">
+            <a href="https://www.bamas.xyz" style="color:#5FE0AC;text-decoration:none;">bamas.xyz</a>
+            &nbsp;·&nbsp;<a href="mailto:info@bamas.xyz" style="color:#5FE0AC;text-decoration:none;">info@bamas.xyz</a>
+            &nbsp;·&nbsp;<a href="https://www.linkedin.com/company/bulgarian-additive-manufacturing-association/" style="color:#5FE0AC;text-decoration:none;">LinkedIn</a>
+          </p>
+        </td></tr>
+      </table>
+    </td></tr>
+  </table>
+</body>
+</html>`;
 
 const esc = (s: string) =>
   s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");

@@ -56,6 +56,17 @@ class ErrorBoundary extends Component<
 
   componentDidCatch(error: Error, errorInfo: ErrorInfo) {
     console.error("React Error Boundary caught an error:", error, errorInfo);
+    // Stale-deploy chunk failure: old session, new build. Reload once to
+    // fetch the current bundle instead of stranding the user on an error.
+    if (
+      /Failed to fetch dynamically imported module|Importing a module script failed|error loading dynamically imported module/i.test(
+        error.message
+      ) &&
+      !sessionStorage.getItem("chunk-reload")
+    ) {
+      sessionStorage.setItem("chunk-reload", "1");
+      window.location.reload();
+    }
   }
 
   render() {

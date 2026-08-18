@@ -8,12 +8,26 @@ if (window.location.search.includes('?/')) {
   window.history.replaceState(null, '', path);
 }
 
+// After a deploy, chunk filenames change; a session that started on the old
+// build fails to lazy-load pages ("Failed to fetch dynamically imported
+// module"). Reload once to pick up the new build instead of showing an error.
+window.addEventListener('vite:preloadError', (event) => {
+  if (!sessionStorage.getItem('chunk-reload')) {
+    sessionStorage.setItem('chunk-reload', '1');
+    event.preventDefault();
+    window.location.reload();
+  }
+});
+
 // Enable scroll-entrance animations only when JS runs and motion is allowed.
 // Runs before React renders, so animated elements never flash. Without this
 // class (crawlers, no-JS, reduced motion) all content is simply visible.
 if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
   document.documentElement.classList.add('js-anim');
 }
+
+// A load that made it this far is healthy — re-arm the one-shot reload guard.
+window.addEventListener('load', () => sessionStorage.removeItem('chunk-reload'));
 
 // Error handling for root rendering
 try {

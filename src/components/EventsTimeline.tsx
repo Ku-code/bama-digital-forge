@@ -87,17 +87,6 @@ const EVENTS: BamasEvent[] = [
         },
     },
     {
-        key: "board-june",
-        start: "2026-06-15",
-        date: { bg: "Юни 2026", en: "June 2026" },
-        title: { bg: "Общо събрание", en: "Board Assembly" },
-        place: { bg: "София", en: "Sofia" },
-        desc: {
-            bg: "Полугодишен преглед на стратегическите цели.",
-            en: "Mid-year review of strategic goals.",
-        },
-    },
-    {
         key: "additive-days",
         start: "2026-09-10",
         date: { bg: "10 септември 2026", en: "10 September 2026" },
@@ -110,6 +99,17 @@ const EVENTS: BamasEvent[] = [
         url: "https://additivedays.com/",
         schemaLocation: { name: "Sofia Tech Park", locality: "Sofia", country: "BG" },
         organizer: "B2N",
+    },
+    {
+        key: "board-september",
+        start: "2026-09-25",
+        date: { bg: "Септември 2026 · очаквайте дата", en: "September 2026 · date TBA" },
+        title: { bg: "Общо събрание", en: "Board Assembly" },
+        place: { bg: "Онлайн", en: "Online" },
+        desc: {
+            bg: "Преглед на стратегическите цели с всички членове — онлайн формат.",
+            en: "Review of strategic goals with all members — held online.",
+        },
     },
     {
         key: "mach-tech",

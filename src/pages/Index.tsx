@@ -128,7 +128,7 @@ const Index = () => {
       <section id="home" className="relative pt-20 md:pt-24 scroll-mt-20 md:scroll-mt-24 overflow-hidden">
         {/* Four partner banners on the faces of a forward-tumbling cube. */}
         <BannerCube
-          intervalMs={3500}
+          intervalMs={2000}
           faces={[
             <AdditiveDaysBanner key="additive-days" />,
             <RSFBanner key="rsf" />,

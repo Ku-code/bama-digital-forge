@@ -50,7 +50,15 @@ times out — poll into a global and read it back in a second call for longer wa
 - Allow ≥500 ms after a burst of clicks before reading state; React batches, and
   probes that read too early produce phantom failures.
 - Screenshots: `Page.captureScreenshot` clip coordinates are **page**-relative, not
-  viewport-relative — add `window.scrollY` to a `getBoundingClientRect()` y.
+  viewport-relative — add `window.scrollY` to a `getBoundingClientRect()` y. Capturing the
+  whole viewport after `scrollIntoView` is usually easier than computing a clip.
+- Never call `location.reload()` inside an evaluate — it destroys the execution context and
+  CDP returns "Inspected target navigated or closed". Start from a fresh `--user-data-dir`
+  when you need empty localStorage (e.g. to make the cookie banner appear again).
+- `--window-size` bottoms out around 500px wide. For real phone widths use
+  `Emulation.setDeviceMetricsOverride` with `{mobile: true}`.
+- CDP swallows errors silently: print `out.exceptionDetails` in the driver, otherwise a
+  throwing probe just returns `{}`.
 
 ## Backend
 

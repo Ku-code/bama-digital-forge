@@ -61,19 +61,36 @@ export function ProfileCardCarousel({
     const [currentIndex, setCurrentIndex] = useState(0);
     const [paused, setPaused] = useState(false);
 
+    /* Pause on hover only for real mice. Touch taps synthesize mouseenter
+       with no matching mouseleave, which used to leave the slideshow frozen
+       for the rest of the visit on phones. */
+    const pauseForMouse = (event: React.PointerEvent) => {
+        if (event.pointerType === "mouse") setPaused(true);
+    };
+    const resume = () => setPaused(false);
+
     const count = items.length;
     const handleNext = useCallback(
         () => setCurrentIndex((index) => (index + 1) % count),
         [count]
     );
-    const handlePrevious = () =>
-        setCurrentIndex((index) => (index - 1 + count) % count);
+
+    /* Bumped by every manual navigation so the auto-advance timer restarts;
+       without it a click could be followed by an automatic jump a moment
+       later, which reads as the slideshow fighting the visitor. */
+    const [cycle, setCycle] = useState(0);
+    const goTo = (next: number | ((index: number) => number)) => {
+        setCurrentIndex(next);
+        setCycle((c) => c + 1);
+    };
+    const handlePrevious = () => goTo((index) => (index - 1 + count) % count);
+    const handleNextClick = () => goTo((index) => (index + 1) % count);
 
     useEffect(() => {
         if (!autoAdvanceMs || paused || count < 2) return;
         const id = window.setInterval(handleNext, autoAdvanceMs);
         return () => window.clearInterval(id);
-    }, [autoAdvanceMs, paused, count, handleNext]);
+    }, [autoAdvanceMs, paused, count, handleNext, cycle]);
 
     const current = items[currentIndex];
     if (!current) return null;
@@ -149,8 +166,9 @@ export function ProfileCardCarousel({
     return (
         <div
             className={cn("mx-auto w-full max-w-3xl px-4", className)}
-            onMouseEnter={() => setPaused(true)}
-            onMouseLeave={() => setPaused(false)}
+            onPointerEnter={pauseForMouse}
+            onPointerLeave={resume}
+            onPointerCancel={resume}
         >
             {/* Desktop layout */}
             <div className="relative hidden items-center md:flex">
@@ -233,7 +251,7 @@ export function ProfileCardCarousel({
                     {items.map((_, itemIndex) => (
                         <button
                             key={itemIndex}
-                            onClick={() => setCurrentIndex(itemIndex)}
+                            onClick={() => goTo(itemIndex)}
                             className={cn(
                                 "h-2.5 w-2.5 cursor-pointer rounded-full transition-all",
                                 itemIndex === currentIndex
@@ -247,7 +265,7 @@ export function ProfileCardCarousel({
                 </div>
 
                 <button
-                    onClick={handleNext}
+                    onClick={handleNextClick}
                     aria-label={nextLabel}
                     className="flex h-12 w-12 cursor-pointer items-center justify-center rounded-full border border-border bg-card shadow-md transition-colors hover:border-primary/50 hover:bg-muted"
                 >

@@ -45,7 +45,7 @@ const BoardMembersCarousel = () => {
             <ProfileCardCarousel
                 items={items}
                 imageFit="contain"
-                autoAdvanceMs={6000}
+                autoAdvanceMs={4000}
                 prevLabel={language === "bg" ? "Предишен член" : "Previous member"}
                 nextLabel={language === "bg" ? "Следващ член" : "Next member"}
             />

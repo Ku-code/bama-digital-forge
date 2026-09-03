@@ -140,14 +140,14 @@ const Index = () => {
             <ImageBanner
               key="machtech-expo"
               src="/banners/machtech-expo-2026.gif"
-              href="https://machtech.bg/"
+              href={"https://machtech.bg/posetiteli/bileti/?utm_source=bamas.xyz&utm_medium=banner_1920%D1%85160&utm_campaign=Tickets_2026&utm_id=MachTech%26InnoTech_2026"}
               alt="MACHTECH & INNOTECH EXPO 2026, international exhibition for machinery and technologies in metalworking industry, Inter Expo Center — opens machtech.bg in a new tab"
               background="#FFFFFF"
             />,
             <ImageBanner
               key="interdrone-expo"
               src="/banners/interdrone-expo-2026.gif"
-              href="https://interdroneexpo.bg/"
+              href={"https://interdroneexpo.bg/online-ticket/"}
               alt="INTER DRONE EXPO, 6–9 October 2026, Inter Expo Center — opens interdroneexpo.bg in a new tab"
               background="#C4CCB5"
             />,

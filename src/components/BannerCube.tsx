@@ -1,20 +1,23 @@
 import React, { useEffect, useRef, useState, useCallback } from "react";
 
 /**
- * Rotating banner cube.
+ * Rotating banner prism.
  *
- * Four banners live on the four faces of a horizontal prism that tumbles
- * forward (around the X axis), so each banner rolls up and out while the next
- * rolls in from below.
+ * Banners live on the faces of a horizontal prism that tumbles forward (around
+ * the X axis), so each banner rolls up and out while the next rolls in from
+ * below.
  *
- * The faces are positioned with `rotateX(i * 90deg) translateZ(depth)`, where
- * `depth` is half the banner's height — that is what makes the four faces meet
- * at right angles instead of overlapping. Height is measured at runtime with a
+ * The cross-section is an N-gon, one side per banner, so the step angle is
+ * 360/N and each face sits at `rotateX(i * step) translateZ(apothem)`. The
+ * apothem — the centre-to-side distance, `(height/2) / tan(PI/N)` — is what
+ * makes N faces of the measured height meet edge-to-edge instead of
+ * overlapping or leaving gaps. With four faces it reduces to height/2, the
+ * plain cube this started as. Height is measured at runtime with a
  * ResizeObserver rather than hard-coded, because the banner is responsive
  * (12:1 on desktop, a taller stacked block on mobile).
  *
- * `index` increments forever instead of wrapping modulo 4 — wrapping would make
- * the cube spin backwards through three faces on every fourth step.
+ * `index` increments forever instead of wrapping modulo N — wrapping would make
+ * the prism spin backwards through N-1 faces on every Nth step.
  */
 
 interface BannerCubeProps {
@@ -32,16 +35,19 @@ const BannerCube: React.FC<BannerCubeProps> = ({ faces, intervalMs = 7000, class
     const [paused, setPaused] = useState(false);
     const [reducedMotion, setReducedMotion] = useState(false);
 
-    // Half the banner height — the translateZ that forms the prism.
+    const count = faces.length;
+    const step = 360 / count;
+
+    // Apothem of the N-gon cross-section — see the note above.
     useEffect(() => {
         const el = stageRef.current;
         if (!el) return;
-        const measure = () => setDepth(el.clientHeight / 2);
+        const measure = () => setDepth(el.clientHeight / 2 / Math.tan(Math.PI / count));
         measure();
         const ro = new ResizeObserver(measure);
         ro.observe(el);
         return () => ro.disconnect();
-    }, []);
+    }, [count]);
 
     useEffect(() => {
         const mq = window.matchMedia("(prefers-reduced-motion: reduce)");
@@ -50,8 +56,6 @@ const BannerCube: React.FC<BannerCubeProps> = ({ faces, intervalMs = 7000, class
         mq.addEventListener("change", onChange);
         return () => mq.removeEventListener("change", onChange);
     }, []);
-
-    const count = faces.length;
 
     // Auto-advance retires after a few full cycles so the page eventually
     // settles for readers; hovering or using the dots re-arms it.
@@ -110,7 +114,7 @@ const BannerCube: React.FC<BannerCubeProps> = ({ faces, intervalMs = 7000, class
 
     return (
         <div
-            className={`w-full bg-background relative z-[41] ${className ?? ""}`}
+            className={`w-full bg-background relative z-[41] overflow-hidden ${className ?? ""}`}
             onMouseEnter={() => { setPaused(true); autoSteps.current = 0; }}
             onMouseLeave={() => setPaused(false)}
             onFocusCapture={() => setPaused(true)}
@@ -125,7 +129,7 @@ const BannerCube: React.FC<BannerCubeProps> = ({ faces, intervalMs = 7000, class
                     className="absolute inset-0"
                     style={{
                         transformStyle: "preserve-3d",
-                        transform: `translateZ(-${depth}px) rotateX(${-90 * index}deg)`,
+                        transform: `translateZ(-${depth}px) rotateX(${-step * index}deg)`,
                         transition: reducedMotion ? "none" : "transform 0.7s cubic-bezier(0.72, 0, 0.18, 1)",
                     }}
                 >
@@ -134,7 +138,7 @@ const BannerCube: React.FC<BannerCubeProps> = ({ faces, intervalMs = 7000, class
                             key={i}
                             className="absolute inset-0 overflow-hidden"
                             style={{
-                                transform: `rotateX(${90 * i}deg) translateZ(${depth}px)`,
+                                transform: `rotateX(${step * i}deg) translateZ(${depth}px)`,
                                 backfaceVisibility: "hidden",
                             }}
                             // Faces that aren't showing are hidden from AT and tab order.

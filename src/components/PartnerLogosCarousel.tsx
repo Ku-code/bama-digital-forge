@@ -99,6 +99,7 @@ const PARTNERS: Partner[] = [
   },
   {
     logo: "/partnerlogos/buildplatez.svg",
+    logoDark: "/partnerlogos/buildplatez-white.svg",
     name: "Buildplatez",
     url: "https://buildplatez.com/",
   },

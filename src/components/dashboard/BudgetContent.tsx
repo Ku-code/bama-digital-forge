@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -32,7 +32,28 @@ import {
 } from "@/components/ui/table";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useLanguage } from "@/contexts/LanguageContext";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { useAuth } from "@/contexts/AuthContext";
+import {
+  loadAccounts,
+  loadTransactions,
+  loadBudgetCategories,
+  createTransaction,
+  deleteTransaction,
+  withActuals,
+  type BankAccount,
+  type Transaction,
+  type BudgetCategory,
+} from "@/lib/treasury";
 import { useToast } from "@/hooks/use-toast";
 import { format } from "date-fns";
 import { bg, enUS } from "date-fns/locale";
@@ -62,77 +83,6 @@ import {
   Info
 } from "lucide-react";
 
-interface Transaction {
-  id: string;
-  date: string;
-  description: string;
-  category: 'income' | 'expense';
-  subcategory: string;
-  amount: number;
-  currency: 'BGN' | 'EUR';
-  account_id: string;
-  reference?: string;
-  notes?: string;
-  created_by: string;
-}
-
-interface BankAccount {
-  id: string;
-  name: string;
-  bank_name: string;
-  iban: string;
-  currency: 'BGN' | 'EUR';
-  balance: number;
-  type: 'checking' | 'savings' | 'grant';
-  is_primary: boolean;
-}
-
-interface BudgetCategory {
-  id: string;
-  name: string;
-  type: 'income' | 'expense';
-  budgeted: number;
-  actual: number;
-  color: string;
-}
-
-// Mock data
-const MOCK_ACCOUNTS: BankAccount[] = [
-  {
-    id: "acc1",
-    name: "dashboard.budget.bankDetails.account1Name",
-    bank_name: "EUROBANK BULGARIA AD",
-    iban: "BG55BPBI79421200077761",
-    currency: "BGN",
-    balance: 0,
-    type: "checking",
-    is_primary: true,
-  },
-  {
-    id: "acc2",
-    name: "dashboard.budget.bankDetails.account2Name",
-    bank_name: "Paysera LT, UAB",
-    iban: "LT443500010018837611",
-    currency: "EUR",
-    balance: 0,
-    type: "grant",
-    is_primary: false,
-  },
-];
-
-const MOCK_TRANSACTIONS: Transaction[] = [];
-
-const MOCK_BUDGET: BudgetCategory[] = [
-  { id: "b1", name: "dashboard.budget.category.membershipFees", type: "income", budgeted: 0, actual: 0, color: "#10B981" },
-  { id: "b2", name: "dashboard.budget.category.grants", type: "income", budgeted: 0, actual: 0, color: "#3B82F6" },
-  { id: "b3", name: "dashboard.budget.category.sponsorships", type: "income", budgeted: 0, actual: 0, color: "#8B5CF6" },
-  { id: "b4", name: "dashboard.budget.category.events", type: "income", budgeted: 0, actual: 0, color: "#F59E0B" },
-  { id: "b5", name: "dashboard.budget.category.office", type: "expense", budgeted: 0, actual: 0, color: "#EF4444" },
-  { id: "b6", name: "dashboard.budget.category.technology", type: "expense", budgeted: 0, actual: 0, color: "#EC4899" },
-  { id: "b7", name: "dashboard.budget.category.marketing", type: "expense", budgeted: 0, actual: 0, color: "#6366F1" },
-  { id: "b8", name: "dashboard.budget.category.eventsCosts", type: "expense", budgeted: 0, actual: 0, color: "#14B8A6" },
-];
-
 const EXPENSE_CATEGORIES = [
   "dashboard.budget.category.office", "dashboard.budget.category.technology", "dashboard.budget.category.marketing", "dashboard.budget.category.eventsCosts", "dashboard.budget.category.travel", "dashboard.budget.category.legal", "dashboard.budget.category.consulting", "dashboard.budget.category.services", "dashboard.budget.category.other"
 ];
@@ -143,11 +93,86 @@ const INCOME_CATEGORIES = [
 
 const BudgetContent = () => {
   const { t, language } = useLanguage();
-  const { user, isSuperAdmin, isAdmin } = useAuth();
+  const { user, isSuperAdmin, isAdmin, isBoardMember } = useAuth();
   const { toast } = useToast();
-  const [accounts, setAccounts] = useState<BankAccount[]>(MOCK_ACCOUNTS);
-  const [transactions, setTransactions] = useState<Transaction[]>(MOCK_TRANSACTIONS);
-  const [budget, setBudget] = useState<BudgetCategory[]>(MOCK_BUDGET);
+  const [accounts, setAccounts] = useState<BankAccount[]>([]);
+  const [transactions, setTransactions] = useState<Transaction[]>([]);
+  const [budget, setBudget] = useState<BudgetCategory[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+
+  const reload = useCallback(async () => {
+    try {
+      const [accountRows, txnRows, categoryRows] = await Promise.all([
+        loadAccounts(),
+        loadTransactions(),
+        loadBudgetCategories(),
+      ]);
+      setAccounts(accountRows);
+      setTransactions(txnRows);
+      // "Actual" is summed from the ledger so it can't drift from it.
+      setBudget(withActuals(categoryRows, txnRows));
+    } catch (error) {
+      console.error("Error loading treasury data:", error);
+      toast({
+        title: t("dashboard.budget.error.load") || "Couldn't load budget",
+        description:
+          t("dashboard.budget.error.loadDesc") ||
+          "The treasury data could not be loaded. Check your connection and try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  useEffect(() => {
+    void reload();
+  }, [reload]);
+
+  /** Exports the transaction ledger as CSV. RFC 4180 quoting so descriptions
+   *  containing commas, quotes or newlines survive the round-trip into Excel. */
+  const handleExportCsv = () => {
+    const columns: { header: string; value: (tx: Transaction) => string | number }[] = [
+      { header: "Date", value: (tx) => tx.txn_date },
+      { header: "Description", value: (tx) => tx.description },
+      { header: "Type", value: (tx) => tx.category },
+      { header: "Category", value: (tx) => tx.subcategory },
+      { header: "Amount", value: (tx) => tx.amount },
+      { header: "Currency", value: (tx) => tx.currency },
+      { header: "Account", value: (tx) => accounts.find((a) => a.id === tx.account_id)?.name ?? tx.account_id },
+      { header: "Reference", value: (tx) => tx.reference ?? "" },
+      { header: "Notes", value: (tx) => tx.notes ?? "" },
+    ];
+
+    const escape = (value: string | number) => {
+      const text = String(value);
+      return /[",\n\r]/.test(text) ? `"${text.replace(/"/g, '""')}"` : text;
+    };
+
+    const rows = [
+      columns.map((c) => escape(c.header)).join(","),
+      ...transactions.map((tx) => columns.map((c) => escape(c.value(tx))).join(",")),
+    ];
+
+    // Prepend a BOM so Excel reads the Cyrillic descriptions as UTF-8.
+    const blob = new Blob(["\uFEFF" + rows.join("\r\n")], {
+      type: "text/csv;charset=utf-8;",
+    });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = `bamas-transactions-${new Date().toISOString().slice(0, 10)}.csv`;
+    link.click();
+    URL.revokeObjectURL(url);
+
+    toast({
+      title: t("dashboard.budget.export.success") || "Export ready",
+      description:
+        t("dashboard.budget.export.description") ||
+        `${transactions.length} transaction(s) exported to CSV.`,
+    });
+  };
   const [showIban, setShowIban] = useState<Record<string, boolean>>({});
   const [isAddTransactionOpen, setIsAddTransactionOpen] = useState(false);
   const [isAddAccountOpen, setIsAddAccountOpen] = useState(false);
@@ -165,7 +190,7 @@ const BudgetContent = () => {
   });
 
   const dateLocale = language === 'bg' ? bg : enUS;
-  const canManage = isSuperAdmin || isAdmin;
+  const canManage = isSuperAdmin || isAdmin || isBoardMember;
 
   // Calculate totals
   const totalBalance = accounts.reduce((sum, acc) => {
@@ -174,13 +199,15 @@ const BudgetContent = () => {
     return sum + amount;
   }, 0);
 
+  const currentMonthPrefix = new Date().toISOString().slice(0, 7);
+
   const currentMonthIncome = transactions
-    .filter(t => t.category === 'income' && t.date.startsWith('2026-01'))
-    .reduce((sum, t) => sum + (t.currency === 'EUR' ? t.amount * 1.96 : t.amount), 0);
+    .filter((tx) => tx.category === 'income' && tx.txn_date.startsWith(currentMonthPrefix))
+    .reduce((sum, tx) => sum + (tx.currency === 'EUR' ? tx.amount * 1.96 : tx.amount), 0);
 
   const currentMonthExpenses = transactions
-    .filter(t => t.category === 'expense' && t.date.startsWith('2026-01'))
-    .reduce((sum, t) => sum + (t.currency === 'EUR' ? t.amount * 1.96 : t.amount), 0);
+    .filter((tx) => tx.category === 'expense' && tx.txn_date.startsWith(currentMonthPrefix))
+    .reduce((sum, tx) => sum + (tx.currency === 'EUR' ? tx.amount * 1.96 : tx.amount), 0);
 
   const totalBudgetedIncome = budget.filter(b => b.type === 'income').reduce((sum, b) => sum + b.budgeted, 0);
   const totalActualIncome = budget.filter(b => b.type === 'income').reduce((sum, b) => sum + b.actual, 0);
@@ -209,7 +236,10 @@ const BudgetContent = () => {
     setTimeout(() => setCopiedField(null), 2000);
   };
 
-  const handleAddTransaction = () => {
+  const [isSaving, setIsSaving] = useState(false);
+  const [pendingDeleteId, setPendingDeleteId] = useState<string | null>(null);
+
+  const handleAddTransaction = async () => {
     if (!newTransaction.description || !newTransaction.amount || !newTransaction.account_id) {
       toast({
         title: t("dashboard.budget.error.validation") || "Validation Error",
@@ -219,47 +249,81 @@ const BudgetContent = () => {
       return;
     }
 
-    const transaction: Transaction = {
-      id: `t-${Date.now()}`,
-      date: new Date().toISOString().split('T')[0],
-      description: newTransaction.description,
-      category: newTransaction.category,
-      subcategory: newTransaction.subcategory,
-      amount: parseFloat(newTransaction.amount),
-      currency: newTransaction.currency,
-      account_id: newTransaction.account_id,
-      reference: newTransaction.reference || undefined,
-      notes: newTransaction.notes || undefined,
-      created_by: user?.id || "",
-    };
-
-    setTransactions(prev => [transaction, ...prev]);
-
-    // Update account balance
-    const account = accounts.find(a => a.id === newTransaction.account_id);
-    if (account) {
-      const delta = newTransaction.category === 'income' ? parseFloat(newTransaction.amount) : -parseFloat(newTransaction.amount);
-      setAccounts(prev => prev.map(a =>
-        a.id === newTransaction.account_id ? { ...a, balance: a.balance + delta } : a
-      ));
+    const amount = parseFloat(newTransaction.amount);
+    if (!Number.isFinite(amount) || amount < 0) {
+      toast({
+        title: t("dashboard.budget.error.validation") || "Validation Error",
+        description: t("dashboard.budget.error.amount") || "Enter a valid, non-negative amount.",
+        variant: "destructive",
+      });
+      return;
     }
 
-    setNewTransaction({
-      description: "",
-      category: "expense",
-      subcategory: "",
-      amount: "",
-      currency: "BGN",
-      account_id: "",
-      reference: "",
-      notes: "",
-    });
-    setIsAddTransactionOpen(false);
+    setIsSaving(true);
+    try {
+      await createTransaction({
+        txn_date: new Date().toISOString().split("T")[0],
+        description: newTransaction.description,
+        category: newTransaction.category,
+        subcategory: newTransaction.subcategory,
+        amount,
+        currency: newTransaction.currency,
+        account_id: newTransaction.account_id,
+        reference: newTransaction.reference || undefined,
+        notes: newTransaction.notes || undefined,
+        created_by: user?.id,
+      });
 
-    toast({
-      title: t("dashboard.budget.success.transaction") || "Transaction Added",
-      description: t("dashboard.budget.success.transactionDesc") || "Transaction recorded successfully",
-    });
+      // Balances and budget actuals are derived, so a reload is what refreshes
+      // them — there is no local figure to nudge by hand.
+      await reload();
+
+      setNewTransaction({
+        description: "",
+        category: "expense",
+        subcategory: "",
+        amount: "",
+        currency: "BGN",
+        account_id: "",
+        reference: "",
+        notes: "",
+      });
+      setIsAddTransactionOpen(false);
+
+      toast({
+        title: t("dashboard.budget.success.transaction") || "Transaction Added",
+        description: t("dashboard.budget.success.transactionDesc") || "Transaction recorded successfully",
+      });
+    } catch (error) {
+      console.error("Error creating transaction:", error);
+      toast({
+        title: t("dashboard.budget.error.save") || "Couldn't save transaction",
+        description:
+          error instanceof Error
+            ? error.message
+            : t("dashboard.budget.error.saveDesc") || "Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  const handleDeleteTransaction = async (id: string) => {
+    try {
+      await deleteTransaction(id);
+      await reload();
+      toast({
+        title: t("dashboard.budget.success.deleted") || "Transaction deleted",
+      });
+    } catch (error) {
+      console.error("Error deleting transaction:", error);
+      toast({
+        title: t("dashboard.budget.error.delete") || "Couldn't delete transaction",
+        description: error instanceof Error ? error.message : undefined,
+        variant: "destructive",
+      });
+    }
   };
 
   const getAccountIcon = (type: BankAccount["type"]) => {
@@ -291,6 +355,13 @@ const BudgetContent = () => {
     }
   ];
 
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-primary" />
+      </div>
+    );
+  }
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
@@ -484,7 +555,7 @@ const BudgetContent = () => {
                   {transactions.slice(0, 5).map(tx => (
                     <TableRow key={tx.id}>
                       <TableCell className="text-muted-foreground">
-                        {format(new Date(tx.date), 'PP', { locale: dateLocale })}
+                        {format(new Date(tx.txn_date), 'PP', { locale: dateLocale })}
                       </TableCell>
                       <TableCell>
                         <div>
@@ -561,7 +632,12 @@ const BudgetContent = () => {
             <CardHeader>
               <div className="flex items-center justify-between">
                 <CardTitle>{t("dashboard.budget.allTransactions") || "All Transactions"}</CardTitle>
-                <Button variant="outline" className="rounded-full">
+                <Button
+                  variant="outline"
+                  className="rounded-full"
+                  onClick={handleExportCsv}
+                  disabled={transactions.length === 0}
+                >
                   <Download className="mr-2 h-4 w-4" />
                   {t("dashboard.budget.export") || "Export CSV"}
                 </Button>
@@ -577,6 +653,7 @@ const BudgetContent = () => {
                     <TableHead>{t("dashboard.budget.table.account") || "Account"}</TableHead>
                     <TableHead>{t("dashboard.budget.table.reference") || "Reference"}</TableHead>
                     <TableHead className="text-right">{t("dashboard.budget.table.amount") || "Amount"}</TableHead>
+                    {canManage && <TableHead className="w-10" />}
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -585,7 +662,7 @@ const BudgetContent = () => {
                     return (
                       <TableRow key={tx.id}>
                         <TableCell className="text-muted-foreground">
-                          {format(new Date(tx.date), 'PP', { locale: dateLocale })}
+                          {format(new Date(tx.txn_date), 'PP', { locale: dateLocale })}
                         </TableCell>
                         <TableCell>
                           <div>
@@ -607,6 +684,19 @@ const BudgetContent = () => {
                         <TableCell className={`text-right font-medium ${tx.category === 'income' ? 'text-green-600' : 'text-red-600'}`}>
                           {tx.category === 'income' ? '+' : '-'}{formatCurrency(tx.amount, tx.currency)}
                         </TableCell>
+                        {canManage && (
+                          <TableCell>
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              className="h-8 w-8 rounded-full text-muted-foreground hover:text-destructive"
+                              onClick={() => setPendingDeleteId(tx.id)}
+                              aria-label={t("dashboard.budget.table.delete") || "Delete transaction"}
+                            >
+                              <Trash2 className="h-4 w-4" />
+                            </Button>
+                          </TableCell>
+                        )}
                       </TableRow>
                     );
                   })}
@@ -837,7 +927,7 @@ const BudgetContent = () => {
             <Button variant="outline" onClick={() => setIsAddTransactionOpen(false)} className="rounded-full">
               {t("common.cancel") || "Cancel"}
             </Button>
-            <Button onClick={handleAddTransaction} className="rounded-full">
+            <Button onClick={handleAddTransaction} className="rounded-full" disabled={isSaving}>
               {t("dashboard.budget.save") || "Save Transaction"}
             </Button>
           </DialogFooter>
@@ -943,6 +1033,39 @@ const BudgetContent = () => {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      {/* Deleting a financial record is not undoable — always confirm. */}
+      <AlertDialog
+        open={pendingDeleteId !== null}
+        onOpenChange={(open) => !open && setPendingDeleteId(null)}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>
+              {t("dashboard.budget.delete.title") || "Delete this transaction?"}
+            </AlertDialogTitle>
+            <AlertDialogDescription>
+              {t("dashboard.budget.delete.description") ||
+                "This removes the entry from the ledger permanently. Account balances and budget figures will be recalculated."}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel className="rounded-full">
+              {t("common.cancel") || "Cancel"}
+            </AlertDialogCancel>
+            <AlertDialogAction
+              className="rounded-full bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              onClick={() => {
+                const id = pendingDeleteId;
+                setPendingDeleteId(null);
+                if (id) void handleDeleteTransaction(id);
+              }}
+            >
+              {t("common.delete") || "Delete"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 };

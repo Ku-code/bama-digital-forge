@@ -85,7 +85,7 @@ type MenuItem = "history" | "votes" | "agenda" | "documents" | "budget" | "netwo
 
 const Dashboard = () => {
 
-  const { user } = useAuth();
+  const { user, refreshProfile, isAdmin, isSuperAdmin, isBoardMember } = useAuth();
   const { t, language } = useLanguage();
   useDocumentMeta({
     title: language === 'bg' ? 'Табло | БАЗАП' : 'Dashboard | BAMAS',
@@ -107,13 +107,17 @@ const Dashboard = () => {
     }
   }, [searchParams]);
 
-  const menuItems = [
+  // Panels holding board-level material. Regular members never see these in
+  // the sidebar (RLS is the real gate; this stops them landing on an error).
+  const canSeeBoardPanels = isSuperAdmin || isAdmin || isBoardMember;
+
+  const allMenuItems: { id: MenuItem; icon: typeof Clock; label: string; boardOnly?: boolean }[] = [
     { id: "history" as MenuItem, icon: Clock, label: t("dashboard.menu.history") || "History" },
     { id: "meetings" as MenuItem, icon: Gavel, label: t("dashboard.menu.meetings") || "Meetings" },
     { id: "votes" as MenuItem, icon: CheckSquare, label: t("dashboard.menu.votes") || "Votes" },
     { id: "agenda" as MenuItem, icon: Calendar, label: t("dashboard.menu.agenda") || "Agenda" },
     { id: "documents" as MenuItem, icon: FileText, label: t("dashboard.menu.documents") || "Documents" },
-    { id: "budget" as MenuItem, icon: DollarSign, label: t("dashboard.menu.budget") || "Budget" },
+    { id: "budget" as MenuItem, icon: DollarSign, label: t("dashboard.menu.budget") || "Budget", boardOnly: true },
     { id: "network" as MenuItem, icon: Users, label: t("dashboard.menu.network") || "Network" },
     { id: "resources" as MenuItem, icon: Package, label: t("dashboard.menu.resources") || "Resources" },
     { id: "terminology" as MenuItem, icon: BookOpen, label: t("dashboard.menu.terminology") || "Terminology" },
@@ -124,13 +128,15 @@ const Dashboard = () => {
     { id: "signatures" as MenuItem, icon: PenTool, label: t("dashboard.menu.signatures") || "Signatures" },
     { id: "eufunds" as MenuItem, icon: Euro, label: t("dashboard.menu.eufunds") || "EU Funds Radar" },
     { id: "whiteboard" as MenuItem, icon: PenTool, label: t("dashboard.menu.whiteboard") || "Whiteboard" },
-    { id: "vault" as MenuItem, icon: FolderLock, label: t("dashboard.menu.vault") || "BAMAS Vault" },
+    { id: "vault" as MenuItem, icon: FolderLock, label: t("dashboard.menu.vault") || "BAMAS Vault", boardOnly: true },
     { id: "strategiccalendar" as MenuItem, icon: CalendarDays, label: t("dashboard.menu.strategiccalendar") || "Strategic Calendar" },
     { id: "standards" as MenuItem, icon: BookOpen, label: t("dashboard.menu.standards") || "AM Standards Guide" },
     { id: "amclub" as MenuItem, icon: MessageSquare, label: t("dashboard.menu.amclub") || "AM Club" },
     { id: "embed" as MenuItem, icon: Code, label: t("dashboard.menu.embed") || "BAMAS Badge" },
     { id: "calendarintegration" as MenuItem, icon: CalendarPlus, label: t("dashboard.menu.calendarintegration") || "Calendar Sync" },
   ];
+
+  const menuItems = allMenuItems.filter((item) => !item.boardOnly || canSeeBoardPanels);
 
   const renderContent = () => {
     // If no user, show nothing (shouldn't happen as Dashboard requires auth)
@@ -148,7 +154,7 @@ const Dashboard = () => {
             {t("dashboard.profile.loadError") ||
               "We couldn't load your profile. Check your connection and try again."}
           </p>
-          <Button onClick={() => window.location.reload()} variant="outline" className="rounded-full">
+          <Button onClick={() => void refreshProfile()} variant="outline" className="rounded-full">
             {t("common.retry") || "Retry"}
           </Button>
         </div>

@@ -53,7 +53,12 @@ import {
 
 const VotesContent = () => {
   const { t } = useLanguage();
-  const { user } = useAuth();
+  const { user, isAdmin, isSuperAdmin } = useAuth();
+
+  // Calling an official association vote is an administrative act — restricted
+  // to admins and superadmins. Migration 028 enforces the same rule in RLS, so
+  // hiding the button here only removes a dead end, it isn't the security gate.
+  const canCreatePolls = isAdmin || isSuperAdmin;
   const { toast } = useToast();
   const [polls, setPolls] = useState<Poll[]>([]);
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
@@ -531,12 +536,14 @@ const VotesContent = () => {
           <h2 className="text-2xl font-bold">{t("dashboard.votes.title") || "Votes & Polls"}</h2>
         </div>
         <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
-          <DialogTrigger asChild>
-            <Button className="rounded-full">
-              <Plus className="mr-2 h-4 w-4" />
-              {t("dashboard.votes.create.button") || "Create Poll"}
-            </Button>
-          </DialogTrigger>
+          {canCreatePolls && (
+            <DialogTrigger asChild>
+              <Button className="rounded-full">
+                <Plus className="mr-2 h-4 w-4" />
+                {t("dashboard.votes.create.button") || "Create Poll"}
+              </Button>
+            </DialogTrigger>
+          )}
           <DialogContent className="sm:max-w-[600px] max-h-[90vh] overflow-y-auto">
             <DialogHeader>
               <DialogTitle>{t("dashboard.votes.create.title") || "Create New Poll"}</DialogTitle>

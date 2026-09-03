@@ -36,7 +36,12 @@ import {
 
 const AgendaContent = () => {
   const { t } = useLanguage();
-  const { user, isSuperAdmin } = useAuth();
+  const { user, isSuperAdmin, isAdmin, isBoardMember } = useAuth();
+
+  // Per BOARD_MEMBER_PERMISSIONS_PLAN.md: agendas are board business. Creation
+  // was previously open to every member; edit/delete was superadmin-only, which
+  // locked out the board members who actually run the meetings.
+  const canManageAgendas = isSuperAdmin || isAdmin || isBoardMember;
   const { toast } = useToast();
   const [agendaItems, setAgendaItems] = useState<AgendaItem[]>([]);
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
@@ -344,12 +349,14 @@ const AgendaContent = () => {
           <h2 className="text-2xl font-bold">{t("dashboard.agenda.title") || "Agenda & Meetings"}</h2>
         </div>
         <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
-          <DialogTrigger asChild>
-            <Button className="rounded-full">
-              <Plus className="mr-2 h-4 w-4" />
-              {t("dashboard.agenda.create.button") || "Create Agenda"}
-            </Button>
-          </DialogTrigger>
+          {canManageAgendas && (
+            <DialogTrigger asChild>
+              <Button className="rounded-full">
+                <Plus className="mr-2 h-4 w-4" />
+                {t("dashboard.agenda.create.button") || "Create Agenda"}
+              </Button>
+            </DialogTrigger>
+          )}
           <DialogContent className="sm:max-w-[500px]">
             <DialogHeader>
               <DialogTitle>{t("dashboard.agenda.create.title") || "Create New Agenda Item"}</DialogTitle>
@@ -485,7 +492,7 @@ const AgendaContent = () => {
                     </Avatar>
                     <span className="text-sm text-muted-foreground">{item.createdByName}</span>
                   </div>
-                  {(user?.id === item.created_by || isSuperAdmin) && (
+                  {(user?.id === item.created_by || canManageAgendas) && (
                     <div className="flex items-center gap-2">
                       <Button
                         variant="ghost"

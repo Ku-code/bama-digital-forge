@@ -132,6 +132,14 @@ const PARTNERS: Partner[] = [
     name: "CONCREEF",
     url: "https://www.concreef.eu/",
   },
+  {
+    // Supplied as white artwork on the brand blue; both variants are that same
+    // artwork with the coverage recovered as alpha, so neither theme needs a plate.
+    logo: "/partnerlogos/interexpocenter.png",
+    logoDark: "/partnerlogos/interexpocenter-white.png",
+    name: "Inter Expo Center",
+    url: "https://iec.bg/",
+  },
 ];
 
 // Duplicate partners for seamless infinite loop

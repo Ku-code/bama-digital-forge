@@ -32,7 +32,6 @@ import {
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/hooks/use-toast";
-import { supabase } from "@/lib/supabase";
 import { formatDistanceToNow, format } from "date-fns";
 import { bg, enUS } from "date-fns/locale";
 import {

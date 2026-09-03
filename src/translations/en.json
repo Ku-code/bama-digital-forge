@@ -129,6 +129,7 @@
   "auth.register.title": "Register",
   "auth.register.description": "Create a new account to get started",
   "auth.register.button": "Register",
+  "auth.register.link": "Register",
   "auth.register.success.title": "Registration Successful",
   "auth.register.success.description": "Your account has been created successfully!",
   "auth.register.error.title": "Registration Failed",

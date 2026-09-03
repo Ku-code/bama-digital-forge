@@ -27,6 +27,7 @@ import BannerCube from "@/components/BannerCube";
 import RSFBanner from "@/components/RSFBanner";
 import MachTechBanner from "@/components/MachTechBanner";
 import IndustryInfoBanner from "@/components/IndustryInfoBanner";
+import ImageBanner from "@/components/ImageBanner";
 import { motion } from "framer-motion";
 import { ArrowRight, Zap as ZapIcon, Target, Rocket as RocketIcon, ChevronDown, ChevronUp } from "lucide-react";
 import { useIsMobile } from "@/hooks/use-mobile";
@@ -126,7 +127,9 @@ const Index = () => {
 
       <main>
       <section id="home" className="relative pt-20 md:pt-24 scroll-mt-20 md:scroll-mt-24 overflow-hidden">
-        {/* Four partner banners on the faces of a forward-tumbling cube. */}
+        {/* Partner banners on the faces of a forward-tumbling prism. The
+            background colours below are sampled from each creative's own edge
+            pixels so the letterboxing is invisible — see ImageBanner. */}
         <BannerCube
           intervalMs={2000}
           faces={[
@@ -134,6 +137,27 @@ const Index = () => {
             <RSFBanner key="rsf" />,
             <MachTechBanner key="machtech" />,
             <IndustryInfoBanner key="industryinfo" />,
+            <ImageBanner
+              key="machtech-expo"
+              src="/banners/machtech-expo-2026.gif"
+              href="https://machtech.bg/"
+              alt="MACHTECH & INNOTECH EXPO 2026, international exhibition for machinery and technologies in metalworking industry, Inter Expo Center — opens machtech.bg in a new tab"
+              background="#FFFFFF"
+            />,
+            <ImageBanner
+              key="interdrone-expo"
+              src="/banners/interdrone-expo-2026.gif"
+              href="https://interdroneexpo.bg/"
+              alt="INTER DRONE EXPO, 6–9 October 2026, Inter Expo Center — opens interdroneexpo.bg in a new tab"
+              background="#C4CCB5"
+            />,
+            <ImageBanner
+              key="europm-2026"
+              src="/banners/europm-2026.webp"
+              href="https://www.europm2026.com/"
+              alt="EURO PM2026 Congress & Exhibition, 11–14 October 2026, Budapest, Hungary — opens europm2026.com in a new tab"
+              background="#0B1F2A"
+            />,
           ]}
         />
         <NewsBanner />
